@@ -1,0 +1,17 @@
+.git
+.github
+.gitmodules
+.tox
+.tox-mobsf
+.vscode
+.pytest_cache
+.dockerignore
+.gitignore
+dev-requirements.txt
+tox.ini
+Dockerfile
+venv
+mobsfscan.egg-info
+dist
+build
+tests
