@@ -1,0 +1,1 @@
+recursive-include mobsfscan/rules/pattern_matcher *.yaml
