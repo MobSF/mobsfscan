@@ -204,7 +204,7 @@ jobs:
       uses: actions/checkout@v2
     - name: mobsf static scan
       id: mobsfscan
-      uses: MobSF/mobsfscan-action@master
+      uses: MobSF/mobsfscan-action@main
       with:
         args: '.'
 ```
