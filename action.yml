@@ -1,0 +1,11 @@
+name: 'mobsfscan'
+description: 'mobsfscan'
+
+# inputs:
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        python3 "${{ github.action_path }}/mobsfscan/__main__.py"
+      shell: bash
