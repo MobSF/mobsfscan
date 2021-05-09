@@ -1,0 +1,23 @@
+name: 'mobsfscan'
+description: 'mobsfscan'
+
+inputs:
+  args:
+    description: 'Argument'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        echo "::group::Installing Dependencies"
+        python3 -m pip install -r ${{ github.action_path }}/requirements.txt
+        echo "::endgroup::"
+
+    - shell: bash
+      run: |
+        PYTHONPATH=${{ github.action_path }} && export PYTHONPATH=${{ github.action_path }}
+        echo "Running mobsfscan..."
+        python3 -m mobsfscan ${{ inputs.args }}
+        echo "Finished"

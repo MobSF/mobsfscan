@@ -222,7 +222,7 @@ on:
   pull_request:
     branches: [ master ]
 jobs:
-  njsscan:
+  mobsfscan:
     runs-on: ubuntu-latest
     name: mobsfscan code scanning
     steps:
@@ -230,7 +230,7 @@ jobs:
       uses: actions/checkout@v2
     - name: mobsfscan scan
       id: mobsfscan
-      uses: MobSF/mobsfscan-action@master
+      uses: MobSF/mobsfscan@master
       with:
         args: '. --sarif --output results.sarif || true'
     - name: Upload mobsfscan report
@@ -285,5 +285,3 @@ docker run -v /path-to-source-dir:/src opensecurity/mobsfscan /src
 docker build -t mobsfscan .
 docker run -v /path-to-source-dir:/src mobsfscan /src
 ```
-
-
