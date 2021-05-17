@@ -9,7 +9,7 @@ Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82
 [![python](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/)
 
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/MobSF/mobsfscan.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/MobSF/mobsfscan/context:python)
-[![Requirements Status](https://requires.io/github/MobSF/mobsfscan/requirements/?branch=main)](https://requires.io/github/MobSF/mobsfscan/requirements/?branch=main)
+[![Requirements Status](https://requires.io/github/MobSF/mobsfscan/requirements.svg?branch=main)](https://requires.io/github/MobSF/mobsfscan/requirements/?branch=main)
 [![Build](https://github.com/MobSF/mobsfscan/workflows/Build/badge.svg)](https://github.com/MobSF/mobsfscan/actions?query=workflow%3ABuild)
 
 ### Support mobsfscan
