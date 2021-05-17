@@ -212,10 +212,58 @@ A `.mobsf` file in the root of the source code directory allows you to configure
 
 You can enable mobsfscan in your CI/CD or DevSecOps pipelines.
 
+#### Github Action
+
+Add the following to the file `.github/workflows/mobsfscan.yml`.
+
+```yaml
+name: mobsfscan
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: mobsfscan
+      uses: MobSF/mobsfscan@main
+      with:
+        args: '. --json'
+```
+Example: [pivaa with mobsfscan github action](https://github.com/MobSF/pivaa/actions/workflows/mobsfscan.yml)
 
 #### Github Code Scanning Integration
+Add the following to the file `.github/workflows/njsscan_sarif.yml`.
 
-Add the contents of [action.yml](action.yml) to the file `.github/workflows/mobsfscan_sarif.yml`.
+```yaml
+name: mobsfscan sarif
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  mobsfscan:
+    runs-on: ubuntu-latest
+    name: mobsfscan code scanning
+    steps:
+    - name: Checkout the code
+      uses: actions/checkout@v2
+    - name: mobsfscan
+      uses: MobSF/mobsfscan@main
+      with:
+        args: '. --sarif --output results.sarif || true'
+    - name: Upload mobsfscan report
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: results.sarif
+```
 
 #### Gitlab CI/CD
 
