@@ -7,10 +7,9 @@ from libsast import standards
 
 from mobsfscan import settings
 from mobsfscan.utils import (
-    get_config,
     get_best_practices,
+    get_config,
 )
-
 from mobsfscan.patcher import patch_libsast
 
 
@@ -126,8 +125,8 @@ class MobSFScan:
         for rule_id in missing:
             if rule_id in deleted:
                 continue
-            self.result["results"][rule_id] = {}
-            res = self.result["results"][rule_id]
+            self.result['results'][rule_id] = {}
+            res = self.result['results'][rule_id]
             details = rules[rule_id]
             res['metadata'] = details['metadata']
             res['metadata']['description'] = details['message']
