@@ -187,7 +187,7 @@ mobsfscan: v0.0.2 | Ajin Abraham | opensecurity.in
 
 ## Configure mobsfscan
 
-A `.mobsf` file in the root of the source code directory allows you to configure njsscan. You can also use a custom `.mobsf` file using `--config` argument.
+A `.mobsf` file in the root of the source code directory allows you to configure mobsfscan. You can also use a custom `.mobsf` file using `--config` argument.
 
 ```yaml
 ---
@@ -212,31 +212,6 @@ A `.mobsf` file in the root of the source code directory allows you to configure
 
 You can enable mobsfscan in your CI/CD or DevSecOps pipelines.
 
-#### Github Action
-
-Add the following to the file `.github/workflows/mobsf.yml`.
-
-```yaml
-name: mobsfscan
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-jobs:
-  njsscan:
-    runs-on: ubuntu-latest
-    name: mobsf static analysis
-    steps:
-    - name: Checkout the code
-      uses: actions/checkout@v2
-    - name: mobsf static scan
-      id: mobsfscan
-      uses: MobSF/mobsfscan-action@main
-      with:
-        args: '.'
-```
-Example: 
 
 #### Github Code Scanning Integration
 
@@ -249,7 +224,7 @@ Add the following to the file `.gitlab-ci.yml`.
 ```yaml
 stages:
     - test
-njsscan:
+mobsfscan:
     image: python
     before_script:
         - pip3 install --upgrade mobsfscan
