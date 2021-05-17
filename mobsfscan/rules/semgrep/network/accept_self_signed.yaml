@@ -1,0 +1,88 @@
+rules:
+  - id: accept_self_signed_certificate
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $X.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER
+          - pattern: |
+              $X.setHostnameVerifier($Z.ALLOW_ALL_HOSTNAME_VERIFIER);
+          - pattern: |
+              $X.setHostnameVerifier(new AllowAllHostnameVerifier());
+          - pattern: |
+              $X.setDefaultHostnameVerifier(new NullHostnameVerifier());
+          - pattern: >
+              $X.setDefaultHostnameVerifier((HostnameVerifier) new
+              NullHostnameVerifier());
+          - pattern: |
+              $RET verify(..., SSLSession $X) {
+                ...
+                return true;
+              }
+          - pattern: |
+              $Y = SSLContext.getInstance(...);
+              ...
+              $Y.init(null, ...);
+          - pattern: |
+              $Y = $S.SSLContext.getInstance(...);
+              ...
+              $Y.init(null, ...);
+          - pattern: |
+              $Z = new TLSClientParameters(...);
+              ...
+              $Z.setDisableCNCheck(true);
+          - pattern: |
+              X509Certificate[] getAcceptedIssuers() { 
+                ...
+                return new X509Certificate[]{};
+              }
+          - pattern: |
+              X509Certificate[] getAcceptedIssuers() {
+                ...
+                return new java.security.cert.X509Certificate[]{};
+              }
+          - pattern: |
+              X509Certificate[] getAcceptedIssuers() { 
+                ...
+                $Y = new X509Certificate[]{};
+                ...
+                return $Y;
+              }
+          - pattern: |
+              X509Certificate[] getAcceptedIssuers() {
+                ...
+                $Y = new X509Certificate[]{};
+                ...
+                return $Y;
+              }
+          - pattern: |
+              X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[0];
+              }
+          - pattern: |
+              X509Certificate[] getAcceptedIssuers() {
+                ...
+                $X =  new X509Certificate[0];
+                ...
+                return $X;
+              }
+          - pattern: |
+              X509Certificate[] getAcceptedIssuers() {
+                return null;
+              }
+          - pattern: |
+              sslContext.init(null, ...);
+          - pattern: |
+              setSslSocketFactory(new NonValidatingSSLSocketFactory());
+    message: >-
+      Insecure Implementation of SSL. Trusting all the certificates or accepting
+      self signed certificates is a critical Security Hole. This application is
+      vulnerable to MITM attacks.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-295
+      owasp-mobile: m3
+      masvs: network-3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-endpoint-identify-verification-mstg-network-3

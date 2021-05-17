@@ -1,0 +1,23 @@
+rules:
+  - id: ignore_ssl_certificate_errors
+    patterns:
+      - pattern-either:
+          - pattern: >
+              $RET onReceivedSslError(WebView $W, SslErrorHandler $H, SslError
+              $E) {
+                ...
+                $H.proceed();
+              }
+    message: >-
+      Insecure WebView Implementation. WebView ignores SSL Certificate errors
+      and accept any SSL Certificate. This application is vulnerable to MITM
+      attacks.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-295
+      owasp-mobile: m3
+      masvs: network-3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#webview-server-certificate-verification

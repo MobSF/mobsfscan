@@ -2,9 +2,19 @@
 """CLI mobsfscan output format."""
 from tabulate import tabulate
 
+from html import escape
+
 from mobsfscan.logger import init_logger
 
 logger = init_logger(__name__)
+UNSAFE_HTML = 'unsafehtml'
+
+
+def _escape(data, fmt):
+    """Escape HTML unsafe data."""
+    if fmt == UNSAFE_HTML:
+        return escape(data)
+    return data
 
 
 def print_tool_info(ver):
@@ -14,9 +24,8 @@ def print_tool_info(ver):
     return tool_str
 
 
-def format_table(rule_id, details):
+def format_table(rule_id, details, fmt):
     """Get CLI friendly format."""
-    tbl_fmt = 'fancy_grid'
     items = []
     items.append(['RULE ID', rule_id])
     for meta, value in details['metadata'].items():
@@ -30,7 +39,7 @@ def format_table(rule_id, details):
     if files:
         for match in files:
             file_path = match['file_path']
-            fstore.append(['File', file_path])
+            fstore.append(['File', _escape(file_path, fmt)])
             position = match['match_position']
             pos = f'{position[0]} - {position[1]}'
             fstore.append(['Match Position', pos])
@@ -41,14 +50,16 @@ def format_table(rule_id, details):
             match_string = match['match_string']
             if isinstance(match_string, list):
                 match_string = '\n'.join(ln.strip() for ln in match_string)
+            if fmt == UNSAFE_HTML:
+                match_string = f'<pre>{_escape(match_string, fmt)}</pre>'
             fstore.append(['Match String', match_string])
         if fstore:
-            files_tbl = tabulate(fstore, tablefmt=tbl_fmt)
+            files_tbl = tabulate(fstore, tablefmt=fmt)
             items.append(['FILES', files_tbl])
-    return tabulate(items, tablefmt=tbl_fmt)
+    return tabulate(items, tablefmt=fmt)
 
 
-def cli_output(outfile, scan_results, version):
+def cli_output(outfile, scan_results, version, fmt):
     """Format output printing."""
     tool = print_tool_info(version)
     if not scan_results['results']:
@@ -58,11 +69,11 @@ def cli_output(outfile, scan_results, version):
     buffer = []
     for out in scan_results:
         for rule_id, details in scan_results[out].items():
-            formatted = format_table(rule_id, details)
+            formatted = format_table(rule_id, details, fmt)
             buffer.append(formatted)
             severity = details['metadata']['severity'].lower()
             if not outfile:
-                if severity == 'high':
+                if severity == 'error':
                     logger.error(formatted)
                 elif severity == 'warning':
                     logger.warning(formatted)

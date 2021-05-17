@@ -1,0 +1,26 @@
+rules:
+  - id: weak_hash
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $C.getInstance("=~/md5|md4/i", ...);
+          - pattern: |
+              $C.Files.hash(..., Hashing.md5());
+          - pattern: |
+              Files.hash(..., Hashing.md5());
+          - pattern: |
+              DigestUtils.md5Hex(...);
+          - pattern: |
+              DigestUtils.md5(...);
+    message: >-
+      Weak Hash algorithm used. The hash algorithm is known to have hash
+      collisions.
+    severity: WARNING
+    languages:
+      - java
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-4
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4

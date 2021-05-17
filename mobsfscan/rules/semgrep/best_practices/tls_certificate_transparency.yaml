@@ -1,0 +1,24 @@
+rules:
+  - id: android_certificate_transparency
+    patterns:
+      - pattern-either:
+          - pattern: |
+              import com.babylon.certificatetransparency;
+          - pattern: |
+              new CTInterceptorBuilder(...)
+          - pattern: |
+              new CTHostnameVerifierBuilder(...)
+    message: >-
+      This App does not enforce TLS Certificate Transparency that helps to
+      detect SSL certificates that have been mistakenly issued by a certificate
+      authority or maliciously acquired from an otherwise unimpeachable
+      certificate authority.
+    languages:
+      - java
+    severity: INFO
+    metadata:
+      cwe: cwe-295
+      owasp-mobile: m3
+      masvs: network-4
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4

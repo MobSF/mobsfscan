@@ -1,0 +1,19 @@
+# https://find-sec-bugs.github.io/bugs.htm#DEFAULT_HTTP_CLIENT
+rules:
+  - id: default_http_client_tls
+    patterns:
+      - pattern-either:
+          - pattern: |
+              new DefaultHttpClient()
+    message: >-
+      DefaultHTTPClient() with default constructor is not compatible with TLS
+      1.2.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-757
+      owasp-mobile: m3
+      masvs: network-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2

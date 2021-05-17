@@ -1,0 +1,37 @@
+# https://github.com/returntocorp/semgrep-rules/blob/develop/java/lang/security/audit/xml-decoder.yaml
+rules:
+  - id: xml_decoder_xxe
+    patterns:
+      - pattern: |
+          $X $METHOD(...) {
+            ...
+            new XMLDecoder(...);
+            ...
+          }
+      - pattern-not: |
+          $X $METHOD(...) {
+            ...
+            new XMLDecoder("...");
+            ...
+          }
+      - pattern-not: |-
+          $X $METHOD(...) {
+            ...
+            String $STR = "...";
+            ...
+            new XMLDecoder($STR);
+            ...
+          }
+    message: |
+      XMLDecoder should not be used to parse untrusted data.
+      Deserializing user input can lead to arbitrary code execution.
+      Use an alternative and explicitly disable external entities.
+    severity: WARNING
+    languages:
+      - java
+    metadata:
+      cwe: cwe-611
+      owasp-mobile: m8
+      masvs: platform-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2

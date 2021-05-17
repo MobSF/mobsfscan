@@ -1,30 +1,76 @@
 # -*- coding: utf_8 -*-
 """The MobSF cli: mobsfscan."""
+from pathlib import Path
+
 from libsast import Scanner
+from libsast import standards
 
 from mobsfscan import settings
 from mobsfscan.utils import (
     get_config,
+    get_best_practices,
 )
+
+from mobsfscan.patcher import patch_libsast
 
 
 class MobSFScan:
     def __init__(self, paths, json, config=False) -> None:
-        conf = get_config(paths, config)
+        patch_libsast()
+        self.conf = get_config(paths, config)
         self.options = {
-            'match_rules': settings.PATTERN_RULES_DIR,
-            'match_extensions': conf['scan_extensions'],
-            'ignore_filenames': conf['ignore_filenames'],
-            'ignore_extensions': conf['ignore_extensions'],
-            'ignore_paths': conf['ignore_paths'],
-            'ignore_rules': conf['ignore_rules'],
-            'suppress_findings': conf['suppress_findings'],
+            'match_rules': None,
+            'sgrep_rules': None,
+            'sgrep_extensions': None,
+            'match_extensions': None,
+            'ignore_filenames': self.conf['ignore_filenames'],
+            'ignore_extensions': self.conf['ignore_extensions'],
+            'ignore_paths': self.conf['ignore_paths'],
+            'ignore_rules': self.conf['ignore_rules'],
             'show_progress': not json,
         }
         self.paths = paths
         self.result = {
             'results': {},
+            'errors': [],
         }
+        self.best_practices = None
+        self.standards = standards.get_standards()
+        self.get_extensions()
+
+    def rules_selector(self, suffix):
+        """Get rule extensions from suffix."""
+        if suffix in ['.java', '.kt']:
+            if suffix == '.java':
+                self.best_practices = '.java'
+            else:
+                self.best_practices = '.kt'
+            self.options['match_rules'] = settings.ANDROID_RULES_DIR.as_posix()
+            self.options['sgrep_rules'] = settings.SGREP_RULES_DIR.as_posix()
+            self.options['sgrep_extensions'] = {'.java'}
+            self.options['match_extensions'] = {'.kt'}
+        elif suffix in {'.swift', '.m'}:
+            if suffix == '.swift':
+                self.best_practices = '.swift'
+            else:
+                self.best_practices = '.m'
+            self.options['match_rules'] = settings.IOS_RULES_DIR.as_posix()
+            self.options['match_extensions'] = {'.m', '.swift'}
+
+    def get_extensions(self) -> set:
+        """Get extensions to scan."""
+        scan_suffix = {'.java', '.kt', '.swift', '.m'}
+        for path in self.paths:
+            pobj = Path(path)
+            if pobj.is_dir():
+                for pfile in pobj.rglob('*'):
+                    if pfile.suffix not in scan_suffix:
+                        continue
+                    return self.rules_selector(pfile.suffix)
+            else:
+                if pobj.suffix not in scan_suffix:
+                    continue
+                return self.rules_selector(pobj.suffix)
 
     def scan(self) -> dict:
         """Start Scan."""
@@ -36,13 +82,68 @@ class MobSFScan:
 
     def format_output(self, results) -> dict:
         """Format to mobsfscan friendly output."""
-        self.format_matches(results['pattern_matcher'])
+        self.format_semgrep(results.get('semantic_grep'))
+        # TODO: When we support kotlin semgrep, this needs rework
+        self.format_pattern(results.get('pattern_matcher'))
+        self.missing_controls()
         self.post_ignore_rules()
-        self.post_ignore_findings()
+        self.post_ignore_files()
 
-    def format_matches(self, matcher_out):
+    def format_semgrep(self, sgrep_output):
+        """Format semgrep output."""
+        if not sgrep_output:
+            return
+        self.result['errors'] = sgrep_output['errors']
+        for rule_id in sgrep_output['matches']:
+            self.expand_mappings(sgrep_output['matches'][rule_id])
+            for finding in sgrep_output['matches'][rule_id]['files']:
+                finding.pop('metavars', None)
+        self.result['results'] = sgrep_output['matches']
+
+    def format_pattern(self, matcher_out):
         """Format Pattern Matcher output."""
-        self.result['results'] = matcher_out
+        if not matcher_out:
+            return
+        for rule_id in matcher_out:
+            # TODO Remove after standards is handled in libsast
+            self.expand_mappings(matcher_out[rule_id])
+        self.result['results'].update(matcher_out)
+
+    def missing_controls(self):
+        """Check for missing controls."""
+        if not self.best_practices:
+            return
+        ids, rules = get_best_practices(self.best_practices)
+        result_keys = self.result['results'].keys()
+        deleted = set()
+        for rule_id in ids:
+            if rule_id in result_keys:
+                # Control Present
+                deleted.add(rule_id)
+                del self.result['results'][rule_id]
+        # Add Missing
+        missing = ids.difference(result_keys)
+        for rule_id in missing:
+            if rule_id in deleted:
+                continue
+            self.result["results"][rule_id] = {}
+            res = self.result["results"][rule_id]
+            details = rules[rule_id]
+            res['metadata'] = details['metadata']
+            res['metadata']['description'] = details['message']
+            res['metadata']['severity'] = details['severity']
+            self.expand_mappings(res)
+
+    def expand_mappings(self, meta):
+        """Expand libsast standard mappings."""
+        meta_keys = meta['metadata'].keys()
+        for mkey in meta_keys:
+            if mkey not in self.standards.keys():
+                continue
+            to_expand = meta['metadata'][mkey]
+            expanded = self.standards[mkey].get(to_expand)
+            if expanded:
+                meta['metadata'][mkey] = expanded
 
     def post_ignore_rules(self):
         """Ignore findings by rules."""
@@ -50,42 +151,7 @@ class MobSFScan:
             if rule_id in self.result['results']:
                 del self.result['results'][rule_id]
 
-    def is_suppressed(self, rule_id, obj):
-        """Check if finding is suppressed."""
-        suppressions = self.options['suppress_findings'].get(rule_id)
-        if not suppressions:
-            return False
-        for ignore in suppressions:
-            if ',' not in ignore:
-                # Invalid format, just ignore
-                return False
-            parts = ignore.split(',')
-            if not len(parts) > 1:
-                # Invalid, line nos not provided
-                return False
-            name = parts[0]
-            lines = parts[1:]
-            lines = [lno.strip() for lno in lines]
-            mline = obj['match_lines']
-            is_name = name in obj['file_path']
-            is_line = str(mline[0]) in lines or str(mline[1]) in lines
-            if is_name and is_line:
-                return True
-        return False
-
-    def is_cross_pollution(self, rule_id, obj):
-        """Check if finding is cross pollution."""
-        andr = rule_id.startswith('android_')
-        iosr = rule_id.startswith('ios_')
-        andext = obj['file_path'].endswith(('.java', '.kt'))
-        iosext = obj['file_path'].endswith(('.swift', '.m'))
-        if andr and iosext:
-            return True
-        if iosr and andext:
-            return True
-        return False
-
-    def post_ignore_findings(self):
+    def post_ignore_files(self):
         """Ignore file by rule."""
         del_keys = set()
         for rule_id, details in self.result['results'].items():
@@ -93,11 +159,10 @@ class MobSFScan:
             if not files:
                 continue
             tmp_files = files.copy()
-            for file_ in files:
-                if self.is_suppressed(rule_id, file_):
-                    tmp_files.remove(file_)
-                if self.is_cross_pollution(rule_id, file_):
-                    tmp_files.remove(file_)
+            for file in files:
+                mstr = file.get('match_string')
+                if 'mobsf-ignore:' in mstr and rule_id in mstr:
+                    tmp_files.remove(file)
                 if len(tmp_files) == 0:
                     del_keys.add(rule_id)
             details['files'] = tmp_files

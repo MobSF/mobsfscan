@@ -1,0 +1,100 @@
+- id: ios_jailbreak_detect
+  message: This App does not have Jailbreak detection capabilities.
+  input_case: exact
+  pattern:
+  - /Applications/Cydia\.app
+  - /Library/MobileSubstrate/MobileSubstrate\.dylib
+  - /usr/sbin/sshd
+  - /etc/apt
+  - cydia://
+  - /var/lib/cydia
+  - /Applications/FakeCarrier\.app
+  - /Applications/Icy\.app
+  - /Applications/IntelliScreen\.app
+  - /Applications/SBSettings\.app
+  - /Library/MobileSubstrate/DynamicLibraries/LiveClock\.plist
+  - /System/Library/LaunchDaemons/com\.ikey\.bbot\.plist
+  - /System/Library/LaunchDaemons/com\.saurik\.Cydia\.Startup\.plist
+  - /etc/ssh/sshd_config
+  - /private/var/tmp/cydia\.log
+  - /usr/libexec/ssh-keysign
+  - /Applications/MxTube\.app
+  - /Applications/RockApp\.app
+  - /Applications/WinterBoard\.app
+  - /Applications/blackra1n\.app
+  - /Library/MobileSubstrate/DynamicLibraries/Veency\.plist
+  - /private/var/lib/apt
+  - /private/var/lib/cydia
+  - /private/var/mobile/Library/SBSettings/Themes
+  - /private/var/stash
+  - /usr/bin/sshd
+  - /usr/libexec/sftp-server
+  - /var/cache/apt
+  - /var/lib/apt
+  - /usr/sbin/frida-server
+  - /usr/bin/cycript
+  - /usr/local/bin/cycript
+  - /usr/lib/libcycript.dylib
+  - frida-server
+  - /etc/apt/sources\.list\.d/electra\.list
+  - /etc/apt/sources\.list\.d/sileo\.sources
+  - /.bootstrapped_electra
+  - /usr/lib/libjailbreak\.dylib
+  - /jb/lzma
+  - /\.cydia_no_stash
+  - /\.installed_unc0ver
+  - /jb/offsets\.plist
+  - /usr/share/jailbreak/injectme\.plist
+  - /Library/MobileSubstrate/MobileSubstrate\.dylib
+  - /usr/libexec/cydia/firmware\.sh
+  - /private/var/cache/apt/
+  - /Library/MobileSubstrate/CydiaSubstrate\.dylib
+  severity: INFO
+  type: RegexOr
+  metadata:
+    cwe: cwe-919
+    masvs: resilience-1
+    owasp-mobile: m8
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#jailbreak-detection-mstg-resilience-1
+- id: ios_detect_jailbreak_check
+  message: This app does not perform SFAntiPiracy Jailbreak checks.
+  input_case: exact
+  pattern:
+    - SFAntiPiracy\.h
+    - SFAntiPiracy
+    - isJailbroken
+  severity: INFO
+  type: RegexAnd
+  metadata:
+    cwe: cwe-919
+    masvs: resilience-1
+    owasp-mobile: m8
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#jailbreak-detection-mstg-resilience-1
+- id: ios_piracy_check
+  message: This app does not perform SFAntiPiracy Piracy checks.
+  input_case: exact
+  pattern:
+    - SFAntiPiracy\.h
+    - SFAntiPiracy
+    - isPirated
+  severity: INFO
+  type: RegexAnd
+  metadata:
+    masvs: resilience-3
+    cwe: cwe-919
+    owasp-mobile: m2
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#bypassing-jailbreak-detection
+- id: ios_mach_ports
+  message: This App does not have anti-debugger code using Mach Exception Ports.
+  input_case: exact
+  pattern:
+    - mach\/mach_init\.h
+    - - MACH_PORT_VALID
+      - mach_task_self\(\)
+  severity: INFO
+  type: RegexAndOr
+  metadata:
+    masvs: resilience-2
+    cwe: cwe-919
+    owasp-mobile: m8
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06d-Testing-Data-Storage.md#mach-ports

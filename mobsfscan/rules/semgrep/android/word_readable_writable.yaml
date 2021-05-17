@@ -1,0 +1,33 @@
+rules:
+  - id: world_readable
+    patterns:
+      - pattern-either:
+          - pattern: |
+              Context.MODE_WORLD_READABLE
+    message: The file is World Readable. Any App can read from the file.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-276
+      owasp-mobile: m2
+      masvs: storage-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2
+  - id: world_writeable
+    patterns:
+      - pattern-either:
+          - pattern: |
+              Context.MODE_WORLD_WRITEABLE
+    message: >-
+      The file is World Readable and Writable. Any App can read/write to the
+      file.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-276
+      owasp-mobile: m2
+      masvs: storage-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2

@@ -43,6 +43,9 @@ def main():
     parser.add_argument('--sonarqube',
                         help='set output format compatible with SonarQube',
                         action='store_true')
+    parser.add_argument('--html',
+                        help='set output format as HTML',
+                        action='store_true')
     parser.add_argument('-o', '--output',
                         help='output filename to save the result',
                         required=False)
@@ -66,13 +69,33 @@ def main():
             args.config,
         ).scan()
         if args.sonarqube:
-            sonarqube.sonarqube_output(args.output, scan_results, __version__)
+            sonarqube.sonarqube_output(
+                args.output,
+                scan_results,
+                __version__)
         elif args.json:
-            json.json_output(args.output, scan_results, __version__)
+            json.json_output(
+                args.output,
+                scan_results,
+                __version__)
         elif args.sarif:
-            sarif.sarif_output(args.output, scan_results, __version__)
+            sarif.sarif_output(
+                args.output,
+                scan_results,
+                __version__,
+                args.path)
+        elif args.html:
+            cli.cli_output(
+                args.output,
+                scan_results,
+                __version__,
+                'unsafehtml')
         else:
-            cli.cli_output(args.output, scan_results, __version__)
+            cli.cli_output(
+                args.output,
+                scan_results,
+                __version__,
+                'fancy_grid')
         handle_exit(scan_results, args.exit_warning)
 
     elif args.version:

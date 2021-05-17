@@ -1,0 +1,30 @@
+rules:
+  - id: webview_external_storage
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $X = <... $E.getExternalStorageDirectory() ...>;
+              ...
+              $WV.loadUrl(<... $X ...>);
+          - pattern: |
+              $WV.loadUrl(<... $E.getExternalStorageDirectory().$F() ...>);
+          - pattern: |
+              $X = <... Environment.getExternalStorageDirectory().$F() ...>;
+              ...
+              $WV.loadUrl(<... $X ...>);
+          - pattern: |
+              $X = <... $E.getExternalFilesDir(...) ...>;
+              ...
+              $WV.loadUrl(<... $X ...>);
+    message: >-
+      WebView load files from external storage. Files in external storage can be
+      modified by any application.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-749
+      owasp-mobile: m1
+      masvs: platform-6
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-webview-protocol-handlers-mstg-platform-6

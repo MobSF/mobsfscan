@@ -1,0 +1,1 @@
+  CC_MD5([hashMaterial bytes], (CC_LONG)[hashMaterial length], md);

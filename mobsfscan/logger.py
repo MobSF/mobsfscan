@@ -8,8 +8,8 @@ from colorama import Back, Fore, Style
 
 class ColorLogsWrapper(object):
     COLOR_MAP = {
-        'debug': Fore.CYAN,
-        'info': Fore.BLUE,
+        'debug': Fore.BLUE,
+        'info': Fore.CYAN,
         'warning': Fore.YELLOW,
         'error': Fore.RED,
         'critical': Back.RED,

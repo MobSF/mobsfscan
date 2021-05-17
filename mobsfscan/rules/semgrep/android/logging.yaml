@@ -1,0 +1,42 @@
+rules:
+  - id: android_logging
+    patterns:
+      - pattern-not: System.out.print();
+      - pattern-not: System.out.println();
+      - pattern-not: System.err.print();
+      - pattern-not: System.err.println();
+      - pattern-not: 'Log.$D("...", "...", ...);'
+      - pattern-not: 'Log.$D($T, "...", ...);'
+      - pattern-not: System.out.print("...");
+      - pattern-not: System.out.println("...");
+      - pattern-not: System.err.print("...");
+      - pattern-not: System.err.println("...");
+      - pattern-either:
+          - pattern: |
+              Log.$D($T, $X + "...", ...);
+          - pattern: |
+              Log.$D($T, "..." + $X + "...", ...);
+          - pattern: |
+              Log.$D($T, "..." + $X, ...);
+          - pattern: |
+              $Y = $Z;
+              ...
+              Log.$D($T,<... $Y ...>, ...);
+          - pattern: |
+              System.out.print(...);
+          - pattern: |
+              System.err.print(...);
+          - pattern: |
+              System.out.println(...);
+          - pattern: |
+              System.err.println(...);
+    message: The App logs information. Please ensure that sensitive information is never logged.
+    languages:
+      - java
+    severity: INFO
+    metadata:
+      cwe: cwe-532
+      owasp-mobile: m1
+      masvs: storage-3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#logs

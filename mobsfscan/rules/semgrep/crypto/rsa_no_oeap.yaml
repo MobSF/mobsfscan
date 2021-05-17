@@ -1,0 +1,24 @@
+rules:
+  - id: rsa_no_oeap
+    patterns:
+      - pattern-either:
+          - pattern: |
+              Cipher.getInstance($X, ...)
+          - pattern: |
+              javax.crypto.Cipher.getInstance($X, ...)
+      - metavariable-regex:
+          metavariable: $X
+          regex: '(?i:.*rsa/.+/nopadding.*)'
+    message: >-
+      This App uses RSA Crypto without OAEP padding. The purpose of the padding
+      scheme is to prevent a number of attacks on RSA that only work when the
+      encryption is performed without padding.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-780
+      owasp-mobile: m5
+      masvs: crypto-3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#mobile-app-cryptography

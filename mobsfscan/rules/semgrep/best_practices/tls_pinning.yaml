@@ -1,0 +1,50 @@
+rules:
+  - id: android_certificate_pinning
+    patterns:
+      - pattern-either:
+          - pattern: |
+              import com.toyberman.RNSslPinningPackage;
+          - pattern: |
+              import org.thoughtcrime.ssl.pinning;
+          - pattern: |
+              new PinningValidationReportTestBroadcastReceiver()
+          - pattern: |
+              new CertificatePinner.Builder()
+          - pattern: |
+              CertificatePinner.Builder()
+          - pattern: |
+              TrustKit.getInstance().getSSLSocketFactory(...)
+          - pattern: |
+              $X = $R.openRawResource(...);
+              ...
+              $KS = KeyStore.getInstance(...);
+              ...
+              $KS.load($X, ...);
+              ...
+              $T.init($KS);
+          - pattern: |
+              TrustKit.initializeWithNetworkSecurityConfiguration(...);
+          - pattern: |
+              OkHttp2Helper.getPinningInterceptor()
+          - pattern: |
+              OkHttp3Helper.getPinningInterceptor()
+          - pattern: |
+              new PinningHostnameVerifier(...)
+          - pattern: |
+              PinningHelper.getPinnedHttpsURLConnection
+          - pattern: |
+              $F.openRawResource(...);
+              ...
+              $X = new Picasso.Builder(...);
+    message: >-
+      This App does not use TLS/SSL certificate or public key pinning to detect
+      or prevent MITM attacks in secure communication channel.
+    languages:
+      - java
+    severity: INFO
+    metadata:
+      cwe: cwe-295
+      owasp-mobile: m3
+      masvs: network-4
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4

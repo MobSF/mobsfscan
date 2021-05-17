@@ -1,0 +1,37 @@
+rules:
+  - id: aes_ecb_mode
+    patterns:
+      - pattern-either:
+          - pattern: |
+              Cipher.getInstance("=~/AES\/ECB.*/i")
+    message: >-
+      The App uses ECB mode in Cryptographic encryption algorithm. ECB mode is
+      known to be weak as it results in the same ciphertext for identical blocks
+      of plaintext.
+    severity: ERROR
+    languages:
+      - java
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode
+  - id: aes_ecb_mode_default
+    patterns:
+      - pattern-either:
+          - pattern: |
+              Cipher.getInstance("AES")
+    message: >-
+      Calling Cipher.getInstance("AES") will return AES ECB mode by default. ECB
+      mode is known to be weak as it results in the same ciphertext for
+      identical blocks of plaintext.
+    severity: ERROR
+    languages:
+      - java
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode

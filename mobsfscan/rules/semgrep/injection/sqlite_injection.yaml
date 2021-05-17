@@ -1,0 +1,39 @@
+rules:
+  - id: sqlite_injection
+    patterns:
+      - pattern-not: '$DB.execSQL("..." , ...);'
+      - pattern-not: '$DB.rawQuery("..." , ...);'
+      - pattern-either:
+          - pattern: |
+              $DB.rawQuery($INP + "..." , ...);
+          - pattern: |
+              $DB.rawQuery("..." + $INP + "..." , ...);
+          - pattern: |
+              $DB.rawQuery($INP + "..." , ... );
+          - pattern: |
+              $DB.rawQuery($INP + "..." + $INP2, ...);
+          - pattern: |
+              $DB.rawQuery($INP + "..." + $INP2 + "...", ...);
+          - pattern: |
+              $DB.execSQL($INP + "..." , ...);
+          - pattern: |
+              $DB.execSQL("..." + $INP + "..." , ...);
+          - pattern: |
+              $DB.execSQL($INP + "..." , ...);
+          - pattern: |
+              $DB.execSQL($INP + "..." + $INP2, ...);
+          - pattern: |
+              $DB.execSQL($INP + "..." + $INP2 + "...", ...);
+    message: >-
+      App uses SQLite Database and execute raw SQL query. Untrusted user input
+      in raw SQL queries can cause SQL Injection. Also sensitive information
+      should be encrypted and written to the database.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-78
+      owasp-mobile: m7
+      masvs: platform-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2

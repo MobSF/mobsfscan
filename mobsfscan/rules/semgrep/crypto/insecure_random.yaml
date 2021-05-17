@@ -1,0 +1,18 @@
+rules:
+  - id: java_insecure_random
+    patterns:
+      - pattern-either:
+          - pattern: |
+              import java.util.Random;
+          - pattern: |
+              import java.util.concurrent.ThreadLocalRandom;
+    message: The App uses an insecure Random Number Generator.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-330
+      owasp-mobile: m5
+      masvs: crypto-6
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-random-number-generators

@@ -1,0 +1,130 @@
+- id: ios_hardcoded_secret
+  message: Files may contain hardcoded sensitive information like usernames,
+    passwords, keys etc.
+  input_case: lower
+  pattern: (password\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(pass\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(username\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(secret\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(key\s*=\s*[\'|\"].+[\'|\"]\s{0,5})
+  severity: WARNING
+  type: Regex
+  metadata:
+    cwe: cwe-312
+    masvs: storage-14
+    owasp-mobile: m9
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-memory-for-sensitive-data-mstg-storage-10
+- id: ios_load_html_string
+  message: User input in "loadHTMLString" will result in JavaScript Injection.
+  input_case: exact
+  pattern:
+  - loadHTMLString
+  - webView
+  severity: INFO
+  type: RegexAnd
+  metadata:
+    cwe: cwe-95
+    masvs: platform-5
+    owasp-mobile: m7
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#testing-webview-protocol-handlers-mstg-platform-6
+- id: ios_banned_api
+  message: >-
+    The App may contain banned API(s). These API(s) are insecure and must not be
+    used.
+  input_case: exact
+  pattern: 'strcpy\(|memcpy\(|strcat\(|strncat\(|strncpy\(|sprintf\(|vsprintf\(|gets\('
+  severity: WARNING
+  type: Regex
+  metadata:
+    cwe: cwe-676
+    masvs: code-8
+    owasp-mobile: m7
+    reference: https://developer.apple.com/library/archive/documentation/Security/Conceptual/SecureCodingGuide/Articles/BufferOverflows.html#//apple_ref/doc/uid/TP40002577-SW1
+- id: ios_self_signed_ssl
+  message: >-
+    App allows self signed or invalid SSL certificates. App is vulnerable to
+    MITM attacks.
+  input_case: exact
+  pattern: >-
+    canAuthenticateAgainstProtectionSpace|continueWithoutCredentialForAuthenticationChallenge|kCFStreamSSLAllowsExpiredCertificates|kCFStreamSSLAllowsAnyRoot|kCFStreamSSLAllowsExpiredRoots|validatesSecureCertificate\s*=\s*(no|NO)|allowInvalidCertificates\s*=\s*(YES|yes)
+  severity: ERROR
+  type: Regex
+  metadata:
+    masvs: network-3
+    owasp-mobile: m3
+    cwe: cwe-295
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-3-and-mstg-network-4
+- id: ios_webview_ignore_ssl
+  message: >-
+    UIWebView in App ignore SSL errors and accept any SSL Certificate. App is
+    vulnerable to MITM attacks.
+  input_case: exact
+  pattern: >-
+    setAllowsAnyHTTPSCertificate:\s*YES|allowsAnyHTTPSCertificateForHost|loadingUnvalidatedHTTPSPage\s*=\s*(YES|yes)
+  severity: ERROR
+  type: Regex
+  metadata:
+    masvs: network-3
+    owasp-mobile: m3
+    cwe: cwe-295
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#webview-server-certificate-verification
+- id: ios_app_logging
+  message: The App logs information. Sensitive information should never be logged.
+  pattern: NSLog\(|NSAssert\(|fprintf\(|fprintf\(|Logging\(
+  severity: INFO
+  type: Regex
+  input_case: exact
+  metadata:
+    cwe: cwe-532
+    masvs: storage-3
+    owasp-mobile: m1
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06i-Testing-Code-Quality-and-Build-Settings.md#finding-debugging-code-and-verbose-error-logging-mstg-code-4
+- id: ios_file_perm
+  message: The file has no special protections associated with it.
+  input_case: exact
+  pattern: NSFileProtectionNone
+  severity: WARNING
+  type: Regex
+  metadata:
+    cwe: cwe-311
+    masvs: storage-2
+    owasp-mobile: m1
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06d-Testing-Data-Storage.md#ios-data-storage
+- id: ios_weak_hash
+  message: Weak Hash algorithm used. The hash algorithm is known to have hash collisions.
+  input_case: exact
+  pattern:
+    - CommonDigest\.h
+    - MD2\(|MD4\(|MD5\(|MD6\(
+  severity: WARNING
+  type: RegexOr
+  metadata:
+    cwe: cwe-327
+    masvs: crypto-4
+    owasp-mobile: m5
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+- id: ios_sha1_collision
+  message: SHA1 is a weak hash known to have hash collisions.
+  input_case: exact
+  pattern:
+    - CommonDigest\.h
+    - CC_SHA1
+  severity: WARNING
+  type: RegexAnd
+  metadata:
+    cwe: cwe-327
+    masvs: crypto-4
+    owasp-mobile: m5
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+- id: ios_aes_ecb
+  message: >-
+    The App uses ECB mode in Cryptographic encryption algorithm. ECB mode is
+    known to be weak as it results in the same ciphertext for identical blocks
+    of plaintext.
+  input_case: exact
+  pattern:
+    - kCCOptionECBMode
+    - kCCAlgorithmAES
+  severity: ERROR
+  type: RegexAnd
+  metadata:
+    cwe: cwe-327
+    masvs: crypto-3
+    owasp-mobile: m5
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode

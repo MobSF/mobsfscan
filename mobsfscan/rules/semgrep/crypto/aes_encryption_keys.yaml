@@ -1,0 +1,26 @@
+rules:
+  - id: aes_hardcoded_key
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $S = new SecretKeySpec("...".getBytes(), "AES");
+              ...
+              $C.init(..., $S); 
+          - pattern: |
+              $P = "...";
+              ...
+              $S = new SecretKeySpec($P.getBytes(), "AES");
+              ...
+              $C.init(..., $S);
+    message: >-
+      Hardcoded encryption key makes AES symmetric encryption useless. An
+      attacker can easily reverse engineer the application and recover the keys.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-321
+      owasp-mobile: m5
+      masvs: crypto-1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#common-configuration-issues-mstg-crypto-1-mstg-crypto-2-and-mstg-crypto-3

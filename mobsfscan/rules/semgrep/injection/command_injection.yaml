@@ -1,0 +1,18 @@
+rules:
+  - id: command_injection
+    patterns:
+      - pattern-not: 'Runtime.getRuntime().exec("...", ...);'
+      - pattern-not: 'Runtime.getRuntime().exec(new String[] {"...", ...}, ...);'
+      - pattern-either:
+          - pattern: |
+              Runtime.getRuntime().exec(...);
+    message: User controlled strings in exec() will result in command execution.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-78
+      owasp-mobile: m7
+      masvs: platform-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2

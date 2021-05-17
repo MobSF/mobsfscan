@@ -1,0 +1,53 @@
+# https://find-sec-bugs.github.io/bugs.htm#BLOWFISH_KEY_SIZE
+rules:
+  - id: weak_key_size
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $K = $G.getInstance("RSA");
+              ...
+              $K.initialize(1024);
+          - pattern: |
+              $K = $G.getInstance("RSA");
+              ...
+              $K.initialize(512);
+          - pattern: |
+              $K = $G.getInstance("EC");
+              ...
+              $K.initialize(new ECGenParameterSpec("secp112r1"));
+          - pattern: |
+              $K = $G.getInstance("EC");
+              ...
+              $S = new ECGenParameterSpec("secp112r1");
+              ...
+              $K.initialize($S);
+          - pattern: |
+              $K = $G.getInstance("EC");
+              ...
+              $K.initialize(new ECGenParameterSpec("secp224r1"));
+          - pattern: |
+              $K = $G.getInstance("EC");
+              ...
+              $S = new ECGenParameterSpec("secp224r1");
+              ...
+              $K.initialize($S);
+          - pattern: |
+              $K = $G.getInstance("Blowfish");
+              ...
+              $K.init(64);
+          - pattern: |
+              $K = $G.getInstance("AES");
+              ...
+              $K.init(64);
+    message: >-
+      Cryptographic implementations with insufficient key length is susceptible
+      to bruteforce attacks.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-326
+      owasp-mobile: m5
+      masvs: crypto-3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#common-configuration-issues-mstg-crypto-1-mstg-crypto-2-and-mstg-crypto-3

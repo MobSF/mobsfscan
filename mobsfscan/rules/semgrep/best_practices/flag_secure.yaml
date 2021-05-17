@@ -1,0 +1,42 @@
+rules:
+  - id: android_prevent_screenshot
+    patterns:
+      - pattern-either:
+          - pattern: |
+              getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, ...);
+          - pattern: |
+              $V = WindowManager.LayoutParams.FLAG_SECURE;
+              ...
+              getWindow().setFlags($V);
+          - pattern: |
+              getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE, ...);
+          - pattern: |
+              $V = WindowManager.LayoutParams.FLAG_SECURE;
+              ...
+              getWindow().addFlags($V);
+          - pattern: >
+              $A.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,
+              ...);
+          - pattern: |
+              $V = WindowManager.LayoutParams.FLAG_SECURE;
+              ...
+              $A.getWindow().setFlags($V);
+          - pattern: >
+              $A.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE,
+              ...);
+          - pattern: |
+              $V = WindowManager.LayoutParams.FLAG_SECURE;
+              ...
+              $A.getWindow().addFlags($V);
+    message: >-
+      This App does not have capabilities to prevent against Screenshots from
+      Recent Task History/ Now On Tap etc.
+    languages:
+      - java
+    severity: INFO
+    metadata:
+      cwe: cwe-200
+      owasp-mobile: m2
+      masvs: storage-9
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#finding-sensitive-information-in-auto-generated-screenshots-mstg-storage-9

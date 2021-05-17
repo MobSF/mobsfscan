@@ -9,7 +9,7 @@ Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82
 [![python](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/)
 
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/MobSF/mobsfscan.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/MobSF/mobsfscan/context:python)
-[![Requirements Status](https://requires.io/github/MobSF/mobsfscan/requirements.svg?branch=master)](https://requires.io/github/MobSF/mobsfscan/requirements/?branch=master)
+[![Requirements Status](https://requires.io/github/MobSF/mobsfscan/requirements/?branch=main)](https://requires.io/github/MobSF/mobsfscan/requirements/?branch=main)
 [![Build](https://github.com/MobSF/mobsfscan/workflows/Build/badge.svg)](https://github.com/MobSF/mobsfscan/actions?query=workflow%3ABuild)
 
 ### Support mobsfscan
@@ -192,9 +192,9 @@ Add the following to the file `.github/workflows/mobsf.yml`.
 name: mobsfscan
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 jobs:
   njsscan:
     runs-on: ubuntu-latest
@@ -218,9 +218,9 @@ Add the following to the file `.github/workflows/mobsfscan_sarif.yml`.
 name: mobsfscan sarif
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 jobs:
   mobsfscan:
     runs-on: ubuntu-latest
@@ -230,7 +230,7 @@ jobs:
       uses: actions/checkout@v2
     - name: mobsfscan scan
       id: mobsfscan
-      uses: MobSF/mobsfscan@master
+      uses: MobSF/mobsfscan@main
       with:
         args: '. --sarif --output results.sarif || true'
     - name: Upload mobsfscan report

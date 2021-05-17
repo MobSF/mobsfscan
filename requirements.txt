@@ -6,7 +6,7 @@ idna==2.10
 jschema-to-python==1.2.3
 jsonpickle==2.0.0
 jsonschema==3.2.0
-libsast==1.4.1
+libsast==1.4.4
 packaging==20.9
 pbr==5.6.0
 pyparsing==2.4.7
@@ -16,7 +16,7 @@ requests==2.25.1
 ruamel.yaml==0.17.4
 ruamel.yaml.clib==0.2.2
 sarif-om==1.0.4
-semgrep==0.47.0
+semgrep==0.50.1
 six==1.16.0
 tabulate==0.8.9
 tqdm==4.60.0

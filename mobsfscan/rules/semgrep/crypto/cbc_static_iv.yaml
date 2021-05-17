@@ -1,0 +1,28 @@
+rules:
+  - id: cbc_static_iv
+    patterns:
+      - pattern-either:
+          - pattern: |
+              byte[] $X = {...};
+              ...
+              $Y =  new IvParameterSpec($X, ...);
+              ...
+              $C.getInstance("=~/AES/CBC.*/i");
+          - pattern: |
+              byte[] $X = "...".$FUNC(...);
+              ...
+              $Y =  new IvParameterSpec($X, ...);
+              ...
+              $C.getInstance("=~/AES/CBC.*/i");
+    message: >-
+      The IV for AES CBC mode should be random. A static IV makes the ciphertext
+      vulnerable to Chosen Plaintext Attack.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-329
+      owasp-mobile: m5
+      masvs: crypto-5
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#predictable-initialization-vector

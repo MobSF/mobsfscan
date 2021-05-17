@@ -1,0 +1,22 @@
+rules:
+  - id: jackson_deserialization
+    patterns:
+      - pattern-either:
+          - pattern: |
+              import com.fasterxml.jackson.databind.ObjectMapper;
+              ...
+              $Z.enableDefaultTyping();
+    message: >-
+      The app uses jackson deserialization library. Deserialization of untrusted
+      input can result in arbitrary code execution. Consider using HMACs to sign
+      the data stream to make sure it is not tampered with, or consider only 
+      transmitting object fields and populating a new object.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-502
+      owasp-mobile: m1
+      masvs: platform-8
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-object-persistence-mstg-platform-8

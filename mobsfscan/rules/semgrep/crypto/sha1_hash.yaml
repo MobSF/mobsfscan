@@ -1,0 +1,22 @@
+rules:
+  - id: sha1_hash
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $C.getInstance("=~/sha-1|sha1/i", ...);
+          - pattern: |
+              DigestUtils.sha1Hex(...);
+          - pattern: |
+              DigestUtils.sha1(...);
+          - pattern: |
+              DigestUtils.sha(...);
+    message: SHA1 Hash algorithm used. The SHA1 hash is known to have hash collisions.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-4
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4

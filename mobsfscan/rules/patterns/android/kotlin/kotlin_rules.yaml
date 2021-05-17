@@ -1,0 +1,327 @@
+- id: android_kotlin_hiddenui
+  message: >-
+    Hidden elements in view can be used to hide data from user. But this data
+    can be leaked.
+  type: Regex
+  pattern: View\.GONE|View\.INVISIBLE
+  severity: ERROR
+  input_case: exact
+  metadata:
+    cwe: cwe-919
+    owasp-mobile: m1
+    masvs: storage-7
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-for-sensitive-data-disclosure-through-the-user-interface-mstg-storage-7
+- id: android_kotlin_insecure_ssl
+  message: >-
+    Insecure Implementation of SSL. Trusting all the certificates or accepting
+    self signed certificates is a critical Security Hole. This application is
+    vulnerable to MITM attacks
+  type: RegexAnd
+  pattern:
+    - javax\.net\.ssl
+    - >-
+      TrustAllSSLSocket-Factory|AllTrustSSLSocketFactory|NonValidatingSSLSocketFactory|net\.SSLCertificateSocketFactory|ALLOW_ALL_HOSTNAME_VERIFIER|\.setDefaultHostnameVerifier\(|NullHostnameVerifier\(
+  severity: ERROR
+  input_case: exact
+  metadata:
+    cwe: cwe-295
+    owasp-mobile: m3
+    masvs: network-3
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#android-network-apis
+- id: android_kotlin_webview_external
+  message: >-
+    WebView load files from external storage. Files in external storage can be
+    modified by any application.
+  type: RegexAnd
+  pattern:
+    - \.loadUrl\(.*getExternalStorageDirectory\(
+    - webkit\.WebView
+  severity: ERROR
+  input_case: exact
+  metadata:
+    cwe: cwe-749
+    owasp-mobile: m1
+    masvs: platform-6
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#static-analysis-7
+- id: android_kotlin_insecure_random
+  message: The App uses an insecure Random Number Generator.
+  type: Regex
+  pattern: java\.util\.Random(?!Access)
+  severity: WARNING
+  metadata:
+    input_case: exact
+    cwe: cwe-330
+    owasp-mobile: m5
+    masvs: crypto-6
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-random-number-generators
+- id: android_kotlin_logging
+  message: The App logs information. Sensitive information should never be logged.
+  type: Regex
+  pattern: Log\.(v|d|i|w|e|f|s)|System\.out\.print|System\.err\.print
+  severity: INFO
+  metadata:
+    input_case: exact
+    cwe: cwe-532
+    owasp-mobile: m1
+    masvs: storage-3
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#logs
+- id: android_kotlin_webview
+  message: >-
+    Insecure WebView Implementation. Execution of user controlled code in
+    WebView is a critical Security Hole.
+  type: RegexAnd
+  pattern:
+    - setJavaScriptEnabled\(true\)
+    - \.addJavascriptInterface\(
+  severity: WARNING
+  input_case: exact
+  metadata:
+    cwe: cwe-749
+    owasp-mobile: m1
+    masvs: platform-7
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-javascript-execution-in-webviews-mstg-platform-5
+- id: android_kotlin_webview_debug
+  message: Remote WebView debugging is enabled.
+  type: RegexAnd
+  pattern:
+    - \.setWebContentsDebuggingEnabled\(true\)
+    - WebView
+  severity: ERROR
+  input_case: exact
+  metadata:
+    cwe: cwe-489
+    owasp-mobile: m1
+    masvs: resilience-2
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-anti-debugging-detection-mstg-resilience-2
+- id: android_kotlin_webview_ignore_ssl
+  message: >-
+    Insecure WebView Implementation. WebView ignores SSL Certificate errors and
+    accept any SSL Certificate. This application is vulnerable to MITM attacks
+  type: RegexAnd
+  pattern:
+    - onReceivedSslError\(WebView
+    - \.proceed\(\);
+  severity: ERROR
+  input_case: exact
+  metadata:
+    cwe: cwe-295
+    owasp-mobile: m3
+    masvs: network-3
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#webview-server-certificate-verification
+- id: android_kotlin_sql_raw_query
+  message: >-
+    App uses SQLite Database and execute raw SQL query. Untrusted user input in
+    raw SQL queries can cause SQL Injection. Also sensitive information should
+    be encrypted and written to the database.
+  type: RegexAndOr
+  pattern:
+    - android\.database\.sqlite
+    - - rawQuery\(
+      - execSQL\(
+  severity: WARNING
+  input_case: exact
+  metadata:
+    cwe: cwe-78
+    owasp-mobile: m7
+    masvs: platform-2
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2
+- id: android_kotlin_jackson_deserialize
+  message: >-
+    The app uses jackson deserialization library. Deserialization of untrusted
+    input can result in arbitrary code execution.
+  type: RegexAnd
+  pattern:
+    - com\.fasterxml\.jackson\.databind\.ObjectMapper
+    - \.enableDefaultTyping\(
+  severity: ERROR
+  input_case: exact
+  metadata:
+    cwe: cwe-502
+    owasp-mobile: m7
+    masvs: platform-8
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-object-persistence-mstg-platform-8 
+- id: android_kotlin_aes_ecb
+  message: >-
+    The App uses ECB mode in Cryptographic encryption algorithm. ECB mode is
+    known to be weak as it results in the same ciphertext for identical blocks
+    of plaintext.
+  type: Regex
+  pattern: Cipher\.getInstance\(\s*"\s*AES\/ECB
+  severity: ERROR
+  input_case: exact
+  metadata:
+    cwe: cwe-327
+    owasp-mobile: m5
+    masvs: crypto-2
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode
+- id: android_kotlin_aes_ecb_default
+  message: >-
+    Calling Cipher.getInstance("AES") will return AES ECB mode by default. ECB mode is
+    known to be weak as it results in the same ciphertext for identical blocks
+    of plaintext.
+  type: Regex
+  pattern: Cipher\.getInstance\("AES"\)
+  severity: ERROR
+  input_case: exact
+  metadata:
+    cwe: cwe-327
+    owasp-mobile: m5
+    masvs: crypto-2
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode
+- id: cbc_kotlin_padding_oracle
+  message: The App uses the encryption mode CBC with PKCS5/PKCS7 padding. This configuration is vulnerable to padding oracle attacks.
+  pattern:
+    - \.getInstance\(.*\/CBC\/PKCS5Padding
+    - \.getInstance\(.*\/CBC\/PKCS7Padding
+  type: RegexOr
+  severity: ERROR
+  input_case: exact
+  metadata:
+    masvs: crypto-3
+    owasp-mobile: m5
+    cwe: cwe-649
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+- id: android_kotlin_rsa_no_oaep
+  message: >-
+    This App uses RSA Crypto without OAEP padding. The purpose of the padding
+    scheme is to prevent a number of attacks on RSA that only work when the
+    encryption is performed without padding.
+  type: Regex
+  pattern: cipher\.getinstance\(\"rsa/.+/nopadding
+  severity: ERROR
+  input_case: lower
+  metadata:
+    cwe: cwe-780
+    owasp-mobile: m5
+    masvs: crypto-3
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#mobile-app-cryptography
+- id: android_kotlin_world_writable
+  message: The file is World Writable. Any App can write to the file
+  type: RegexOr
+  pattern:
+    - MODE_WORLD_WRITABLE
+    - 'openFileOutput\(\s*".+"\s*,\s*2\s*\)'
+  severity: WARNING
+  input_case: exact
+  metadata:
+    cwe: cwe-276
+    owasp-mobile: m2
+    masvs: storage-2
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2
+- id: android_kotlin_world_readable
+  message: The file is World Readable. Any App can read from the file
+  type: RegexOr
+  pattern:
+    - MODE_WORLD_READABLE
+    - 'openFileOutput\(\s*".+"\s*,\s*1\s*\)'
+  severity: WARNING
+  input_case: exact
+  metadata:
+    cwe: cwe-276
+    owasp-mobile: m2
+    masvs: storage-2
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2
+- id: android_kotlin_world_read_write
+  message: The file is World Readable and Writable. Any App can read/write to the file
+  type: Regex
+  pattern: 'openFileOutput\(\s*".+"\s*,\s*3\s*\)'
+  severity: WARNING
+  input_case: exact
+  metadata:
+    cwe: cwe-276
+    owasp-mobile: m2
+    masvs: storage-2
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2
+- id: android_kotlin_weak_hash
+  message: Weak Hash algorithm used. The hash algorithm is known to have hash collisions.
+  pattern:
+    - \.getInstance\(.*md4
+    - \.getInstance\(.*MD4
+  type: RegexOr
+  input_case: exact
+  severity: WARNING
+  metadata:
+    masvs: crypto-4
+    owasp-mobile: m5
+    cwe: cwe-327
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+- id: android_kotlin_weak_ciphers
+  message: Weak Encryption algorithm used
+  severity: ERROR
+  type: RegexOr
+  input_case: exact
+  pattern:
+    - \.getInstance\(.*rc2
+    - \.getInstance\(.*RC2
+    - \.getInstance\(.*rc4
+    - \.getInstance\(.*RC4
+    - \.getInstance\(.*blowfish
+    - \.getInstance\(.*BLOWFISH
+    - Cipher\.getInstance\(.*DES
+    - Cipher\.getInstance\(.*des
+  metadata:
+    cwe: cwe-327
+    masvs: crypto-4
+    owasp-mobile: m5
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+- id: android_kotlin_md5
+  message: MD5 is a weak hash known to have hash collisions.
+  type: RegexOr
+  pattern:
+      - \.getInstance\(.*MD5
+      - \.getInstance\(.*md5
+      - DigestUtils\.md5\(
+  input_case: exact
+  severity: WARNING
+  metadata:
+    cwe: cwe-327
+    masvs: crypto-4
+    owasp-mobile: m5
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+- id: android_kotlin_sha1
+  message: SHA-1 is a weak hash known to have hash collisions.
+  type: RegexOr
+  input_case: exact
+  severity: WARNING
+  pattern:
+    - \.getInstance\(.*SHA-1
+    - \.getInstance\(.*sha-1
+    - \.getInstance\(.*SHA1
+    - \.getInstance\(.*sha1
+    - DigestUtils\.sha\(
+  metadata:
+    cwe: cwe-327
+    masvs: crypto-4
+    owasp-mobile: m5
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+- id: android_kotlin_weak_iv
+  message: >-
+    The App may use weak IVs like "0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00" or
+    "0x01,0x02,0x03,0x04,0x05,0x06,0x07". Not using a random IV makes the
+    resulting ciphertext much more predictable and susceptible to a dictionary
+    attack.
+  input_case: exact
+  pattern:
+    - '0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00'
+    - '0x01,0x02,0x03,0x04,0x05,0x06,0x07'
+  severity: WARNING
+  type: RegexOr
+  metadata:
+    cwe: cwe-1204
+    masvs: crypto-5
+    owasp-mobile: m5
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#mobile-app-cryptography
+- id: android_kotlin_hardcoded
+  message: >-
+    Files may contain hardcoded sensitive information like usernames,
+    passwords, keys etc.
+  input_case: lower
+  pattern: >-
+    (password\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(pass\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(username\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(secret\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(key\s*=\s*[\'|\"].+[\'|\"]\s{0,5})
+  severity: WARNING
+  type: Regex
+  metadata:
+    masvs: storage-14
+    cwe: cwe-798
+    owasp-mobile: m9
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#storing-a-key---example

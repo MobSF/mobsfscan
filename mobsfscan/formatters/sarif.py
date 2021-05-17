@@ -40,11 +40,11 @@ TS_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 
 def level_from_severity(severity):
-    if severity == 'high':
+    if severity == 'ERROR':
         return 'error'
-    elif severity == 'warning':
+    elif severity == 'WARNING':
         return 'warning'
-    elif severity == 'info':
+    elif severity == 'INFO':
         return 'note'
     else:
         return 'none'
@@ -67,7 +67,7 @@ def get_rule_name(rule_id):
     return ''.join(normalized)
 
 
-def add_results(scan_results, run):
+def add_results(path, scan_results, run):
     if run.results is None:
         run.results = []
     res = {}
@@ -76,22 +76,19 @@ def add_results(scan_results, run):
     rule_indices = {}
 
     for rule_id, issue_dict in res.items():
-        if 'files' not in issue_dict:
-            # no missing controls in sarif
-            continue
-        result = create_result(rule_id, issue_dict, rules, rule_indices)
+        result = create_result(path, rule_id, issue_dict, rules, rule_indices)
         run.results.append(result)
 
     if len(rules) > 0:
         run.tool.driver.rules = list(rules.values())
 
 
-def create_result(rule_id, issue_dict, rules, rule_indices):
+def create_result(path, rule_id, issue_dict, rules, rule_indices):
     if rule_id in rules:
         rule = rules[rule_id]
         rule_index = rule_indices[rule_id]
     else:
-        doc = issue_dict['metadata'].get('ref')
+        doc = issue_dict['metadata'].get('reference')
         if not doc:
             doc = ('https://mobile-security.gitbook.io/'
                    'mobile-security-testing-guide/')
@@ -105,7 +102,7 @@ def create_result(rule_id, issue_dict, rules, rule_indices):
         rule_indices[rule_id] = rule_index
 
     locations = []
-    for item in issue_dict['files']:
+    for item in issue_dict.get('files', []):
         physical_location = om.PhysicalLocation(
             artifact_location=om.ArtifactLocation(
                 uri=to_uri(item['file_path'])),
@@ -118,6 +115,19 @@ def create_result(rule_id, issue_dict, rules, rule_indices):
             snippet=om.ArtifactContent(text=item['match_string']),
         )
         locations.append(om.Location(physical_location=physical_location))
+    if not locations:
+        artifact = om.PhysicalLocation(
+            artifact_location=om.ArtifactLocation(
+                uri=path[0]),
+        )
+        artifact.region = om.Region(
+            start_line=1,
+            end_line=1,
+            start_column=1,
+            end_column=1,
+            snippet=om.ArtifactContent(text='Missing Best Practice'),
+        )
+        locations.append(om.Location(physical_location=artifact))
 
     return om.Result(
         rule_id=rule.id,
@@ -129,12 +139,12 @@ def create_result(rule_id, issue_dict, rules, rule_indices):
             'owasp-mobile': issue_dict['metadata']['owasp-mobile'],
             'masvs': issue_dict['metadata']['masvs'],
             'cwe': issue_dict['metadata']['cwe'],
-            'cvss': issue_dict['metadata']['cvss'],
+            'reference': issue_dict['metadata']['reference'],
         },
     )
 
 
-def sarif_output(outfile, scan_results, mobsfscan_version):
+def sarif_output(outfile, scan_results, mobsfscan_version, path):
     log = om.SarifLog(
         schema_uri=('https://raw.githubusercontent.com/oasis-tcs/'
                     'sarif-spec/master/Schemata/sarif-schema-2.1.0.json'),
@@ -157,7 +167,7 @@ def sarif_output(outfile, scan_results, mobsfscan_version):
         ],
     )
     run = log.runs[0]
-    add_results(scan_results, run)
+    add_results(path, scan_results, run)
     json_out = to_json(log)
     if outfile:
         with open(outfile, 'w') as of:

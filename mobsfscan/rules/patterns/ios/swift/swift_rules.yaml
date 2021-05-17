@@ -1,0 +1,155 @@
+- id: ios_hardcoded_secret
+  message: Files may contain hardcoded sensitive information like usernames,
+    passwords, keys etc.
+  input_case: lower
+  pattern: (password\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(pass\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(username\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(secret\s*=\s*[\'|\"].+[\'|\"]\s{0,5})|(key\s*=\s*[\'|\"].+[\'|\"]\s{0,5})
+  severity: WARNING
+  type: Regex
+  metadata:
+    cwe: cwe-312
+    masvs: storage-14
+    owasp-mobile: m9
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-memory-for-sensitive-data-mstg-storage-10
+- id: ios_load_html_string
+  message: User input in "loadHTMLString" will result in JavaScript Injection.
+  input_case: exact
+  pattern:
+  - loadHTMLString
+  - webView
+  severity: INFO
+  type: RegexAnd
+  metadata:
+    cwe: cwe-95
+    masvs: platform-5
+    owasp-mobile: m7
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#testing-webview-protocol-handlers-mstg-platform-6
+- id: ios_log
+  message: The App logs information. Sensitive information should never be logged.
+  input_case: exact
+  pattern: (print|NSLog|os_log|OSLog|os_signpost)\(.*\)
+  severity: INFO
+  type: Regex
+  metadata:
+    cwe: cwe-532
+    masvs: storage-3
+    owasp-mobile: m1
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06i-Testing-Code-Quality-and-Build-Settings.md#finding-debugging-code-and-verbose-error-logging-mstg-code-4
+- id: ios_sha1_collision
+  cwe: CWE-327
+  message: SHA1 is a weak hash known to have hash collisions.
+  input_case: exact
+  pattern:
+    - (?i)SHA1\(
+    - CC_SHA1\(
+  severity: WARNING
+  type: RegexOr
+  metadata:
+    cwe: cwe-327
+    masvs: crypto-4
+    owasp-mobile: m5
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+- id: ios_weak_hash
+  message: Weak Hash algorithm used. The hash algorithm is known to have hash collisions.
+  input_case: exact
+  pattern:
+    - (?i)MD2\(
+    - CC_MD2\(
+    - (?i)MD4\(
+    - CC_MD4\(
+    - (?i)MD5\(
+    - CC_MD5\(
+    - (?i)MD6\(
+    - CC_MD6\(
+  severity: WARNING
+  type: RegexOr
+  metadata:
+    cwe: cwe-327
+    masvs: crypto-4
+    owasp-mobile: m5
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+- id: ios_biometric_bool
+  message: Biometric authentication should be based on Keychain, not based on bool.
+  input_case: exact
+  pattern: \.evaluatePolicy\(.deviceOwnerAuthentication
+  severity: WARNING
+  type: Regex
+  metadata:
+    cwe: cwe-919
+    masvs: auth-8
+    owasp-mobile: m1
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06f-Testing-Local-Authentication.md#local-authentication-framework
+- id: ios_file_no_special
+  message: The file has no special protections associated with it.
+  input_case: exact
+  pattern: (?i)\.noFileProtection
+  severity: ERROR
+  type: Regex
+  metadata:
+    cwe: cwe-311
+    masvs: storage-1
+    owasp-mobile: m2
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06d-Testing-Data-Storage.md#ios-data-storage
+- id: ios_general_paste
+  message: Usage of generalPasteboard should be avoided. A malicious app can monitor the pasteboard in the background in iOS versions below 9.
+  input_case: exact
+  pattern: UIPasteboard\.generalPasteboard
+  severity: INFO
+  type: Regex
+  metadata:
+    cwe: cwe-919
+    masvs: platform-4
+    owasp-mobile: m1
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#uipasteboard
+- id: ios_tls3_not_used
+  message: The app uses TLS 1.0 or TLS 1.1. TLS 1.3 should be used instead.
+  input_case: exact
+  pattern:
+    - \.TLSMinimumSupportedProtocolVersion
+    - - tls_protocol_version_t\.TLSv10
+      - tls_protocol_version_t\.TLSv11
+  severity: ERROR
+  type: RegexAndOr
+  metadata:
+    cwe: cwe-757
+    masvs: network-2
+    owasp-mobile: m3
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
+- id: ios_tls12_used
+  message: This app uses TLS 1.2. TLS 1.3 should be used instead.
+  input_case: exact
+  pattern:
+    - \.TLSMinimumSupportedProtocolVersion
+    - tls_protocol_version_t\.TLSv12
+  severity: WARNING
+  type: RegexAnd
+  metadata:
+    cwe: cwe-757
+    masvs: network-2
+    owasp-mobile: m3
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
+- id: ios_dtls1_used
+  message: DTLS 1.2 should be used. Detected old version - DTLS 1.0.
+  input_case: exact
+  pattern:
+    - \.TLSMinimumSupportedProtocolVersion
+    - tls_protocol_version_t\.DTLSv10
+  severity: WARNING
+  type: RegexAnd
+  metadata:
+    cwe: cwe-757
+    masvs: network-2
+    owasp-mobile: m3
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
+- id: ios_depr_tls_min
+  message: >-
+    Use of deprecated property tlsMinimumSupportedProtocol. To avoid potential
+    security risks, use tlsMinimumSupportedProtocolVersion
+  input_case: exact
+  pattern: \.tlsMinimumSupportedProtocol
+  severity: WARNING
+  type: Regex
+  metadata:
+    cwe: cwe-757
+    masvs: network-2
+    owasp-mobile: m3
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2

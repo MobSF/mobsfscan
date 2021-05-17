@@ -6,10 +6,9 @@ from mobsfscan.formatters.json import json_output
 
 def get_sonarqube_issue(mobsfscan_issue):
     sonarqube_severity_mapping = {
-        'high': 'CRITICAL',
-        'warning': 'MAJOR',
-        'info': 'MINOR',
-        'good': 'INFO',
+        'ERROR': 'CRITICAL',
+        'WARNING': 'MAJOR',
+        'INFO': 'INFO',
     }
     secondary_locations = []
     issue_data = mobsfscan_issue['metadata']
