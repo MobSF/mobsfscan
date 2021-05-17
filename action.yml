@@ -1,9 +1,28 @@
 name: 'mobsfscan'
-description: 'mobsfscan'
+author: 'Ajin Abraham <ajin@opensecurity.in>'
+description: 'mobsfscan is a SAST that can find insecure code patterns in your Android and iOS source code.'
+branding:
+  icon: 'code'
+  color: 'blue'
 
 inputs:
   args:
-    description: 'Argument'
+    description: |
+      positional arguments:
+      path                  Path can be file(s) or directories with source code
+
+      optional arguments:
+        -h, --help            show this help message and exit
+        --json                set output format as JSON
+        --sarif               set output format as SARIF 2.1.0
+        --sonarqube           set output format compatible with SonarQube
+        --html                set output format as HTML
+        -o OUTPUT, --output OUTPUT
+                              output filename to save the result
+        -c CONFIG, --config CONFIG
+                              Location to .mobsf config file
+        -w, --exit-warning    non zero exit code on warning
+        -v, --version         show mobsfscan version
     required: true
 
 runs:
@@ -11,7 +30,7 @@ runs:
   steps:
     - shell: bash
       run: |
-        echo "::group::Installing Dependencies"
+        echo "::group::Installing mobsfscan dependencies"
         python3 -m pip install -r ${{ github.action_path }}/requirements.txt
         echo "::endgroup::"
 
