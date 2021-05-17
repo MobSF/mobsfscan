@@ -1,5 +1,3 @@
- public ArrayList<DatabaseRecord> getAllRecords() {
-        ArrayList<DatabaseRecord> records = new ArrayList<DatabaseRecord>();
 
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -24,10 +22,7 @@
         }
         return records;
 
-    }
-
-    private OkHttpClient createOkHttpClient(Set<String> hosts, boolean isFailOnError, CTLogger defaultLogger) {
-        // Create a network interceptor
+  // Create a network interceptor
         CTInterceptorBuilder builder = new CTInterceptorBuilder()
             .setFailOnError(isFailOnError)
             .setLogger(defaultLogger)
@@ -43,4 +38,3 @@
         return new OkHttpClient.Builder()
             .addNetworkInterceptor(networkInterceptor)
             .build();
-    }

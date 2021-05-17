@@ -1,5 +1,5 @@
 # mobsfscan
-**mobsfscan** is a static analysis tool that can find insecure code patterns in your Android and iOS source code. Supports Java, Kotlin, Swift, and Objective C Code. mobsfscan uses MobSF static analysis rules and is powered by a simple pattern matcher from [libsast](https://github.com/ajinabraham/libsast).
+**mobsfscan** is a static analysis tool that can find insecure code patterns in your Android and iOS source code. Supports Java, Kotlin, Swift, and Objective C Code. mobsfscan uses MobSF static analysis rules and is powered by semgrep and a simple pattern matcher.
 
 Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82e3a63c-4813-11e6-9430-6015d98aeaab.png) in India  [![Tweet](https://img.shields.io/twitter/url?url=https://github.com/MobSF/mobsfscan)](https://twitter.com/intent/tweet/?text=mobsfscan%20is%20a%20static%20analysis%20tool%20that%20can%20find%20insecure%20code%20patterns%20in%20your%20Android%20and%20iOS%20source%20code.%20Supports%20Java,%20Kotlin,%20Swift,%20and%20Objective%20C%20Code.%20by%20%40ajinabraham%20%40OpenSecurity_IN&url=https://github.com/MobSF/mobsfscan)
 
@@ -14,8 +14,9 @@ Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82
 
 ### Support mobsfscan
 
-* **Donate via Paypal:** [![Donate via Paypal](https://user-images.githubusercontent.com/4301109/76471686-c43b0500-63c9-11ea-8225-2a305efb3d87.gif)](https://paypal.me/ajinabraham)
-* **Sponsor the Project:** [![Github Sponsors](https://user-images.githubusercontent.com/4301109/95517226-9e410780-098e-11eb-9ef5-7b8c7561d725.png)](https://github.com/sponsors/ajinabraham)
+[![Donate to MobSF](https://user-images.githubusercontent.com/4301109/117404264-7aab5480-aebe-11eb-9cbd-da82d7346bb3.png)](https://opensecurity.in/donate)
+
+If you liked mobsfscan and find it useful, please consider donating.
 
 ## e-Learning Courses & Certifications
 ![MobSF Course](https://user-images.githubusercontent.com/4301109/76344880-ad68b580-62d8-11ea-8cde-9e3475fc92f6.png) [Automated Mobile Application Security Assessment with MobSF -MAS](https://opsecx.com/index.php/product/automated-mobile-application-security-assessment-with-mobsf/)
@@ -33,7 +34,7 @@ Requires Python 3.6+
 
 ```bash
 $ mobsfscan
-usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [-o OUTPUT] [-c CONFIG] [-w] [-v] [path ...]
+usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--html] [-o OUTPUT] [-c CONFIG] [-w] [-v] [path [path ...]]
 
 positional arguments:
   path                  Path can be file(s) or directories with source code
@@ -43,6 +44,7 @@ optional arguments:
   --json                set output format as JSON
   --sarif               set output format as SARIF 2.1.0
   --sonarqube           set output format compatible with SonarQube
+  --html                set output format as HTML
   -o OUTPUT, --output OUTPUT
                         output filename to save the result
   -c CONFIG, --config CONFIG
@@ -55,10 +57,11 @@ optional arguments:
 ## Example Usage
 
 ```bash
-$ mobsfscan ../test_files/android_src/app/src
-- Pattern Match ████████████████████████████████████████████████████████████ 13
+$ mobsfscan tests/assets/src/
+- Pattern Match ████████████████████████████████████████████████████████████ 3
+- Semantic Grep ██████ 37
 
-mobsfscan: v0.0.1 | Ajin Abraham | opensecurity.in
+mobsfscan: v0.0.2 | Ajin Abraham | opensecurity.in
 ╒══════════════╤════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╕
 │ RULE ID      │ android_webview_ignore_ssl                                                                                                                             │
 ├──────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -106,38 +109,79 @@ mobsfscan: v0.0.1 | Ajin Abraham | opensecurity.in
 
 ```python
 >>> from mobsfscan.mobsfscan import MobSFScan
->>> src = '../test_files/android_src/app/src'
+>>> src = 'tests/assets/src/java/java_vuln.java'
 >>> scanner = MobSFScan([src], json=True)
 >>> scanner.scan()
-{{
+{
     'results': {
-        'android_webview_ignore_ssl': {
+        'android_logging': {
             'files': [{
-                'file_path': '../test_files/android_src/app/src/main/java/opensecurity/webviewignoressl/MainActivity.java',
-                'match_string': 'onReceivedSslError(WebView',
-                'match_position': (1331, 1357),
-                'match_lines': (46, 46)
-            }, {
-                'file_path': '../test_files/android_src/app/src/main/java/opensecurity/webviewignoressl/MainActivity.java',
-                'match_string': '.proceed();',
-                'match_position': (1480, 1491),
-                'match_lines': (50, 50)
+                'file_path': 'tests/assets/src/java/java_vuln.java',
+                'match_position': (13, 73),
+                'match_lines': (19, 19),
+                'match_string': '            Log.d("htbridge", "getAllRecords(): " + records.toString());'
             }],
             'metadata': {
-                'id': 'android_webview_ignore_ssl',
-                'description': 'Insecure WebView Implementation. WebView ignores SSL Certificate errors and accept any SSL Certificate. This application is vulnerable to MITM attacks',
-                'type': 'RegexAnd',
-                'pattern': ['onReceivedSslError\\(WebView', '\\.proceed\\(\\);'],
-                'severity': 'high',
-                'input_case': 'exact',
-                'cvss': 7.4,
+                'cwe': 'CWE-532 Insertion of Sensitive Information into Log File',
+                'owasp-mobile': 'M1: Improper Platform Usage',
+                'masvs': 'MSTG-STORAGE-3',
+                'reference': 'https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#logs',
+                'description': 'The App logs information. Please ensure that sensitive information is never logged.',
+                'severity': 'INFO'
+            }
+        },
+        'android_certificate_pinning': {
+            'metadata': {
                 'cwe': 'CWE-295 Improper Certificate Validation',
                 'owasp-mobile': 'M3: Insecure Communication',
-                'masvs': 'MSTG-NETWORK-3',
-                'ref': 'https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#webview-server-certificate-verification'
+                'masvs': 'MSTG-NETWORK-4',
+                'reference': 'https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4',
+                'description': 'This App does not use TLS/SSL certificate or public key pinning to detect or prevent MITM attacks in secure communication channel.',
+                'severity': 'INFO'
+            }
+        },
+        'android_root_detection': {
+            'metadata': {
+                'cwe': 'CWE-919 - Weaknesses in Mobile Applications',
+                'owasp-mobile': 'M8: Code Tampering',
+                'masvs': 'MSTG-RESILIENCE-1',
+                'reference': 'https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-root-detection-mstg-resilience-1',
+                'description': 'This App does not have root detection capabilities. Running a sensitive application on a rooted device questions the device integrity and affects users data.',
+                'severity': 'INFO'
+            }
+        },
+        'android_prevent_screenshot': {
+            'metadata': {
+                'cwe': 'CWE-200 Information Exposure',
+                'owasp-mobile': 'M2: Insecure Data Storage',
+                'masvs': 'MSTG-STORAGE-9',
+                'reference': 'https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#finding-sensitive-information-in-auto-generated-screenshots-mstg-storage-9',
+                'description': 'This App does not have capabilities to prevent against Screenshots from Recent Task History/ Now On Tap etc.',
+                'severity': 'INFO'
+            }
+        },
+        'android_safetynet_api': {
+            'metadata': {
+                'cwe': 'CWE-353 Missing Support for Integrity Check',
+                'owasp-mobile': 'M8: Code Tampering',
+                'masvs': 'MSTG-RESILIENCE-1',
+                'reference': 'https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-root-detection-mstg-resilience-1',
+                'description': "This App does not uses SafetyNet Attestation API that provides cryptographically-signed attestation, assessing the device's integrity. This check helps to ensure that the servers are interacting with the genuine app running on a genuine Android device. ",
+                'severity': 'INFO'
+            }
+        },
+        'android_detect_tapjacking': {
+            'metadata': {
+                'cwe': 'CWE-200 Information Exposure',
+                'owasp-mobile': 'M1: Improper Platform Usage',
+                'masvs': 'MSTG-PLATFORM-9',
+                'reference': 'https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-for-overlay-attacks-mstg-platform-9',
+                'description': "This app does not has capabilities to prevent tapjacking attacks. An attacker can hijack the user's taps and tricks him into performing some critical operations that he did not intend to.",
+                'severity': 'INFO'
             }
         }
-    }
+    },
+    'errors': []
 }
 ```
 
@@ -147,37 +191,21 @@ A `.mobsf` file in the root of the source code directory allows you to configure
 
 ```yaml
 ---
-- scan-extensions:
-  - .java
-  - .kt
-  - .swift
-  - .m
-
-  ignore-filenames:
-  - skip.js
+- ignore-filenames:
+  - skip.java
 
   ignore-paths:
   - __MACOSX
-  - node_modules
-  - Pods
-
-  ignore-extensions:
-  - .dex
-  - .jar
-  - .apk
-  - .ipa
-  - .zip
-  - .tar.gz
+  - skip_dir
 
   ignore-rules:
-  - android_logging
-  - ios_app_logging
-
-  suppress-findings:
-    android_webview_ignore_ssl:
-    - opensecurity/webviewignoressl/MainActivity.java,50,46,3
-    - Foo.java,22
-    - webviewignoressl/,33
+  - android_kotlin_logging
+  - android_safetynet_api
+  - android_prevent_screenshot
+  - android_detect_tapjacking
+  - android_certificate_pinning
+  - android_root_detection
+  - android_certificate_transparency
 ```
 
 ## CI/CD Integrations
@@ -212,34 +240,7 @@ Example:
 
 #### Github Code Scanning Integration
 
-Add the following to the file `.github/workflows/mobsfscan_sarif.yml`.
-
-```yaml
-name: mobsfscan sarif
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-jobs:
-  mobsfscan:
-    runs-on: ubuntu-latest
-    name: mobsfscan code scanning
-    steps:
-    - name: Checkout the code
-      uses: actions/checkout@v2
-    - name: mobsfscan scan
-      id: mobsfscan
-      uses: MobSF/mobsfscan@main
-      with:
-        args: '. --sarif --output results.sarif || true'
-    - name: Upload mobsfscan report
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: results.sarif
-```
-![mobsfscan web ui](https://user-images.githubusercontent.com/4301109/99230041-cfe29500-27bc-11eb-8baa-d5b30e21348d.png)
-
+Add the contents of [action.yml](action.yml) to the file `.github/workflows/mobsfscan_sarif.yml`.
 
 #### Gitlab CI/CD
 
