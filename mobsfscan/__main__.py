@@ -16,13 +16,12 @@ from mobsfscan.formatters import (
 
 def handle_exit(results, exit_warn):
     """Handle Exit."""
-    combined = {}
-    if results.get('results'):
-        combined.update(results['results'])
-    for meta in combined.values():
+    if not results.get('results'):
+        return
+    for meta in results.get('results').values():
         severity = meta['metadata']['severity']
-        ewarn = severity == 'warning' and exit_warn
-        if severity == 'high' or ewarn:
+        ewarn = severity == 'WARNING' and exit_warn
+        if severity == 'ERROR' or ewarn:
             sys.exit(1)
     sys.exit(0)
 
