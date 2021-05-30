@@ -48,6 +48,7 @@ public class MyActivity extends Activity {
             return true;
         }
 
+        // ruleid:ignore_ssl_certificate_errors
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
             super.onReceivedSslError(view, handler, error);

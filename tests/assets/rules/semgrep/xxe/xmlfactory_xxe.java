@@ -31,7 +31,7 @@ class GoodConstXMLInputFactory {
 
 class BadXMLInputFactory {
     public Blah() {
-        // ruleid:xmlinputfactory-possible-xxe
+        // ruleid:xmlinputfactory_xxe
         final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
         xmlInputFactory.setProperty("javax.xml.stream.isSupportingExternalEntities", true);
     }
@@ -39,7 +39,7 @@ class BadXMLInputFactory {
 
 class MaybeBadXMLInputFactory {
     public Blah() {
-        // ruleid:xmlinputfactory-possible-xxe
+        // ruleid:xmlinputfactory_xxe
         final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
     }
 }

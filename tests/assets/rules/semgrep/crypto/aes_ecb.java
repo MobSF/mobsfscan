@@ -1,10 +1,11 @@
     SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
+    // ruleid:aes_ecb_mode_default
     Cipher cipher = Cipher.getInstance("AES");
     cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
     byte[] encrypted = cipher.doFinal(clear);
     return encrypted;
-
     SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
+    // ruleid:aes_ecb_mode_default
     Cipher cipher = Cipher.getInstance("AES");
     cipher.init(Cipher.DECRYPT_MODE, skeySpec);
     byte[] decrypted = cipher.doFinal(encrypted);
@@ -13,6 +14,7 @@
     try {
         byte[] seed = Base64.decode(seedBase64, 0);
         SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
+        // ruleid:aes_ecb_mode
         Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
         cipher.init(1, keySpec);
         return Base64.encodeToString(cipher.doFinal(seed), 0);

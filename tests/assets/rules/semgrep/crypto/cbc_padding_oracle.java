@@ -1,9 +1,13 @@
 
-
+// ruleid:cbc_padding_oracle
 Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+// ruleid:cbc_padding_oracle
 Cipher cc = Cipher.getInstance("Blowfish/CBC/PKCS5Padding");
+// ruleid:cbc_padding_oracle
 Cipher ccc = Cipher.getInstance("DES/CBC/PKCS5Padding");
+// ruleid:cbc_padding_oracle
 Cipher cccc = Cipher.getInstance("AES/CBC/PKCS7Padding");
+// ruleid:cbc_padding_oracle
 Cipher ccccc = Cipher.getInstance("Blowfish/CBC/PKCS7Padding");
 
 // good

@@ -3,7 +3,9 @@ rules:
     patterns:
       - pattern-either:
           - pattern: |
-              addJavascriptInterface(...);
+              addJavascriptInterface(...)
+          - pattern: |
+              $W.addJavascriptInterface(...)
     message: >-
       Ensure that javascript interface is implemented securely.
       Execution of user controlled code in WebView is a 

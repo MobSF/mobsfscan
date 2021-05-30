@@ -18,6 +18,7 @@ public class MainActivity extends ReactActivity {
     protected void onCreate() {
         super.onCreate();
         //added this line with necessary imports at the top.
+        // ruleid:webview_debugging
         WebView.setWebContentsDebuggingEnabled(true);
     }
 }

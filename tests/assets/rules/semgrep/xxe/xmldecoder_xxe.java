@@ -10,7 +10,7 @@ public class XmlDecodeUtil {
         XmlDecodeUtil.handleXml(in);
     }
 
-    // ruleid: xml-decoder
+    // ruleid:xml_decoder_xxe
     public static Object handleXml(InputStream in) {
         XMLDecoder d = new XMLDecoder(in);
         try {
@@ -22,7 +22,7 @@ public class XmlDecodeUtil {
         }
     }
 
-    // ok: xml-decoder
+    // ok: xml_decoder_xxe
     public static Object handleXml1() {
         XMLDecoder d = new XMLDecoder("<safe>XML</safe>");
         try {
@@ -34,7 +34,7 @@ public class XmlDecodeUtil {
         }
     }
 
-    // ok: xml-decoder
+    // ok: xml_decoder_xxe
     public static Object handleXml2() {
         String strXml = "<safe>XML</safe>";
         XMLDecoder d = new XMLDecoder(strXml);

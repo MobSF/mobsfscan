@@ -1,3 +1,4 @@
+// ruleid:cbc_static_iv
 byte[] bytesIV = "foo".getBytes("UTF-8");
 
     IvParameterSpec iv = new IvParameterSpec(bytesIV);
@@ -9,6 +10,7 @@ byte[] bytesIV = "foo".getBytes("UTF-8");
 
 
 
+// ruleid:cbc_static_iv
 byte[] bytesIV1 ={
 0x01,0x02,0x00,0x00,0x00,0x00,0x00,0x00
 };

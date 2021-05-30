@@ -1,4 +1,5 @@
 package com.patrilic.jackson;
+// ruleid:jackson_deserialization
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 public class poc {

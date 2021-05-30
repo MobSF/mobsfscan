@@ -1,4 +1,5 @@
      // Create a network interceptor
+        // ruleid:android_certificate_transparency
         CTInterceptorBuilder builder = new CTInterceptorBuilder()
             .setFailOnError(isFailOnError)
             .setLogger(defaultLogger)
@@ -19,6 +20,7 @@
  HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
 
             // Create a hostname verifier wrapping the original
+            // ruleid:android_certificate_transparency
             CTHostnameVerifierBuilder builder = new CTHostnameVerifierBuilder(httpsConnection.getHostnameVerifier())
                 .setFailOnError(isFailOnError)
                 .setLogger(defaultLogger)
@@ -29,8 +31,8 @@
             }
 
             httpsConnection.setHostnameVerifier(builder.build());
-
    // Create a hostname verifier wrapping the original
+            // ruleid:android_certificate_transparency
             CTHostnameVerifierBuilder builder = new CTHostnameVerifierBuilder(httpsConnection.getHostnameVerifier())
                 .setFailOnError(isFailOnError)
                 .setLogger(defaultLogger)

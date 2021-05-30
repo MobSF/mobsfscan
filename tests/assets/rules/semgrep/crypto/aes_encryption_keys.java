@@ -1,10 +1,10 @@
    
+    // ruleid:aes_hardcoded_key
     SecretKeySpec secret = new SecretKeySpec("hardcoded".getBytes(), "AES"); 
        cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
    cipher.init(Cipher.ENCRYPT_MODE, secret); 
    //good
     SecretKeySpec secret = new SecretKeySpec(password.getBytes(), "AES"); 
-
     throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException 
    /* Encrypt the message. */
    Cipher cipher = null; 

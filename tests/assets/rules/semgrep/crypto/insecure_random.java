@@ -1,3 +1,4 @@
+// ruleid:java_insecure_random
 import java.util.Random;
 import java.security.SecureRandom;
 class GenerateRandom {
@@ -15,6 +16,7 @@ class GenerateRandom {
     }
 }
 
+// ruleid:java_insecure_random
 import java.util.concurrent.ThreadLocalRandom;
 class GenerateRandom {
     public static void main( String args[] ) {
@@ -26,7 +28,6 @@ class GenerateRandom {
 
       // Generate Random doubles 
       double double_rand = ThreadLocalRandom.current().nextDouble(); 
-  
       // Print random doubles 
       System.out.println("Random Doubles: " + double_rand); 
        

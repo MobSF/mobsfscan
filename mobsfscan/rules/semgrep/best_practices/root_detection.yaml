@@ -5,9 +5,11 @@ rules:
           - pattern: |
               $J.isJailBroken(...)
           - pattern: |
-              $R.isDeviceRooted(...);
+              $R.isDeviceRooted(...)
           - pattern: |
-              RootTools.isAccessGiven(...);
+              $R.isRooted(...)
+          - pattern: |
+              RootTools.isAccessGiven(...)
           - pattern: |
               $MTD.contains("test-keys")
     message: >-

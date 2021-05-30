@@ -1,3 +1,4 @@
+// ruleid:accept_self_signed_certificate
 HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 
 DefaultHttpClient client = new DefaultHttpClient();
@@ -19,6 +20,7 @@ HttpResponse response = httpClient.execute(httpPost);
 
 
 public class DummyHostnameVerifier implements HostnameVerifier {
+    // ruleid:accept_self_signed_certificate
     @Override
     public boolean verify(String s, SSLSession sslSession) {
         return true;
@@ -35,10 +37,12 @@ HttpsURLConnection.setDefaultHostnameVerifier(new DummyHostnameVerifier());
 
         trustAllCertificates[0] = tm;
 
+        // ruleid:accept_self_signed_certificate
         javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance("SSL");
 
         sc.init(null, trustAllCertificates, null);
 
+        // ruleid:accept_self_signed_certificate
         javax.net.ssl.SSLContext sc = SSLContext.getInstance("SSL");
 
         sc.init(null, trustAllCertificates, null);
@@ -53,6 +57,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sslFactory);
     HTTPClientPolicy httpClientPolicy = new HTTPClientPolicy();
     httpClientPolicy.setConnection(ConnectionType.CLOSE);
     http.setClient(httpClientPolicy);
+    // ruleid:accept_self_signed_certificate
     TLSClientParameters tls = new TLSClientParameters();
     tls.setSSLSocketFactory(sslFactory);
     tls.setDisableCNCheck(true);
@@ -62,6 +67,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sslFactory);
 
     TrustManager[] trustAllCerts = new TrustManager[] {
     new X509TrustManager() {
+        // ruleid:accept_self_signed_certificate
         @Override
         public X509Certificate[] getAcceptedIssuers() {
             return new java.security.cert.X509Certificate[] {};
@@ -78,6 +84,7 @@ HttpsURLConnection.setDefaultSSLSocketFactory(sslFactory);
         }
     }
  };
+ // ruleid:accept_self_signed_certificate
  SSLContext context = SSLContext.getInstance("SSL");
 
 // SSLContext context
@@ -85,6 +92,7 @@ context.init(null, trustAllCerts, new SecureRandom());
 
 
 final static HostnameVerifier NO_VERIFY = new HostnameVerifier() {
+    // ruleid:accept_self_signed_certificate
     public boolean verify(String hostname, SSLSession session) {
         return true;
     }
@@ -122,6 +130,7 @@ final static HostnameVerifier NO_VERIFY = new HostnameVerifier() {
         tmf.init(keyStore);
 
         // Create an SSLContext that uses our TrustManager
+        // ruleid:accept_self_signed_certificate
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, tmf.getTrustManagers(), null);
 
@@ -138,11 +147,13 @@ final static HostnameVerifier NO_VERIFY = new HostnameVerifier() {
         return null;
     }
 
+    // ruleid:accept_self_signed_certificate
     SSLContext ctx = SSLContext.getInstance("TLS");
 ctx.init(null, new TrustManager[] {
   new X509TrustManager() {
     public void checkClientTrusted(X509Certificate[] chain, String authType) {}
     public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+    // ruleid:accept_self_signed_certificate
     public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[]{}; }
   }
 }, null);
@@ -154,6 +165,7 @@ try {
 
                 new X509TrustManager() {
 
+                    // ruleid:accept_self_signed_certificate
                     public X509Certificate[] getAcceptedIssuers() {
 
                         X509Certificate[] myTrustedAnchors = new X509Certificate[0];
@@ -171,10 +183,12 @@ try {
                 }
         };
 
+        // ruleid:accept_self_signed_certificate
         SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null, victimizedManager, new SecureRandom());
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+            // ruleid:accept_self_signed_certificate
             @Override
             public boolean verify(String s, SSLSession sslSession) {
                 return true;
@@ -200,11 +214,13 @@ public class MySSLSocketFactory extends SSLSocketFactory {
             public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
             }
 
+            // ruleid:accept_self_signed_certificate
             public X509Certificate[] getAcceptedIssuers() {
                 return null;
             }
         };
 
+        // ruleid:accept_self_signed_certificate
         sslContext.init(null, new TrustManager[] { tm }, null);
     }
 
@@ -227,6 +243,7 @@ trustStore.load(null, null);
 // We initialize a new SSLSocketFacrory
 MySSLSocketFactory socketFactory = new MySSLSocketFactory(trustStore);
 // We set that all host names are allowed in the socket factory
+// ruleid:accept_self_signed_certificate
 socketFactory.setHostnameVerifier(MySSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 // We initialize the Async Client
 AsyncHttpClient client = new AsyncHttpClient();
@@ -257,11 +274,13 @@ public class MySSLSocketFactory extends SSLSocketFactory {
                 public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
                 }
 
+                // ruleid:accept_self_signed_certificate
                 public X509Certificate[] getAcceptedIssuers() {
                     return null;
                 }
             };
 
+            // ruleid:accept_self_signed_certificate
             sslContext.init(null, new TrustManager[] { tm }, null);
         }
 
@@ -284,9 +303,9 @@ import org.springframework.ldap.core.support.DefaultTlsDirContextAuthenticationS
 public class IgnoreAllTlsDirContextAuthenticationStrategy extends DefaultTlsDirContextAuthenticationStrategy {
     public IgnoreAllTlsDirContextAuthenticationStrategy() {
         setHostnameVerifier((hostname, session) -> true);
+        // ruleid:accept_self_signed_certificate
         setSslSocketFactory(new NonValidatingSSLSocketFactory());
     }
 }
+// ruleid:accept_self_signed_certificate
 x.setDefaultHostnameVerifier((HostnameVerifier)  new NullHostnameVerifier());
-
-    

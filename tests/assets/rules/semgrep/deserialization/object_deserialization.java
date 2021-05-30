@@ -10,7 +10,7 @@ import com.biz.org.UserData;
 public class Cls
 {
     public UserData deserializeObject(InputStream receivedFile) throws IOException, ClassNotFoundException {
-        // ruleid:object-deserialization
+        // ruleid:object_deserialization
         ObjectInputStream in = new ObjectInputStream(receivedFile);
         return (UserData) in.readObject();
     }

@@ -1,9 +1,12 @@
 final DatePicker dp2 = (DatePicker) findViewById(R.id.datePick2);
 final Button btn2 = (Button) findViewById(R.id.btnDate2);
-
+// ruleid:android_hidden_ui
 dp2.setVisibility(View.GONE);
+// ruleid:android_hidden_ui
 dp2.setVisibility(View.INVISIBLE);
+// ruleid:android_hidden_ui
 btn2.setVisibility(View.GONE);
+// ruleid:android_hidden_ui
 btn2.setVisibility(View.INVISIBLE);
 
 btn2.setOnClickListener(new View.OnClickListener() {

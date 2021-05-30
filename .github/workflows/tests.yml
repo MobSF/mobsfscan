@@ -33,9 +33,13 @@ jobs:
       run: |
         tox -e bandit
 
-    - name: Semgrep validate
+    - name: Semgrep validate rules
       run: |
         semgrep --validate --strict --config=./mobsfscan/rules/semgrep/
+
+    - name: Semgrep tests
+      run: |
+        semgrep --quiet --test --config ./mobsfscan/rules/semgrep/ ./tests/assets/rules/semgrep/
 
     - name: Run tests
       run: |

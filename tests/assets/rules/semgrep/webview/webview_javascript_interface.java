@@ -13,6 +13,7 @@ public class HelloWebApp extends Activity {
         setContentView(R.layout.main);
         WebView webView = (WebView)findViewById(R.id.webView);
         webView.getSettings().setJavaScriptEnabled(true);
+        // ruleid:webview_javascript_interface
         webView.addJavascriptInterface(new testClass(), "jsinterface");
         webView.loadUrl("file:///android_asset/www/index.html");
     }

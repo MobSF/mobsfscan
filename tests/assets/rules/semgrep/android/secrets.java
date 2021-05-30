@@ -7,16 +7,18 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 public class App
 {
 
+    // ruleid:hardcoded_secret
     static String secret = "secret";
     String password;
+    // ruleid:hardcoded_password
     static String ppassword = "secret";
 
     private static void bad1() {
         try {
           
-            // ruleid: java-jwt-hardcoded-secret
             Algorithm algorithm = Algorithm.HMAC256("secret");
             Foo.algorithm("password", "");
+            // ruleid:hardcoded_password
             foo.password = "aasas";
             String token = JWT.create()
                 .withIssuer("auth0")
@@ -28,7 +30,7 @@ public class App
 
     private static void ok1(String secretKey) {
         try {
-            // ok: java-jwt-hardcoded-secret
+            // ok: hardcoded_password
             Algorithm algorithm = Algorithm.HMAC256(secretKey);
             String token = JWT.create()
                 .withIssuer("auth0")
@@ -45,10 +47,10 @@ public class App
     }
 }
 
-// ruleid: java-jwt-hardcoded-secret
 abstract class App2
 {
 
+    // ruleid:hardcoded_secret
     static String secret = "secret";
 
     public void bad2() {
