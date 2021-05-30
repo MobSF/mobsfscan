@@ -1,6 +1,7 @@
 # -*- coding: utf_8 -*-
 """The MobSF cli: mobsfscan."""
 from pathlib import Path
+from linecache import getline
 
 from libsast import Scanner
 from libsast import standards
@@ -150,6 +151,18 @@ class MobSFScan:
             if rule_id in self.result['results']:
                 del self.result['results'][rule_id]
 
+    def suppress_pm_comments(self, obj, rule_id):
+        """Suppress pattern matcher."""
+        file_path = obj['file_path']
+        lines = obj['match_lines']
+        if lines[0] != lines[1]:
+            # Skip multiline for now
+            return False
+        match_line = getline(file_path, lines[0])
+        if 'mobsf-ignore:' in match_line and rule_id in match_line:
+            return True
+        return False
+
     def post_ignore_files(self):
         """Ignore file by rule."""
         del_keys = set()
@@ -161,6 +174,8 @@ class MobSFScan:
             for file in files:
                 mstr = file.get('match_string')
                 if 'mobsf-ignore:' in mstr and rule_id in mstr:
+                    tmp_files.remove(file)
+                elif self.suppress_pm_comments(file, rule_id):
                     tmp_files.remove(file)
                 if len(tmp_files) == 0:
                     del_keys.add(rule_id)
