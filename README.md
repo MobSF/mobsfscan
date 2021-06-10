@@ -237,7 +237,7 @@ jobs:
 Example: [pivaa with mobsfscan github action](https://github.com/MobSF/pivaa/actions/workflows/mobsfscan.yml)
 
 #### Github Code Scanning Integration
-Add the following to the file `.github/workflows/njsscan_sarif.yml`.
+Add the following to the file `.github/workflows/mobsfscan_sarif.yml`.
 
 ```yaml
 name: mobsfscan sarif
