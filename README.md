@@ -206,6 +206,15 @@ A `.mobsf` file in the root of the source code directory allows you to configure
   - android_root_detection
   - android_certificate_transparency
 ```
+## Suppress Findings
+
+You can suppress findings from source files by adding the comment `// mobsf-ignore: rule_id1, rule_id2` to the line that trigger the findings.
+
+Example:
+
+```java
+String password = "strong password"; // mobsf-ignore: hardcoded_password
+```
 
 ## CI/CD Integrations
 
