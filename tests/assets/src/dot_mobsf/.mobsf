@@ -14,3 +14,6 @@
   - android_certificate_pinning
   - android_root_detection
   - android_certificate_transparency
+  - android_safetynet
+  - android_ssl_pinning
+  - android_tapjacking
