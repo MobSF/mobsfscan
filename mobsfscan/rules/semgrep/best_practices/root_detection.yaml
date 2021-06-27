@@ -13,7 +13,7 @@ rules:
           - pattern: |
               $MTD.contains("test-keys")
     message: >-
-      This App does not have root detection capabilities. Running a sensitive
+      This App may have root detection capabilities. Running a sensitive
       application on a rooted device questions the device integrity and affects
       users data.
     languages:

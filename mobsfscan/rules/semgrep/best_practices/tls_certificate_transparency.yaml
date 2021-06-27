@@ -9,7 +9,7 @@ rules:
           - pattern: |
               new CTHostnameVerifierBuilder(...)
     message: >-
-      This App does not enforce TLS Certificate Transparency that helps to
+      This App may enforce TLS Certificate Transparency that helps to
       detect SSL certificates that have been mistakenly issued by a certificate
       authority or maliciously acquired from an otherwise unimpeachable
       certificate authority.

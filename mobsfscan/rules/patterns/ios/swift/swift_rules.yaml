@@ -70,9 +70,12 @@
 - id: ios_biometric_bool
   message: Biometric authentication should be based on Keychain, not based on bool.
   input_case: exact
-  pattern: \.evaluatePolicy\(.deviceOwnerAuthentication
+  pattern:
+    - \.evaluatePolicy\(.deviceOwnerAuthentication
+    - \.evaluatePolicy\(LAPolicy.deviceOwnerAuthentication
+    - evaluatePolicy:LAPolicyDeviceOwnerAuthentication
   severity: WARNING
-  type: Regex
+  type: RegexOr
   metadata:
     cwe: cwe-919
     masvs: auth-8

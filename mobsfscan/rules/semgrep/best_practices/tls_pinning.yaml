@@ -37,7 +37,7 @@ rules:
               ...
               $X = new Picasso.Builder(...);
     message: >-
-      This App does not use TLS/SSL certificate or public key pinning to detect
+      This App may use TLS/SSL certificate or public key pinning to detect
       or prevent MITM attacks in secure communication channel.
     languages:
       - java

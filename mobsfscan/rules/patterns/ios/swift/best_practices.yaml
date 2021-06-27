@@ -1,5 +1,5 @@
 - id: ios_jailbreak_detect
-  message: This App des not have Jailbreak detection capabilities.
+  message: This App may have Jailbreak detection capabilities.
   input_case: exact
   pattern:
   - /Applications/Cydia\.app
@@ -57,7 +57,7 @@
     owasp-mobile: m8
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#jailbreak-detection-mstg-resilience-1
 - id: ios_custom_keyboard_disabled
-  message: This app does not have custom keyboards disabled.
+  message: This app may have custom keyboards disabled.
   input_case: exact
   pattern: extensionPointIdentifier == .*\.keyboard
   severity: INFO
@@ -68,9 +68,13 @@
     owasp-mobile: m1
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#app-extensions
 - id: ios_keyboard_cache
-  message: This app does not disable Keyboard cache. It must be disabled for all sensitive data inputs.
+  message: This app may disable Keyboard cache. It must be disabled for all sensitive data inputs.
   input_case: exact
-  pattern: \.autocorrectionType = \.no
+  pattern:
+    - \.autocorrectionType\s*=\s*\.no
+    - \.autocorrectionType\s*=\s*\.No
+    - UITextAutocorrectionTypeNo
+    - textField\.disableAutocorrection\s*\(\s*true\s*\)
   severity: INFO
   type: Regex
   metadata:
@@ -80,7 +84,7 @@
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06d-Testing-Data-Storage.md#finding-sensitive-data-in-the-keyboard-cache-mstg-storage-5
 - id: ios_uiwebview_safari_view
   message: >-
-    This app uses SFSafariViewController or UIWebView. It 
+    This app uses SFSafariViewController or UIWebView. It
     is recommended to use WKWebView instead.
   pattern: UIWebView|SFSafariViewController
   severity: INFO
@@ -92,7 +96,7 @@
     owasp-mobile: m1
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#testing-ios-webviews-mstg-platform-5
 - id: ios_detect_reversing
-  message: This App does not have Reverse engineering detection capabilities.
+  message: This App may have Reverse engineering detection capabilities.
   input_case: exact
   pattern:
     - '"FridaGadget"'
