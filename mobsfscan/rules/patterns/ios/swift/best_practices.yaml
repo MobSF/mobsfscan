@@ -73,9 +73,13 @@
 - id: ios_keyboard_cache
   message: This app does not disable Keyboard cache. It must be disabled for all sensitive data inputs.
   input_case: exact
-  pattern: \.autocorrectionType = \.no
+  pattern:
+    - \.autocorrectionType\s*=\s*\.no
+    - \.autocorrectionType\s*=\s*\.No
+    - UITextAutocorrectionTypeNo
+    - \.disableAutocorrection\s*\(\s*true\s*\)
   severity: INFO
-  type: Regex
+  type: RegexOr
   metadata:
     cwe: cwe-919
     masvs: storage-5
