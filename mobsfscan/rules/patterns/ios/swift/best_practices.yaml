@@ -1,5 +1,8 @@
+# All best practices rules are evaluated differently.
+# Unlike other rules which are triggered when we find those patterns in code,
+# these are triggered only when we do not find a pattern after scanning the entire codebase. 
 - id: ios_jailbreak_detect
-  message: This App des not have Jailbreak detection capabilities.
+  message: This app does not have Jailbreak detection capabilities.
   input_case: exact
   pattern:
   - /Applications/Cydia\.app
@@ -78,21 +81,8 @@
     masvs: storage-5
     owasp-mobile: m2
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06d-Testing-Data-Storage.md#finding-sensitive-data-in-the-keyboard-cache-mstg-storage-5
-- id: ios_uiwebview_safari_view
-  message: >-
-    This app uses SFSafariViewController or UIWebView. It 
-    is recommended to use WKWebView instead.
-  pattern: UIWebView|SFSafariViewController
-  severity: INFO
-  type: Regex
-  input_case: exact
-  metadata:
-    cwe: cwe-919
-    masvs: platform-5
-    owasp-mobile: m1
-    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#testing-ios-webviews-mstg-platform-5
 - id: ios_detect_reversing
-  message: This App does not have Reverse engineering detection capabilities.
+  message: This app does not have Reverse engineering detection capabilities.
   input_case: exact
   pattern:
     - '"FridaGadget"'
@@ -107,7 +97,7 @@
     cwe: cwe-919
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#ios-anti-reversing-defenses
 - id: ios_cert_pinning
-  message: This App may have Certificate Pinning mechanism.
+  message: This app does not have Certificate Pinning implemented in code.
   input_case: exact
   pattern:
     - PinnedCertificatesTrustEvaluator
