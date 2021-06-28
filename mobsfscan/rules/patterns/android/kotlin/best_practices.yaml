@@ -52,7 +52,7 @@
     masvs: resilience-1
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-root-detection-mstg-resilience-1
 - id: android_tapjacking
-  message: This app may have capabilities to prevent tapjacking attacks.
+  message: This app does not have capabilities to prevent tapjacking attacks.
   type: Regex
   pattern: setFilterTouchesWhenObscured\(true\)
   severity: INFO

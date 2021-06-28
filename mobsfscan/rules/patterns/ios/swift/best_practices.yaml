@@ -60,7 +60,7 @@
     owasp-mobile: m8
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#jailbreak-detection-mstg-resilience-1
 - id: ios_custom_keyboard_disabled
-  message: This app may have custom keyboards disabled.
+  message: This app does not have custom keyboards disabled.
   input_case: exact
   pattern: extensionPointIdentifier == .*\.keyboard
   severity: INFO
@@ -71,7 +71,7 @@
     owasp-mobile: m1
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#app-extensions
 - id: ios_keyboard_cache
-  message: This app may disable Keyboard cache. It must be disabled for all sensitive data inputs.
+  message: This app does not disable Keyboard cache. It must be disabled for all sensitive data inputs.
   input_case: exact
   pattern:
     - \.autocorrectionType\s*=\s*\.no

@@ -60,7 +60,7 @@
     owasp-mobile: m8
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#jailbreak-detection-mstg-resilience-1
 - id: ios_detect_jailbreak_check
-  message: This app may perform SFAntiPiracy Jailbreak checks.
+  message: This app does not perform SFAntiPiracy Jailbreak checks.
   input_case: exact
   pattern:
     - SFAntiPiracy\.h
@@ -74,7 +74,7 @@
     owasp-mobile: m8
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#jailbreak-detection-mstg-resilience-1
 - id: ios_piracy_check
-  message: This app may perform SFAntiPiracy Piracy checks.
+  message: This app does not perform SFAntiPiracy Piracy checks.
   input_case: exact
   pattern:
     - SFAntiPiracy\.h
