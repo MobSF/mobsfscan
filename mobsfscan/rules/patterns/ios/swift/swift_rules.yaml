@@ -71,11 +71,9 @@
   message: Biometric authentication should be based on Keychain, not based on bool.
   input_case: exact
   pattern:
-    - \.evaluatePolicy\(.deviceOwnerAuthentication
-    - \.evaluatePolicy\(LAPolicy.deviceOwnerAuthentication
-    - evaluatePolicy:LAPolicyDeviceOwnerAuthentication
+    - \.evaluatePolicy\(\w*.deviceOwnerAuthentication
   severity: WARNING
-  type: RegexOr
+  type: Regex
   metadata:
     cwe: cwe-919
     masvs: auth-8

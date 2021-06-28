@@ -74,9 +74,9 @@
     - \.autocorrectionType\s*=\s*\.no
     - \.autocorrectionType\s*=\s*\.No
     - UITextAutocorrectionTypeNo
-    - textField\.disableAutocorrection\s*\(\s*true\s*\)
+    - \.disableAutocorrection\s*\(\s*true\s*\)
   severity: INFO
-  type: Regex
+  type: RegexOr
   metadata:
     cwe: cwe-919
     masvs: storage-5

@@ -128,3 +128,15 @@
     masvs: crypto-3
     owasp-mobile: m5
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode
+- id: ios_biometric_bool
+  message: Biometric authentication should be based on Keychain, not based on bool.
+  input_case: exact
+  pattern:
+    - evaluatePolicy:LAPolicyDeviceOwnerAuthentication
+  severity: WARNING
+  type: Regex
+  metadata:
+    cwe: cwe-919
+    masvs: auth-8
+    owasp-mobile: m1
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06f-Testing-Local-Authentication.md#local-authentication-framework
