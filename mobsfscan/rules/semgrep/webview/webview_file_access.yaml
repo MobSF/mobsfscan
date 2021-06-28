@@ -4,10 +4,6 @@ rules:
       - pattern-either:
           - pattern: |
               $WB.setAllowFileAccess(true);
-          - pattern: |
-              $X = true;
-              ...
-              $WB.setAllowFileAccess($X);
     message: >-
       WebView File System Access is enabled. An attacker able to inject script into a WebView, could exploit the opportunity to access local resources.
     languages:
