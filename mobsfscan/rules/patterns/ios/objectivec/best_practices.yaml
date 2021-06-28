@@ -1,5 +1,8 @@
+# All best practices rules are evaluated differently.
+# Unlike other rules which are triggered when we find those patterns in code,
+# these are triggered only when we do not find a pattern after scanning the entire codebase. 
 - id: ios_jailbreak_detect
-  message: This App may have Jailbreak detection capabilities.
+  message: This app does not have Jailbreak detection capabilities.
   input_case: exact
   pattern:
   - /Applications/Cydia\.app
@@ -85,7 +88,7 @@
     owasp-mobile: m2
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#bypassing-jailbreak-detection
 - id: ios_mach_ports
-  message: This App may have anti-debugger code using Mach Exception Ports.
+  message: This app does not have anti-debugger code using Mach Exception Ports.
   input_case: exact
   pattern:
     - mach\/mach_init\.h

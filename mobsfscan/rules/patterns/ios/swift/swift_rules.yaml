@@ -154,3 +154,15 @@
     masvs: network-2
     owasp-mobile: m3
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
+- id: ios_uiwebview
+  message: >-
+    This app uses UIWebView. For security reasons, It is recommended to use WKWebView instead.
+  pattern: UIWebView
+  severity: INFO
+  type: Regex
+  input_case: exact
+  metadata:
+    cwe: cwe-919
+    masvs: platform-5
+    owasp-mobile: m1
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#testing-ios-webviews-mstg-platform-5

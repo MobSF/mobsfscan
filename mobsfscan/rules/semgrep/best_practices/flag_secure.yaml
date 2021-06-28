@@ -29,7 +29,7 @@ rules:
               ...
               $A.getWindow().addFlags($V);
     message: >-
-      This App may have capabilities to prevent against Screenshots from
+      This app does not have capabilities to prevent against Screenshots from
       Recent Task History/ Now On Tap etc.
     languages:
       - java
