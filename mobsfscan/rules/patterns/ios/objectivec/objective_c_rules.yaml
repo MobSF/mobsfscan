@@ -131,8 +131,7 @@
 - id: ios_biometric_bool
   message: Biometric authentication should be based on Keychain, not based on bool.
   input_case: exact
-  pattern:
-    - evaluatePolicy:LAPolicyDeviceOwnerAuthentication
+  pattern: evaluatePolicy:LAPolicyDeviceOwnerAuthentication
   severity: WARNING
   type: Regex
   metadata:
