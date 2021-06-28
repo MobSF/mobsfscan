@@ -1,0 +1,21 @@
+rules:
+  - id: webview_setAllowFileAccess
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $WB.setAllowFileAccess(true);
+          - pattern: |
+              $X = true;
+              ...
+              $WB.setAllowFileAccess($SX);
+    message: >-
+      WebView File System Access is enabled. An attacker able to inject script into a WebView, could exploit the opportunity to access local resources.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: N/A
+      owasp-mobile: m7
+      masvs: resilience-6.6
+      reference: >-
+        https://github.com/OWASP/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md
