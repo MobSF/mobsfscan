@@ -37,5 +37,5 @@ BEST_PRACTICES_FILE = 'best_practices.yaml'
 SEVERITY_FILTER = (
     'INFO',
     'WARNING',
-    'ERROR'
+    'ERROR',
 )
