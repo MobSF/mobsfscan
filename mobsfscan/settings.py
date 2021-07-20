@@ -33,3 +33,9 @@ BEST_PRACTICES_DIR = (
     BASE_DIR / 'rules' / 'semgrep' / 'best_practices'
 )
 BEST_PRACTICES_FILE = 'best_practices.yaml'
+
+SEVERITY_FILTER = (
+    'INFO',
+    'WARNING',
+    'ERROR',
+)
