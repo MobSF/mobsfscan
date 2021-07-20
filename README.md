@@ -206,6 +206,10 @@ A `.mobsf` file in the root of the source code directory allows you to configure
   - android_certificate_pinning
   - android_root_detection
   - android_certificate_transparency
+
+  severity-filter:
+  - WARNING
+  - ERROR
 ```
 ## Suppress Findings
 

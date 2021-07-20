@@ -17,7 +17,7 @@ def get_config(base_path, config_file):
         'ignore_extensions': config.IGNORE_EXTENSIONS,
         'ignore_paths': config.IGNORE_PATHS,
         'ignore_rules': set(),
-        'severity_threshold': config.SEVERITY_FILTER,
+        'severity_filter': config.SEVERITY_FILTER,
     }
     if config_file:
         cfile = Path(config_file)
