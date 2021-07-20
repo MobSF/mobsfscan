@@ -27,6 +27,7 @@ class MobSFScan:
             'ignore_extensions': self.conf['ignore_extensions'],
             'ignore_paths': self.conf['ignore_paths'],
             'ignore_rules': self.conf['ignore_rules'],
+            'severity_filter': self.conf['severity_filter'],
             'show_progress': not json,
         }
         self.paths = paths
@@ -87,6 +88,7 @@ class MobSFScan:
         self.format_pattern(results.get('pattern_matcher'))
         self.missing_controls()
         self.post_ignore_rules()
+        self.post_ignore_rules_by_severity()
         self.post_ignore_files()
 
     def format_semgrep(self, sgrep_output):
@@ -150,6 +152,17 @@ class MobSFScan:
         for rule_id in self.options['ignore_rules']:
             if rule_id in self.result['results']:
                 del self.result['results'][rule_id]
+
+    def post_ignore_rules_by_severity(self):
+        """Filter findings by rule severity."""
+        del_keys = set()
+        for rule_id, details in self.result['results'].items():
+            issue_severity = details.get('metadata').get('severity')
+            if issue_severity not in self.options['severity_filter']:
+                del_keys.add(rule_id)
+        for rid in del_keys:
+            if rid in self.result['results']:
+                del self.result['results'][rid]
 
     def suppress_pm_comments(self, obj, rule_id):
         """Suppress pattern matcher."""
