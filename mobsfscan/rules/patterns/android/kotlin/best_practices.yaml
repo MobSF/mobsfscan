@@ -24,8 +24,8 @@
   type: RegexAndOr
   pattern:
     - \.FLAG_SECURE
-    - - getWindow\(\)\.setFlags\(
-      - getWindow\(\)\.addFlags\(
+    - - \.setFlags\(
+      - \.addFlags\(
   severity: INFO
   input_case: exact
   metadata:
