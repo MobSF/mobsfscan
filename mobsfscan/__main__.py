@@ -59,6 +59,11 @@ def main():
                         help='show mobsfscan version',
                         required=False,
                         action='store_true')
+    parser.add_argument('-dfp', '--default-file-path',
+                        default="",
+                        help='default file path for generic issues'
+                        )
+
     args = parser.parse_args()
     if args.path:
         is_json = args.json or args.sonarqube or args.sarif
@@ -71,7 +76,8 @@ def main():
             sonarqube.sonarqube_output(
                 args.output,
                 scan_results,
-                __version__)
+                __version__,
+                args.default_file_path)
         elif args.json:
             json.json_output(
                 args.output,
