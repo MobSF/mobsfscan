@@ -51,6 +51,8 @@ optional arguments:
                         Location to .mobsf config file
   -w, --exit-warning    non zero exit code on warning
   -v, --version         show mobsfscan version
+  -dfp, --default-file-path
+                        default file path for generic issues (sonarqube)
 ```
 
 
