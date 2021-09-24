@@ -4,7 +4,7 @@
 from mobsfscan.formatters.json import json_output
 
 
-def get_sonarqube_issue(mobsfscan_issue, defaultFilePath):
+def get_sonarqube_issue(mobsfscan_issue, default_file_path):
     sonarqube_severity_mapping = {
         'ERROR': 'CRITICAL',
         'WARNING': 'MAJOR',
@@ -20,7 +20,7 @@ def get_sonarqube_issue(mobsfscan_issue, defaultFilePath):
         }
         location = {
             'message': issue_data['description'],
-            'filePath': defaultFilePath,
+            'filePath': default_file_path,
             'textRange': text_range,
         }
         primary_location = location
@@ -52,11 +52,11 @@ def get_sonarqube_issue(mobsfscan_issue, defaultFilePath):
     return issue
 
 
-def sonarqube_output(outfile, scan_results, version, defaultFilePath):
+def sonarqube_output(outfile, scan_results, version, default_file_path):
     """Sonarqube JSON Output."""
     sonarqube_issues = []
     for k, v in scan_results['results'].items():
-        issue = get_sonarqube_issue(v, defaultFilePath)
+        issue = get_sonarqube_issue(v, default_file_path)
         issue['ruleId'] = k
         sonarqube_issues.append(issue)
     sonarqube_report = {
