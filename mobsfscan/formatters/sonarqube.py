@@ -30,8 +30,7 @@ def get_sonarqube_issue(mobsfscan_issue):
             }
 
             if 'match_string' in file:
-                location['message'] = '%s [%s]' % 
-                (location['message'], file['match_string'])
+                location['message'] += ' [%s]' % file['match_string']
 
             if ix == 0:
                 primary_location = location
