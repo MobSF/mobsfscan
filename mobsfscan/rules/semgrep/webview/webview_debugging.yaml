@@ -7,7 +7,7 @@ rules:
           - pattern: |
               $X = true;
               ...
-              $WB.setWebContentsDebuggingEnabled($SX);
+              $WB.setWebContentsDebuggingEnabled($X);
     message: >-
       Remote WebView debugging is enabled. This allows an attacker with
       debugging access to interact with the webview and steal or corrupt data.
