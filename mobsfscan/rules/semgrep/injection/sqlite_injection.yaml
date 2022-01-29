@@ -5,8 +5,6 @@ rules:
       - pattern-not: '$DB.rawQuery("..." , ...);'
       - pattern-either:
           - pattern: |
-              $DB.rawQuery($INP + "..." , ...);
-          - pattern: |
               $DB.rawQuery("..." + $INP + "..." , ...);
           - pattern: |
               $DB.rawQuery($INP + "..." , ... );
@@ -18,8 +16,6 @@ rules:
               $DB.execSQL($INP + "..." , ...);
           - pattern: |
               $DB.execSQL("..." + $INP + "..." , ...);
-          - pattern: |
-              $DB.execSQL($INP + "..." , ...);
           - pattern: |
               $DB.execSQL($INP + "..." + $INP2, ...);
           - pattern: |

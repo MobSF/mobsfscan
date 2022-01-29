@@ -49,13 +49,6 @@ rules:
               }
           - pattern: |
               X509Certificate[] getAcceptedIssuers() {
-                ...
-                $Y = new X509Certificate[]{};
-                ...
-                return $Y;
-              }
-          - pattern: |
-              X509Certificate[] getAcceptedIssuers() {
                 return new X509Certificate[0];
               }
           - pattern: |
