@@ -50,7 +50,7 @@ setup(
     long_description_content_type='text/markdown',
     install_requires=[
         'colorama>=0.4.4',
-        'libsast>=1.4.6',
+        'libsast>=1.5.0',
         'sarif-om>=1.0.4',
         'jschema-to-python>=1.2.3',
         'tabulate>=0.8.9',

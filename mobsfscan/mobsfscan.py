@@ -3,20 +3,20 @@
 from pathlib import Path
 from linecache import getline
 
-from libsast import Scanner
-from libsast import standards
+from libsast import (
+    Scanner,
+    standards,
+)
 
 from mobsfscan import settings
 from mobsfscan.utils import (
     get_best_practices,
     get_config,
 )
-from mobsfscan.patcher import patch_libsast
 
 
 class MobSFScan:
     def __init__(self, paths, json, config=False) -> None:
-        patch_libsast()
         self.conf = get_config(paths, config)
         self.options = {
             'match_rules': None,
@@ -97,7 +97,6 @@ class MobSFScan:
             return
         self.result['errors'] = sgrep_output['errors']
         for rule_id in sgrep_output['matches']:
-            self.expand_mappings(sgrep_output['matches'][rule_id])
             for finding in sgrep_output['matches'][rule_id]['files']:
                 finding.pop('metavars', None)
         self.result['results'] = sgrep_output['matches']
@@ -106,9 +105,6 @@ class MobSFScan:
         """Format Pattern Matcher output."""
         if not matcher_out:
             return
-        for rule_id in matcher_out:
-            # TODO Remove after standards is handled in libsast
-            self.expand_mappings(matcher_out[rule_id])
         self.result['results'].update(matcher_out)
 
     def missing_controls(self):
@@ -137,7 +133,7 @@ class MobSFScan:
             self.expand_mappings(res)
 
     def expand_mappings(self, meta):
-        """Expand libsast standard mappings."""
+        """Expand libsast standard mappings for missing controls."""
         meta_keys = meta['metadata'].keys()
         for mkey in meta_keys:
             if mkey not in self.standards.keys():
