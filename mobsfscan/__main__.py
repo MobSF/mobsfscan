@@ -59,9 +59,6 @@ def main():
                         help='show mobsfscan version',
                         required=False,
                         action='store_true')
-    parser.add_argument('-dfp', '--default-file-path',
-                        default='',
-                        help='default file path for generic issues (sonarqube)')
 
     args = parser.parse_args()
     if args.path:
