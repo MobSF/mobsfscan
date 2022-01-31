@@ -75,8 +75,7 @@ def main():
             sonarqube.sonarqube_output(
                 args.output,
                 scan_results,
-                __version__,
-                args.default_file_path)
+                __version__)
         elif args.json:
             json.json_output(
                 args.output,
