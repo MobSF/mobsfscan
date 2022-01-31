@@ -59,7 +59,6 @@ def main():
                         help='show mobsfscan version',
                         required=False,
                         action='store_true')
-
     args = parser.parse_args()
     if args.path:
         is_json = args.json or args.sonarqube or args.sarif
