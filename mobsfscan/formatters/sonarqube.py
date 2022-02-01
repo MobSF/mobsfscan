@@ -14,7 +14,16 @@ def get_sonarqube_issue(mobsfscan_issue):
     issue_data = mobsfscan_issue['metadata']
     # Handle missing controls
     if not mobsfscan_issue.get('files'):
-        primary_location = None
+        text_range = {
+            'startLine': 1,
+            'endLine': 0,
+        }
+        location = {
+            'message': issue_data['description'],
+            'filePath': None,
+            'textRange': text_range,
+        }
+        primary_location = location
     else:
         for ix, file in enumerate(mobsfscan_issue['files']):
             text_range = {
