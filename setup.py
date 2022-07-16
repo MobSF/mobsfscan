@@ -34,7 +34,7 @@ setup(
         'Intended Audience :: Developers',
         ('License :: OSI Approved :: GNU Lesser '
          'General Public License v3 or later (LGPLv3+)'),
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     packages=find_packages(include=[
         'mobsfscan', 'mobsfscan.*',
@@ -49,10 +49,10 @@ setup(
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
     install_requires=[
-        'colorama>=0.4.4',
-        'libsast>=1.5.0',
+        'colorama>=0.4.5',
+        'libsast>=1.5.1',
         'sarif-om>=1.0.4',
         'jschema-to-python>=1.2.3',
-        'tabulate>=0.8.9',
+        'tabulate>=0.8.10',
     ],
 )
