@@ -19,6 +19,14 @@ rules:
                 return true;
               }
           - pattern: |
+              $Y = SSLContext.getInstance(...);
+              ...
+              $Y.init(null, ...);
+          - pattern: |
+              $Y = $S.SSLContext.getInstance(...);
+              ...
+              $Y.init(null, ...);
+          - pattern: |
               $Z = new TLSClientParameters(...);
               ...
               $Z.setDisableCNCheck(true);
