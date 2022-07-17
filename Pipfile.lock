@@ -305,7 +305,7 @@
                 "sha256:ea4105fe0d61e4af478340646a5e67221c2b58754d3c0320520a0cc73579cea0",
                 "sha256:f84dcfb55b63fb4b91a63f284da2447329fbdeaffd912f0ac44b2e3b456decdc"
             ],
-            "markers": "python_version >= '3.7'",
+            "markers": "platform_system != 'Windows'",
             "version": "==0.104.0"
         },
         "tabulate": {
