@@ -8,6 +8,6 @@ COPY . /usr/src/mobsfscan
 
 WORKDIR /usr/src/mobsfscan
 
-RUN pip install -e .
+RUN pip install --no-cache-dir -e .
 
 ENTRYPOINT ["mobsfscan"]
