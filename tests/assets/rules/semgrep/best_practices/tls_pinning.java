@@ -40,27 +40,27 @@
 
 
 // ruleid:android_certificate_pinning
-resourceStream = resources.openRawResource(R.raw.demo_cert)
-KeyStore keyStoreType = KeyStore.getDefaultType()
-KeyStore keyStore = KeyStore.getInstance(keyStoreType)
+resourceStream = resources.openRawResource(R.raw.demo_cert);
+KeyStore keyStoreType = KeyStore.getDefaultType();
+KeyStore keyStore = KeyStore.getInstance(keyStoreType);
 
-keyStore.load(resourceStream, null)
+keyStore.load(resourceStream, null);
 
-val trustManagerAlgorithm = TrustManagerFactory.getDefaultAlgorithm()
-val trustManagerFactory = TrustManagerFactory.getInstance(trustManagerAlgorithm)
+val trustManagerAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+val trustManagerFactory = TrustManagerFactory.getInstance(trustManagerAlgorithm);
 
-trustManagerFactory.init(keyStore)
+trustManagerFactory.init(keyStore);
 
 // ruleid:android_certificate_pinning
 CertificatePinner certificatePinner = CertificatePinner.Builder()
        .add(
                "www.example.com",
                "sha256/ZC3lTYTDBJQVf1P2V7+fibTqbIsWNR/X7CWNVW+CEEA="
-       ).build()
+       ).build();
 
 val okHttpClient = OkHttpClient.Builder()
        .certificatePinner(certificatePinner)
-       .build()
+       .build();
 
 
  // ruleid:android_certificate_pinning
