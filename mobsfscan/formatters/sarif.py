@@ -96,6 +96,9 @@ def create_result(path, rule_id, issue_dict, rules, rule_indices):
             id=rule_id,
             name=get_rule_name(rule_id),
             help_uri=doc,
+            properties={
+                'tags': ['security', 'external/cwe' + issue_dict['metadata']['cwe'].split(':')[0].lower()]
+            }
         )
         rule_index = len(rules)
         rules[rule_id] = rule
