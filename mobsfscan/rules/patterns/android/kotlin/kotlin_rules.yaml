@@ -36,8 +36,8 @@
     modified by any application.
   type: RegexAnd
   pattern:
-  - \.loadUrl\(.*getExternalStorageDirectory\(
-  - webkit\.WebView
+    - \.loadUrl\(.*getExternalStorageDirectory\(
+    - webkit\.WebView
   severity: ERROR
   input_case: exact
   metadata:
@@ -76,8 +76,8 @@
     WebView is a critical Security Hole.
   type: RegexAnd
   pattern:
-  - setJavaScriptEnabled\(true\)
-  - \.addJavascriptInterface\(
+    - setJavaScriptEnabled\(true\)
+    - \.addJavascriptInterface\(
   severity: WARNING
   input_case: exact
   metadata:
@@ -90,8 +90,8 @@
   message: Remote WebView debugging is enabled.
   type: RegexAnd
   pattern:
-  - \.setWebContentsDebuggingEnabled\(true\)
-  - WebView
+    - \.setWebContentsDebuggingEnabled\(true\)
+    - WebView
   severity: ERROR
   input_case: exact
   metadata:
@@ -106,8 +106,8 @@
     accept any SSL Certificate. This application is vulnerable to MITM attacks
   type: RegexAnd
   pattern:
-  - onReceivedSslError\(WebView
-  - \.proceed\(\);
+    - onReceivedSslError\(WebView
+    - \.proceed\(\);
   severity: ERROR
   input_case: exact
   metadata:
@@ -123,9 +123,9 @@
     be encrypted and written to the database.
   type: RegexAndOr
   pattern:
-  - android\.database\.sqlite
-  - - rawQuery\(
-    - execSQL\(
+    - android\.database\.sqlite
+    - - rawQuery\(
+      - execSQL\(
   severity: WARNING
   input_case: exact
   metadata:
@@ -140,8 +140,8 @@
     input can result in arbitrary code execution.
   type: RegexAnd
   pattern:
-  - com\.fasterxml\.jackson\.databind\.ObjectMapper
-  - \.enableDefaultTyping\(
+    - com\.fasterxml\.jackson\.databind\.ObjectMapper
+    - \.enableDefaultTyping\(
   severity: ERROR
   input_case: exact
   metadata:
@@ -183,8 +183,8 @@
 - id: cbc_kotlin_padding_oracle
   message: The App uses the encryption mode CBC with PKCS5/PKCS7 padding. This configuration is vulnerable to padding oracle attacks.
   pattern:
-  - \.getInstance\(.*\/CBC\/PKCS5Padding
-  - \.getInstance\(.*\/CBC\/PKCS7Padding
+    - \.getInstance\(.*\/CBC\/PKCS5Padding
+    - \.getInstance\(.*\/CBC\/PKCS7Padding
   type: RegexOr
   severity: ERROR
   input_case: exact
@@ -213,8 +213,8 @@
   message: The file is World Writable. Any App can write to the file
   type: RegexOr
   pattern:
-  - MODE_WORLD_WRITABLE
-  - 'openFileOutput\(\s*".+"\s*,\s*2\s*\)'
+    - MODE_WORLD_WRITABLE
+    - 'openFileOutput\(\s*".+"\s*,\s*2\s*\)'
   severity: WARNING
   input_case: exact
   metadata:
@@ -227,8 +227,8 @@
   message: The file is World Readable. Any App can read from the file
   type: RegexOr
   pattern:
-  - MODE_WORLD_READABLE
-  - 'openFileOutput\(\s*".+"\s*,\s*1\s*\)'
+    - MODE_WORLD_READABLE
+    - 'openFileOutput\(\s*".+"\s*,\s*1\s*\)'
   severity: WARNING
   input_case: exact
   metadata:
@@ -252,8 +252,8 @@
 - id: android_kotlin_weak_hash
   message: Weak Hash algorithm used. The hash algorithm is known to have hash collisions.
   pattern:
-  - \.getInstance\(.*md4
-  - \.getInstance\(.*MD4
+    - \.getInstance\(.*md4
+    - \.getInstance\(.*MD4
   type: RegexOr
   input_case: exact
   severity: WARNING
@@ -269,14 +269,14 @@
   type: RegexOr
   input_case: exact
   pattern:
-  - \.getInstance\(.*rc2
-  - \.getInstance\(.*RC2
-  - \.getInstance\(.*rc4
-  - \.getInstance\(.*RC4
-  - \.getInstance\(.*blowfish
-  - \.getInstance\(.*BLOWFISH
-  - Cipher\.getInstance\(.*DES
-  - Cipher\.getInstance\(.*des
+    - \.getInstance\(.*rc2
+    - \.getInstance\(.*RC2
+    - \.getInstance\(.*rc4
+    - \.getInstance\(.*RC4
+    - \.getInstance\(.*blowfish
+    - \.getInstance\(.*BLOWFISH
+    - Cipher\.getInstance\(.*DES
+    - Cipher\.getInstance\(.*des
   metadata:
     cwe: cwe-327
     masvs: crypto-4
@@ -287,9 +287,9 @@
   message: MD5 is a weak hash known to have hash collisions.
   type: RegexOr
   pattern:
-  - \.getInstance\(.*MD5
-  - \.getInstance\(.*md5
-  - DigestUtils\.md5\(
+    - \.getInstance\(.*MD5
+    - \.getInstance\(.*md5
+    - DigestUtils\.md5\(
   input_case: exact
   severity: WARNING
   metadata:
@@ -304,11 +304,11 @@
   input_case: exact
   severity: WARNING
   pattern:
-  - \.getInstance\(.*SHA-1
-  - \.getInstance\(.*sha-1
-  - \.getInstance\(.*SHA1
-  - \.getInstance\(.*sha1
-  - DigestUtils\.sha\(
+    - \.getInstance\(.*SHA-1
+    - \.getInstance\(.*sha-1
+    - \.getInstance\(.*SHA1
+    - \.getInstance\(.*sha1
+    - DigestUtils\.sha\(
   metadata:
     cwe: cwe-327
     masvs: crypto-4
@@ -323,8 +323,8 @@
     attack.
   input_case: exact
   pattern:
-  - '0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00'
-  - '0x01,0x02,0x03,0x04,0x05,0x06,0x07'
+    - '0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00'
+    - '0x01,0x02,0x03,0x04,0x05,0x06,0x07'
   severity: WARNING
   type: RegexOr
   metadata:
