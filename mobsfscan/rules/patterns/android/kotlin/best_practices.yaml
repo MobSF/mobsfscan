@@ -51,7 +51,7 @@
   input_case: exact
   metadata:
     cwe: cwe-919
-    security-severity: 
+    security-severity: ''
     owasp-mobile: m8
     masvs: resilience-1
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-root-detection-mstg-resilience-1

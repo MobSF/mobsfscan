@@ -22,7 +22,7 @@ rules:
     severity: ERROR
     metadata:
       cwe: cwe-919
-      security-severity: 
+      security-severity: ''
       owasp-mobile: m1
       masvs: storage-7
       reference: >-

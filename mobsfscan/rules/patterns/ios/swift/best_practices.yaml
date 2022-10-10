@@ -56,7 +56,7 @@
   type: RegexOr
   metadata:
     cwe: cwe-919
-    security-severity: 
+    security-severity: ''
     masvs: resilience-1
     owasp-mobile: m8
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#jailbreak-detection-mstg-resilience-1
@@ -68,7 +68,7 @@
   type: Regex
   metadata:
     cwe: cwe-919
-    security-severity:
+    security-severity: ''
     masvs: platform-11
     owasp-mobile: m1
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#app-extensions
@@ -84,7 +84,7 @@
   type: RegexOr
   metadata:
     cwe: cwe-919
-    security-severity: 
+    security-severity: ''
     masvs: storage-5
     owasp-mobile: m2
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06d-Testing-Data-Storage.md#finding-sensitive-data-in-the-keyboard-cache-mstg-storage-5
@@ -102,7 +102,7 @@
     owasp-mobile: m9
     masvs: resilience-4
     cwe: cwe-919
-    security-severity: 
+    security-severity: ''
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#ios-anti-reversing-defenses
 - id: ios_cert_pinning
   message: This app does not have Certificate Pinning implemented in code.

@@ -21,7 +21,7 @@ rules:
     severity: INFO
     metadata:
       cwe: cwe-919
-      security-severity: 
+      security-severity: ''
       owasp-mobile: m8
       masvs: resilience-1
       reference: >-

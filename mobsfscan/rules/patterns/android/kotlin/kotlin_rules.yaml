@@ -8,7 +8,7 @@
   input_case: exact
   metadata:
     cwe: cwe-919
-    security-severity:
+    security-severity: ''
     owasp-mobile: m1
     masvs: storage-7
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-for-sensitive-data-disclosure-through-the-user-interface-mstg-storage-7
