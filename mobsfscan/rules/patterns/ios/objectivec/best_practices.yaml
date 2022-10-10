@@ -56,6 +56,7 @@
   type: RegexOr
   metadata:
     cwe: cwe-919
+    severity-score:
     masvs: resilience-1
     owasp-mobile: m8
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#jailbreak-detection-mstg-resilience-1
@@ -70,6 +71,7 @@
   type: RegexAnd
   metadata:
     cwe: cwe-919
+    security-severity:
     masvs: resilience-1
     owasp-mobile: m8
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#jailbreak-detection-mstg-resilience-1

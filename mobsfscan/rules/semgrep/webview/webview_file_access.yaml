@@ -11,6 +11,7 @@ rules:
     severity: WARNING
     metadata:
       cwe: cwe-73
+      security-severity: 9.3
       owasp-mobile: m7
       masvs: platform-6
       reference: >-

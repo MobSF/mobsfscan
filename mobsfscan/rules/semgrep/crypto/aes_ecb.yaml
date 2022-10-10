@@ -31,6 +31,7 @@ rules:
       - java
     metadata:
       cwe: cwe-327
+      security-severity: 7.5
       owasp-mobile: m5
       masvs: crypto-2
       reference: >-

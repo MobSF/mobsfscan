@@ -13,6 +13,7 @@ rules:
     severity: WARNING
     metadata:
       cwe: cwe-757
+      security-severity: 7.5
       owasp-mobile: m3
       masvs: network-2
       reference: >-

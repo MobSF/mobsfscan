@@ -36,6 +36,7 @@ rules:
     severity: INFO
     metadata:
       cwe: cwe-532
+      security-severity: 7.5
       owasp-mobile: m1
       masvs: storage-3
       reference: >-

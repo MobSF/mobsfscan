@@ -17,6 +17,7 @@ rules:
     severity: ERROR
     metadata:
       cwe: cwe-295
+      security-severity: 7.5
       owasp-mobile: m3
       masvs: network-3
       reference: >-

@@ -93,12 +93,17 @@ def create_result(path, rule_id, issue_dict, rules, rule_indices):
             doc = ('https://mobile-security.gitbook.io/'
                    'mobile-security-testing-guide/')
         cwe_id = issue_dict['metadata']['cwe'].split(':')[0].lower()
+        security_severity = issue_dict['metadata'].get('security-severity')
+        if not security_severity:
+            security_severity = 6.5
+
         rule = om.ReportingDescriptor(
             id=rule_id,
             name=get_rule_name(rule_id),
             help_uri=doc,
             properties={
                 'tags': ['security', f'external/cwe/{cwe_id}'],
+                'security-severity': f'{security_severity}',
             },
         )
         rule_index = len(rules)

@@ -7,6 +7,7 @@
   type: Regex
   metadata:
     cwe: cwe-312
+    security-severity: 7.5
     masvs: storage-14
     owasp-mobile: m9
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-memory-for-sensitive-data-mstg-storage-10
@@ -20,6 +21,7 @@
   type: RegexAnd
   metadata:
     cwe: cwe-95
+    security-severity: 9.0
     masvs: platform-5
     owasp-mobile: m7
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#testing-webview-protocol-handlers-mstg-platform-6
@@ -31,6 +33,7 @@
   type: Regex
   metadata:
     cwe: cwe-532
+    security-severity: 7.5
     masvs: storage-3
     owasp-mobile: m1
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06i-Testing-Code-Quality-and-Build-Settings.md#finding-debugging-code-and-verbose-error-logging-mstg-code-4
@@ -45,6 +48,7 @@
   type: RegexOr
   metadata:
     cwe: cwe-327
+    security-severity: 7.5
     masvs: crypto-4
     owasp-mobile: m5
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
@@ -64,6 +68,7 @@
   type: RegexOr
   metadata:
     cwe: cwe-327
+    security-severity: 7.5
     masvs: crypto-4
     owasp-mobile: m5
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
@@ -75,6 +80,7 @@
   type: Regex
   metadata:
     cwe: cwe-919
+    security-severity:
     masvs: auth-8
     owasp-mobile: m1
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06f-Testing-Local-Authentication.md#local-authentication-framework
@@ -86,6 +92,7 @@
   type: Regex
   metadata:
     cwe: cwe-311
+    security-severity: 8.1
     masvs: storage-1
     owasp-mobile: m2
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06d-Testing-Data-Storage.md#ios-data-storage
@@ -97,6 +104,7 @@
   type: Regex
   metadata:
     cwe: cwe-919
+    security-severity:
     masvs: platform-4
     owasp-mobile: m1
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#uipasteboard
@@ -111,6 +119,7 @@
   type: RegexAndOr
   metadata:
     cwe: cwe-757
+    security-severity: 7.5
     masvs: network-2
     owasp-mobile: m3
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
@@ -124,6 +133,7 @@
   type: RegexAnd
   metadata:
     cwe: cwe-757
+    security-severity: 7.5
     masvs: network-2
     owasp-mobile: m3
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
@@ -137,6 +147,7 @@
   type: RegexAnd
   metadata:
     cwe: cwe-757
+    security-severity: 7.5
     masvs: network-2
     owasp-mobile: m3
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
@@ -150,6 +161,7 @@
   type: Regex
   metadata:
     cwe: cwe-757
+    security-severity: 7.5
     masvs: network-2
     owasp-mobile: m3
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
@@ -162,6 +174,7 @@
   input_case: exact
   metadata:
     cwe: cwe-919
+    security-severity:
     masvs: platform-5
     owasp-mobile: m1
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#testing-ios-webviews-mstg-platform-5

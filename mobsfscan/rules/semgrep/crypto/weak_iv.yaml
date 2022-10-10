@@ -24,6 +24,7 @@ rules:
     severity: WARNING
     metadata:
       cwe: cwe-1204
+      security-severity: 7.5
       owasp-mobile: m5
       masvs: crypto-5
       reference: >-
