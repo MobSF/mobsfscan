@@ -20,7 +20,7 @@ rules:
     severity: INFO
     metadata:
       cwe: cwe-353
-      security-severity: 7.5
+      security-severity: "7.5"
       owasp-mobile: m8
       masvs: resilience-1
       reference: >-

@@ -47,7 +47,7 @@ rules:
     severity: ERROR
     metadata:
       cwe: cwe-326
-      security-severity: 7.5
+      security-severity: "7.5"
       owasp-mobile: m5
       masvs: crypto-3
       reference: >-

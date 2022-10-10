@@ -13,7 +13,7 @@
   input_case: exact
   metadata:
     cwe: cwe-353
-    security-severity: 7.5
+    security-severity: "7.5"
     owasp-mobile: m8
     masvs: resilience-1
     reference: >-
@@ -31,7 +31,7 @@
   input_case: exact
   metadata:
     cwe: cwe-200
-    security-severity: 6.5
+    security-severity: "6.5"
     owasp-mobile: m2
     masvs: storage-9
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#finding-sensitive-information-in-auto-generated-screenshots-mstg-storage-9
@@ -63,7 +63,7 @@
   input_case: exact
   metadata:
     cwe: cwe-200
-    security-severity: 6.5
+    security-severity: "6.5"
     owasp-mobile: m1
     masvs: platform-9
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-for-overlay-attacks-mstg-platform-9
@@ -81,7 +81,7 @@
   input_case: exact
   metadata:
     cwe: cwe-295
-    security-severity: 7.5
+    security-severity: "7.5"
     owasp-mobile: m3
     masvs: network-4
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4
@@ -102,7 +102,7 @@
   input_case: exact
   metadata:
     cwe: cwe-295
-    security-severity: 7.5
+    security-severity: "7.5"
     owasp-mobile: m3
     masvs: network-4
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4

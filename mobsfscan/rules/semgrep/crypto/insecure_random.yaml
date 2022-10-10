@@ -12,7 +12,7 @@ rules:
     severity: WARNING
     metadata:
       cwe: cwe-330
-      security-severity: 8.8
+      security-severity: "8.8"
       owasp-mobile: m5
       masvs: crypto-6
       reference: >-

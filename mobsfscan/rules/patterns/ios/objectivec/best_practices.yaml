@@ -87,6 +87,7 @@
   metadata:
     masvs: resilience-3
     cwe: cwe-919
+    security-severity:
     owasp-mobile: m2
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#bypassing-jailbreak-detection
 - id: ios_mach_ports
@@ -101,5 +102,6 @@
   metadata:
     masvs: resilience-2
     cwe: cwe-919
+    security-severity:
     owasp-mobile: m8
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06d-Testing-Data-Storage.md#mach-ports
