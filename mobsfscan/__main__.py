@@ -14,15 +14,17 @@ from mobsfscan.formatters import (
 )
 
 
-def handle_exit(results, exit_warn):
+def handle_exit(results, exit_warn, no_fail):
     """Handle Exit."""
     if not results.get('results'):
         return
-    for meta in results.get('results').values():
-        severity = meta['metadata']['severity']
-        ewarn = severity == 'WARNING' and exit_warn
-        if severity == 'ERROR' or ewarn:
-            sys.exit(1)
+    
+    if not no_fail:
+        for meta in results.get('results').values():
+            severity = meta['metadata']['severity']
+            ewarn = severity == 'WARNING' and exit_warn
+            if severity == 'ERROR' or ewarn:
+                sys.exit(1)
     sys.exit(0)
 
 
@@ -53,6 +55,13 @@ def main():
                         required=False)
     parser.add_argument('-w', '--exit-warning',
                         help='non zero exit code on warning',
+                        action='store_true',
+                        required=False)
+    parser.add_argument('--no-fail',
+                        help=(
+                            'force zero exit code, '
+                            'takes precedence over '
+                            '--exit-warning'),
                         action='store_true',
                         required=False)
     parser.add_argument('-v', '--version',
@@ -95,7 +104,10 @@ def main():
                 scan_results,
                 __version__,
                 'fancy_grid')
-        handle_exit(scan_results, args.exit_warning)
+        handle_exit(
+            scan_results,
+            args.exit_warning,
+            args.no_fail)
 
     elif args.version:
         cli.print_tool_info(__version__)
