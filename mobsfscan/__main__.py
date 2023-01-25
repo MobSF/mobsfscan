@@ -18,7 +18,7 @@ def handle_exit(results, exit_warn, no_fail):
     """Handle Exit."""
     if not results.get('results'):
         return
-    
+
     if not no_fail:
         for meta in results.get('results').values():
             severity = meta['metadata']['severity']
