@@ -34,7 +34,8 @@ Requires Python 3.7+
 
 ```bash
 $ mobsfscan
-usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--html] [-o OUTPUT] [-c CONFIG] [-w] [-v] [path [path ...]]
+usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--html] [-o OUTPUT] [-c CONFIG] [-w] [--no-fail] [-v]
+                 [path ...]
 
 positional arguments:
   path                  Path can be file(s) or directories with source code
@@ -50,6 +51,7 @@ optional arguments:
   -c CONFIG, --config CONFIG
                         Location to .mobsf config file
   -w, --exit-warning    non zero exit code on warning
+  --no-fail             force zero exit code, takes precedence over --exit-warning
   -v, --version         show mobsfscan version
 ```
 
