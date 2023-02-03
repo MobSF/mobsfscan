@@ -112,7 +112,7 @@ def android_manifest_checks(xml_path,
         if conv < ANDROID_MIN_SDK:
             r = 'android_manifest_insecure_minsdk'
             add_finding(findings, xml_path, r)
-    except Exception:
+    except (ValueError, TypeError):
         pass
     if allow_backup and allow_backup == 'true':
         r = 'android_manifest_allow_backup'
