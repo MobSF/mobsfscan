@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config>
+        <domain includeSubdomains="true">site.com</domain>
+        <trust-anchors>
+            <certificates src="user"/>
+        </trust-anchors>
+        <domain-config cleartextTrafficPermitted="true">
+            <domain includeSubdomains="true">insecure.site.com</domain>
+        </domain-config>
+    </domain-config>
+</network-security-config>
