@@ -110,25 +110,37 @@ def android_manifest_checks(xml_path,
     try:
         conv = int(min_sdk)
         if conv < ANDROID_MIN_SDK:
-            r = 'android_manifest_insecure_minsdk'
-            add_finding(findings, xml_path, r)
+            add_finding(
+                findings,
+                xml_path,
+                'android_manifest_insecure_minsdk')
     except (ValueError, TypeError):
         pass
     if allow_backup and allow_backup == 'true':
-        r = 'android_manifest_allow_backup'
-        add_finding(findings, xml_path, r)
+        add_finding(
+            findings,
+            xml_path,
+            'android_manifest_allow_backup')
     if not allow_backup:
-        r = 'android_manifest_missing_explicit_allow_backup'
-        add_finding(findings, xml_path, r)
+        add_finding(
+            findings,
+            xml_path,
+            'android_manifest_missing_explicit_allow_backup')
     if clear_text and clear_text == 'true':
-        r = 'android_manifest_usescleartext'
-        add_finding(findings, xml_path, r)
+        add_finding(
+            findings,
+            xml_path,
+            'android_manifest_usescleartext')
     if debuggable and debuggable == 'true':
-        r = 'android_manifest_debugging_enabled'
-        add_finding(findings, xml_path, r)
+        add_finding(
+            findings,
+            xml_path,
+            'android_manifest_debugging_enabled')
     if test_only and test_only == 'true':
-        r = 'android_manifest_test_only'
-        add_finding(findings, xml_path, r)
+        add_finding(
+            findings,
+            xml_path,
+            'android_manifest_test_only')
     return findings
 
 
