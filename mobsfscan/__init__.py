@@ -6,7 +6,7 @@ from datetime import datetime
 __title__ = 'mobsfscan'
 __authors__ = 'Ajin Abraham'
 __copyright__ = f'Copyright {datetime.now().year} Ajin Abraham, OpenSecurity'
-__version__ = '0.1.3'
+__version__ = '0.2.0'
 __version_info__ = tuple(int(i) for i in __version__.split('.'))
 __all__ = [
     '__title__',

@@ -8,11 +8,16 @@ from libsast import (
     standards,
 )
 
+from mobsfscan.logger import init_logger
 from mobsfscan import settings
+from mobsfscan import manifest
 from mobsfscan.utils import (
     get_best_practices,
     get_config,
 )
+
+
+logger = init_logger(__name__)
 
 
 class MobSFScan:
@@ -35,9 +40,11 @@ class MobSFScan:
             'results': {},
             'errors': [],
         }
+        self.xmls = []
         self.best_practices = None
         self.standards = standards.get_standards()
         self.get_extensions()
+        self.get_xmls()
 
     def rules_selector(self, suffix):
         """Get rule extensions from suffix."""
@@ -73,10 +80,32 @@ class MobSFScan:
                     continue
                 return self.rules_selector(pobj.suffix)
 
+    def get_xmls(self) -> set:
+        """Get XML files for scanning."""
+        for path in self.paths:
+            pobj = Path(path)
+            if pobj.is_dir():
+                for pfile in pobj.rglob('*'):
+                    if pfile.suffix == '.xml':
+                        self.xmls.append(pfile)
+            else:
+                if pobj.suffix == '.xml':
+                    self.xmls.append(pobj)
+
     def scan(self) -> dict:
         """Start Scan."""
         scanner = Scanner(self.options, self.paths)
         result = scanner.scan()
+        try:
+            # Keep beta for a while
+            if self.xmls:
+                result['xml_checks'] = manifest.scan_manifest(
+                    self.xmls)
+        except Exception:
+            logger.warning(
+                'Android XML checks failed. '
+                'Please report to mobsfscan project')
+
         if result:
             self.format_output(result)
         return self.result
@@ -86,6 +115,7 @@ class MobSFScan:
         self.format_semgrep(results.get('semantic_grep'))
         # TODO: When we support kotlin semgrep, this needs rework
         self.format_pattern(results.get('pattern_matcher'))
+        self.format_pattern(results.get('xml_checks'))
         self.missing_controls()
         self.post_ignore_rules()
         self.post_ignore_rules_by_severity()
@@ -106,6 +136,12 @@ class MobSFScan:
         if not matcher_out:
             return
         self.result['results'].update(matcher_out)
+
+    def format_xml(self, res_out):
+        """Format XML check output."""
+        if not res_out:
+            return
+        self.result['results'].update(res_out)
 
     def missing_controls(self):
         """Check for missing controls."""
