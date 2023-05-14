@@ -272,7 +272,7 @@ jobs:
       with:
         args: '. --sarif --output results.sarif || true'
     - name: Upload mobsfscan report
-      uses: github/codeql-action/upload-sarif@v1
+      uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: results.sarif
 ```
