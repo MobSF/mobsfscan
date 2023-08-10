@@ -47,11 +47,15 @@ def main():
     parser.add_argument('--html',
                         help='set output format as HTML',
                         action='store_true')
+    parser.add_argument('--type',
+                        help='optional: force android or ios rules explicitly',
+                        choices=['android', 'ios', 'auto'],
+                        default='auto')
     parser.add_argument('-o', '--output',
                         help='output filename to save the result',
                         required=False)
     parser.add_argument('-c', '--config',
-                        help='Location to .mobsf config file',
+                        help='location to .mobsf config file',
                         required=False)
     parser.add_argument('-w', '--exit-warning',
                         help='non zero exit code on warning',
@@ -74,6 +78,7 @@ def main():
         scan_results = MobSFScan(
             args.path,
             is_json,
+            args.type,
             args.config,
         ).scan()
         if args.sonarqube:

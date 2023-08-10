@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install tox semgrep
+        pip install tox semgrep==1.21.0
 
     - name: Lint
       run: |
@@ -42,7 +42,7 @@ jobs:
 
     - name: Semgrep tests
       run: |
-        semgrep --quiet --test --config ./mobsfscan/rules/semgrep/ ./tests/assets/rules/semgrep/
+        SEMGREP_SETTINGS_FILE=/dev/null semgrep --metrics=off --test --config ./mobsfscan/rules/semgrep/ ./tests/assets/rules/semgrep/
 
     - name: Run tests
       run: |

@@ -21,7 +21,8 @@ logger = init_logger(__name__)
 
 
 class MobSFScan:
-    def __init__(self, paths, json, config=False) -> None:
+    def __init__(self, paths, json, scan_type='auto', config=False) -> None:
+        self.scan_type = scan_type
         self.conf = get_config(paths, config)
         self.options = {
             'match_rules': None,
@@ -48,6 +49,11 @@ class MobSFScan:
 
     def rules_selector(self, suffix):
         """Get rule extensions from suffix."""
+        if self.scan_type == 'android':
+            suffix = '.kt'
+        elif self.scan_type == 'ios':
+            suffix = '.swift'
+        # Default to .kt/.swift best practices if scan_type is specified
         if suffix in ['.java', '.kt']:
             if suffix == '.java':
                 self.best_practices = '.java'
@@ -98,7 +104,7 @@ class MobSFScan:
         result = scanner.scan()
         try:
             # Keep beta for a while
-            if self.xmls:
+            if self.xmls and self.scan_type in ('auto', 'android'):
                 result['xml_checks'] = manifest.scan_manifest(
                     self.xmls)
         except Exception:

@@ -62,7 +62,7 @@
 - id: ios_custom_keyboard_disabled
   message: This app does not have custom keyboards disabled.
   input_case: exact
-  pattern: extensionPointIdentifier == .*\.keyboard
+  pattern: extensionPointIdentifier == .{0,100}\.keyboard
   severity: INFO
   type: Regex
   metadata:
