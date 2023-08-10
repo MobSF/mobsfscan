@@ -31,8 +31,7 @@ Requires Python 3.7+
 
 ```bash
 $ mobsfscan
-usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--html] [-o OUTPUT] [-c CONFIG] [-w] [--no-fail] [-v]
-                 [path ...]
+usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--html] [--type {android,ios,auto}] [-o OUTPUT] [-c CONFIG] [-w] [--no-fail] [-v] [path ...]
 
 positional arguments:
   path                  Path can be file(s) or directories with source code
@@ -43,10 +42,12 @@ optional arguments:
   --sarif               set output format as SARIF 2.1.0
   --sonarqube           set output format compatible with SonarQube
   --html                set output format as HTML
+  --type {android,ios,auto}
+                        optional: force android or ios rules explicitly
   -o OUTPUT, --output OUTPUT
                         output filename to save the result
   -c CONFIG, --config CONFIG
-                        Location to .mobsf config file
+                        location to .mobsf config file
   -w, --exit-warning    non zero exit code on warning
   --no-fail             force zero exit code, takes precedence over --exit-warning
   -v, --version         show mobsfscan version
@@ -60,7 +61,7 @@ $ mobsfscan tests/assets/src/
 - Pattern Match ████████████████████████████████████████████████████████████ 3
 - Semantic Grep ██████ 37
 
-mobsfscan: v0.0.2 | Ajin Abraham | opensecurity.in
+mobsfscan: v0.3.0 | Ajin Abraham | opensecurity.in
 ╒══════════════╤════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╕
 │ RULE ID      │ android_webview_ignore_ssl                                                                                                                             │
 ├──────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
