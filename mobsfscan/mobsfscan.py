@@ -106,7 +106,8 @@ class MobSFScan:
             # Keep beta for a while
             if self.xmls and self.scan_type in ('auto', 'android'):
                 result['xml_checks'] = manifest.scan_manifest(
-                    self.xmls)
+                    self.xmls,
+                    scanner.validate_file)
         except Exception:
             logger.warning(
                 'Android XML checks failed. '
