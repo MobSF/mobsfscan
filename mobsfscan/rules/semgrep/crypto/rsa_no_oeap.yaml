@@ -8,7 +8,7 @@ rules:
               javax.crypto.Cipher.getInstance($X, ...)
       - metavariable-regex:
           metavariable: $X
-          regex: '(?i:.*rsa/.+/nopadding.*)'
+          regex: '(?i:rsa/.{1,23}/nopadding.{0,100})'
     message: >-
       This App uses RSA Crypto without OAEP padding. The purpose of the padding
       scheme is to prevent a number of attacks on RSA that only work when the
