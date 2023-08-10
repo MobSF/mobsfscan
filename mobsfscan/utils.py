@@ -11,6 +11,13 @@ import yaml
 logger = init_logger(__name__)
 
 
+def filter_none(user_list):
+    """Filter and remove None values from user supplied config."""
+    if not user_list:
+        return None
+    return list(filter(lambda item: item is not None, user_list))
+
+
 def get_config(base_path, config_file):
     options = {
         'ignore_filenames': config.IGNORE_FILENAMES,
@@ -29,10 +36,10 @@ def get_config(base_path, config_file):
         if not root:
             logger.warning('Invalid YAML, ignoring config from .mobsf')
             return options
-        usr_ignore_files = root.get('ignore-filenames')
-        usr_igonre_paths = root.get('ignore-paths')
-        usr_ignore_rules = root.get('ignore-rules')
-        usr_severity_filter = root.get('severity-filter')
+        usr_ignore_files = filter_none(root.get('ignore-filenames'))
+        usr_igonre_paths = filter_none(root.get('ignore-paths'))
+        usr_ignore_rules = filter_none(root.get('ignore-rules'))
+        usr_severity_filter = filter_none(root.get('severity-filter'))
         if usr_ignore_files:
             options['ignore_filenames'].update(usr_ignore_files)
         if usr_igonre_paths:

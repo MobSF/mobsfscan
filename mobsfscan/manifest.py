@@ -13,12 +13,14 @@ logger = init_logger(__name__)
 ANDROID_MIN_SDK = 27
 
 
-def scan_manifest(xml_paths):
+def scan_manifest(xml_paths, validate_func):
     """Scan android manifest xml."""
     results = []
     p = None
     for xml_path in xml_paths:
         try:
+            if not validate_func(xml_path):
+                continue
             p = parse(xml_path.read_text())
         except Exception:
             logger.warning('Failed to parse XML: %s', xml_path)
