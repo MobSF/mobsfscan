@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install tox semgrep==1.117.0
+        pip install tox semgrep==0.117.0
 
     - name: Lint
       run: |
