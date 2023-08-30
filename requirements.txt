@@ -13,7 +13,7 @@ idna==3.4
 jschema-to-python==1.2.3
 jsonpickle==3.0.2
 jsonschema==4.17.3
-libsast==1.5.3
+libsast==2.0.0
 packaging==21.3
 pbr==5.11.1
 peewee==3.16.3
