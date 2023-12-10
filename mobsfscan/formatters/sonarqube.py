@@ -20,7 +20,7 @@ def get_sonarqube_issue(mobsfscan_issue):
         }
         location = {
             'message': issue_data['description'],
-            'filePath': "",
+            'filePath': '',
             'textRange': text_range,
         }
         primary_location = location
