@@ -210,6 +210,8 @@ class NetworkSecurityChecks:
             r = 'android_manifest_base_config_cleartext'
         elif typ == 'domain':
             r = 'android_manifest_domain_config_cleartext'
+        else:
+            return
         ctt = conf.get('@cleartextTrafficPermitted')
         if ctt and ctt == 'true':
             add_finding(self.findings, self.xml_path, r)
@@ -222,6 +224,8 @@ class NetworkSecurityChecks:
         elif typ == 'domain':
             trule = 'android_manifest_domain_config_trust_user_certs'
             prule = 'android_manifest_domain_config_bypass_pinning'
+        else:
+            return
         src = cert.get('@src')
         op = cert.get('@overridePins')
         # Trust user certs
