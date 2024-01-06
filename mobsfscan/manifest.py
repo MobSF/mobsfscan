@@ -348,7 +348,7 @@ class AppLinksCheck:
                 add_finding(
                     self.findings,
                     self.xml_path,
-                    rule
+                    rule,
                     (w_url, rcode))
 
 
