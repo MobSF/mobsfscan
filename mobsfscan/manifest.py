@@ -5,12 +5,49 @@ from copy import deepcopy
 
 from xmltodict import parse
 
+import requests
+
 from mobsfscan.logger import init_logger
 from mobsfscan.manifest_metadata import metadata
 
 
 logger = init_logger(__name__)
-ANDROID_MIN_SDK = 27
+ANDROID_8_0_LEVEL = 26
+ANDROID_9_0_LEVEL = 28
+ANDROID_10_0_LEVEL = 29
+ANDROID_API_LEVEL_MAP = {
+    '1': '1.0',
+    '2': '1.1',
+    '3': '1.5',
+    '4': '1.6',
+    '5': '2.0-2.1',
+    '8': '2.2-2.2.3',
+    '9': '2.3-2.3.2',
+    '10': '2.3.3-2.3.7',
+    '11': '3.0',
+    '12': '3.1',
+    '13': '3.2-3.2.6',
+    '14': '4.0-4.0.2',
+    '15': '4.0.3-4.0.4',
+    '16': '4.1-4.1.2',
+    '17': '4.2-4.2.2',
+    '18': '4.3-4.3.1',
+    '19': '4.4-4.4.4',
+    '20': '4.4W-4.4W.2',
+    '21': '5.0-5.0.2',
+    '22': '5.1-5.1.1',
+    '23': '6.0-6.0.1',
+    '24': '7.0',
+    '25': '7.1-7.1.2',
+    '26': '8.0',
+    '27': '8.1',
+    '28': '9',
+    '29': '10',
+    '30': '11',
+    '31': '12',
+    '32': '12L',
+    '33': '13',
+}
 
 
 def scan_manifest(xml_paths, validate_func):
@@ -70,6 +107,7 @@ def do_checks(xml_path, p):
     if p.get('manifest') and p.get('manifest').get('application'):
         # Android Manifest
         min_sdk = None
+        target_sdk = None
         app = p.get('manifest').get('application')
         allow_backup = app.get('@android:allowBackup')
         clear_text = app.get('@android:usesCleartextTraffic')
@@ -78,6 +116,9 @@ def do_checks(xml_path, p):
         if p.get('manifest').get('uses-sdk'):
             uses_sdk = p.get('manifest').get('uses-sdk')
             min_sdk = uses_sdk.get('@android:minSdkVersion')
+            target_sdk = uses_sdk.get('@android:targetSdkVersion')
+            if not target_sdk:
+                target_sdk = min_sdk
         findings = android_manifest_checks(
             xml_path,
             min_sdk,
@@ -85,19 +126,24 @@ def do_checks(xml_path, p):
             clear_text,
             debuggable,
             test_only)
+        al = AppLinksCheck(findings, xml_path)
+        al.browsable_activity_check(app)
+        th = TaskHijackingChecks(findings, xml_path, target_sdk)
+        th.check(app)
     elif p.get('network-security-config'):
         # Network Security Config
-        nsc_finds = network_security_checks(xml_path, p)
-        if nsc_finds:
-            findings.extend(nsc_finds)
+        nsc = NetworkSecurityChecks(findings, xml_path)
+        nsc.network_security_checks(p)
     return findings
 
 
-def add_finding(findings, xml_file, rule_id):
+def add_finding(findings, xml_file, rule_id, dynamic=None):
     """Append Findings."""
     meta = deepcopy(metadata[rule_id])
     meta['id'] = rule_id
     meta['file'] = xml_file
+    if dynamic:
+        meta['message'] = meta['message'].format(*dynamic)
     findings.append(meta)
 
 
@@ -110,12 +156,18 @@ def android_manifest_checks(xml_path,
     """Android Manifest Checks."""
     findings = []
     try:
-        conv = int(min_sdk)
-        if conv < ANDROID_MIN_SDK:
+        if int(min_sdk) < ANDROID_8_0_LEVEL:
             add_finding(
                 findings,
                 xml_path,
-                'android_manifest_insecure_minsdk')
+                'android_manifest_insecure_minsdk_error',
+                (ANDROID_API_LEVEL_MAP.get(min_sdk), min_sdk))
+        elif int(min_sdk) < ANDROID_10_0_LEVEL:
+            add_finding(
+                findings,
+                xml_path,
+                'android_manifest_insecure_minsdk_warning',
+                (ANDROID_API_LEVEL_MAP.get(min_sdk), min_sdk))
     except (ValueError, TypeError):
         pass
     if allow_backup and allow_backup == 'true':
@@ -146,74 +198,194 @@ def android_manifest_checks(xml_path,
     return findings
 
 
-def clear_text_traffic_permitted(xml_path, conf, nsc_finds, typ):
-    if typ == 'base':
-        r = 'android_manifest_base_config_cleartext'
-    elif typ == 'domain':
-        r = 'android_manifest_domain_config_cleartext'
-    ctt = conf.get('@cleartextTrafficPermitted')
-    if ctt and ctt == 'true':
-        add_finding(nsc_finds, xml_path, r)
+class NetworkSecurityChecks:
+
+    def __init__(self, findings, xml_path):
+        self.findings = findings
+        self.xml_path = xml_path
+
+    def clear_text_traffic_permitted(self, conf, typ):
+        """Check for clear text traffic."""
+        if typ == 'base':
+            r = 'android_manifest_base_config_cleartext'
+        elif typ == 'domain':
+            r = 'android_manifest_domain_config_cleartext'
+        ctt = conf.get('@cleartextTrafficPermitted')
+        if ctt and ctt == 'true':
+            add_finding(self.findings, self.xml_path, r)
+
+    def trust_cert_and_cert_pinning_bypass(self, cert, typ):
+        """Check for trust user certs and cert pinning bypass."""
+        if typ == 'base':
+            trule = 'android_manifest_base_config_trust_user_certs'
+            prule = 'android_manifest_base_config_bypass_pinning'
+        elif typ == 'domain':
+            trule = 'android_manifest_domain_config_trust_user_certs'
+            prule = 'android_manifest_domain_config_bypass_pinning'
+        src = cert.get('@src')
+        op = cert.get('@overridePins')
+        # Trust user certs
+        if src and src == 'user':
+            add_finding(self.findings, self.xml_path, trule)
+        # Bypass Pinning
+        if src and op and src == 'user' and op == 'true':
+            add_finding(self.findings, self.xml_path, prule)
+
+    def cert_instance_check(self, config, typ):
+        """Check for cert instance."""
+        certs = config.get('trust-anchors').get('certificates')
+        if isinstance(certs, dict):
+            # Single cert instance
+            self.trust_cert_and_cert_pinning_bypass(
+                certs, typ)
+        elif isinstance(certs, list):
+            for cert in certs:
+                # Multiple certs instance
+                self.trust_cert_and_cert_pinning_bypass(
+                    cert, typ)
+
+    def network_security_checks(self, parsed_xml):
+        """Android Network Security Config checks."""
+        # Base Config
+        if parsed_xml.get('network-security-config').get('base-config'):
+            typ = 'base'
+            base_conf = parsed_xml.get(
+                'network-security-config').get('base-config')
+            # Clear text traffic
+            self.clear_text_traffic_permitted(base_conf, typ)
+            if (base_conf.get('trust-anchors')
+                    and base_conf.get('trust-anchors').get('certificates')):
+                # Trust user certs
+                self.cert_instance_check(base_conf, typ)
+
+        # Domain config
+        if parsed_xml.get('network-security-config').get('domain-config'):
+            typ = 'domain'
+            domain_conf = parsed_xml.get(
+                'network-security-config').get('domain-config')
+            # Domain config clear text
+            self.clear_text_traffic_permitted(domain_conf, typ)
+            if domain_conf.get('domain-config'):
+                # Nested domain config clear text
+                self.clear_text_traffic_permitted(
+                    domain_conf.get('domain-config'), typ)
+            if (domain_conf.get('trust-anchors')
+                    and domain_conf.get('trust-anchors').get('certificates')):
+                # Trust user certs
+                self.cert_instance_check(domain_conf, typ)
 
 
-def trust_cert_and_cert_pinning_bypass(xml_path, cert, nsc_finds, typ):
-    if typ == 'base':
-        trule = 'android_manifest_base_config_trust_user_certs'
-        prule = 'android_manifest_base_config_bypass_pinning'
-    elif typ == 'domain':
-        trule = 'android_manifest_domain_config_trust_user_certs'
-        prule = 'android_manifest_domain_config_bypass_pinning'
-    src = cert.get('@src')
-    op = cert.get('@overridePins')
-    # Trust user certs
-    if src and src == 'user':
-        add_finding(nsc_finds, xml_path, trule)
-    # Bypass Pinning
-    if src and op and src == 'user' and op == 'true':
-        add_finding(nsc_finds, xml_path, prule)
+class AppLinksCheck:
+
+    def __init__(self, findings, xml_path):
+        self.findings = findings
+        self.xml_path = xml_path
+
+    def check_in_intents(self, activity):
+        """Check for browsable activities in Intents."""
+        if not activity:
+            return
+        intents = activity.get('intent-filter')
+        if isinstance(intents, dict):
+            self.assetlinks_check(intents)
+        elif isinstance(intents, list):
+            for intent in intents:
+                self.assetlinks_check(intent)
+
+    def browsable_activity_check(self, app):
+        """Check in Activity intents."""
+        # Activities and Alias
+        for item in ('activity', 'activity-alias'):
+            activities = app.get(item)
+            if isinstance(activities, dict):
+                self.check_in_intents(activities)
+            elif isinstance(activities, list):
+                for act in activities:
+                    self.check_in_intents(act)
+
+    def assetlinks_check(self, intent):
+        """Well known assetlink check."""
+        iden = 'sha256_cert_fingerprints'
+        well_known_path = '/.well-known/assetlinks.json'
+        well_knowns = set()
+
+        applink_data = intent.get('data')
+        if isinstance(applink_data, dict):
+            applink_data = [applink_data]
+        elif not isinstance(applink_data, list):
+            return
+        for applink in applink_data:
+            host = applink.get('@android:host')
+            port = applink.get('@android:port')
+            scheme = applink.get('@android:scheme')
+            # Collect possible well-known paths
+            if scheme and scheme in ('http', 'https') and host:
+                if port:
+                    c_url = f'{scheme}://{host}:{port}{well_known_path}'
+                else:
+                    c_url = f'{scheme}://{host}{well_known_path}'
+                well_knowns.add(c_url)
+        for w_url in well_knowns:
+            try:
+                r = requests.get(
+                    w_url,
+                    allow_redirects=True)
+                if not (str(r.status_code).startswith('2')
+                        and iden in str(r.json())):
+                    add_finding(
+                        self.findings,
+                        self.xml_path,
+                        'android_manifest_well_known_assetlinks',
+                        (w_url, r.status_code))
+            except Exception:
+                pass
 
 
-def cert_instance_check(xml_path, config, nsc_finds, typ):
-    certs = config.get('trust-anchors').get('certificates')
-    if isinstance(certs, dict):
-        # Single cert instance
-        trust_cert_and_cert_pinning_bypass(
-            xml_path, certs, nsc_finds, typ)
-    elif isinstance(certs, list):
-        for cert in certs:
-            # Multiple certs instance
-            trust_cert_and_cert_pinning_bypass(
-                xml_path, cert, nsc_finds, typ)
+class TaskHijackingChecks:
 
+    def __init__(self, findings, xml_path, target_sdk):
+        self.findings = findings
+        self.xml_path = xml_path
+        self.target_sdk = target_sdk
 
-def network_security_checks(xml_path, parsed_xml):
-    """Android Network Security Config checks."""
-    nsc_finds = []
-    # Base Config
-    if parsed_xml.get('network-security-config').get('base-config'):
-        typ = 'base'
-        base_conf = parsed_xml.get(
-            'network-security-config').get('base-config')
-        # Clear text traffic
-        clear_text_traffic_permitted(xml_path, base_conf, nsc_finds, typ)
-        if (base_conf.get('trust-anchors')
-                and base_conf.get('trust-anchors').get('certificates')):
-            # Trust user certs
-            cert_instance_check(xml_path, base_conf, nsc_finds, typ)
+    def check(self, app):
+        """Task Hijacking check."""
+        # Activities and Alias
+        for item in ('activity', 'activity-alias'):
+            activities = app.get(item)
+            if isinstance(activities, dict):
+                self.task_hijacking_checks(activities)
+            elif isinstance(activities, list):
+                for act in activities:
+                    self.task_hijacking_checks(act)
 
-    # Domain config
-    if parsed_xml.get('network-security-config').get('domain-config'):
-        typ = 'domain'
-        domain_conf = parsed_xml.get(
-            'network-security-config').get('domain-config')
-        # Domain config clear text
-        clear_text_traffic_permitted(xml_path, domain_conf, nsc_finds, typ)
-        if domain_conf.get('domain-config'):
-            # Nested domain config clear text
-            clear_text_traffic_permitted(
-                xml_path, domain_conf.get('domain-config'), nsc_finds, typ)
-        if (domain_conf.get('trust-anchors')
-                and domain_conf.get('trust-anchors').get('certificates')):
-            # Trust user certs
-            cert_instance_check(xml_path, domain_conf, nsc_finds, typ)
-    return nsc_finds
+    def task_hijacking_checks(self, activity):
+        """Android Task Hijacking Checks."""
+        # StrandHogg 1.0
+        try:
+            target_sdk = int(self.target_sdk)
+        except Exception:
+            target_sdk = ANDROID_8_0_LEVEL
+        launch_mode = activity.get('@android:launchMode')
+        if (target_sdk < ANDROID_9_0_LEVEL
+                and launch_mode == 'singleTask'):
+            add_finding(
+                self.findings,
+                self.xml_path,
+                'android_task_hijacking1',
+                (target_sdk,))
+        # StrandHogg 2.0
+        exported_act = activity.get('@android:exported')
+        if not exported_act:
+            exported_act = 'false'
+        task_affinity = activity.get('@android:taskAffinity')
+        if not task_affinity:
+            task_affinity = ''
+        if (target_sdk < ANDROID_10_0_LEVEL
+                and exported_act == 'true'
+                and (launch_mode != 'singleInstance' or task_affinity != '')):
+            add_finding(
+                self.findings,
+                self.xml_path,
+                'android_task_hijacking2',
+                (target_sdk,))
