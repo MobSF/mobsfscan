@@ -129,7 +129,7 @@ def do_checks(xml_path, p):
         al = AppLinksCheck(findings, xml_path)
         al.browsable_activity_check(app)
         th = TaskHijackingChecks(findings, xml_path, target_sdk)
-        th.check(app)
+        th.strandhogg_check(app)
     elif p.get('network-security-config'):
         # Network Security Config
         nsc = NetworkSecurityChecks(findings, xml_path)
@@ -348,7 +348,7 @@ class TaskHijackingChecks:
         self.xml_path = xml_path
         self.target_sdk = target_sdk
 
-    def check(self, app):
+    def strandhogg_check(self, app):
         """Task Hijacking check."""
         # Activities and Alias
         for item in ('activity', 'activity-alias'):
