@@ -307,6 +307,7 @@ class AppLinksCheck:
         """Well known assetlink check."""
         iden = 'sha256_cert_fingerprints'
         well_known_path = '/.well-known/assetlinks.json'
+        rule = 'android_manifest_well_known_assetlinks'
         well_knowns = set()
 
         applink_data = intent.get('data')
@@ -327,18 +328,24 @@ class AppLinksCheck:
                 well_knowns.add(c_url)
         for w_url in well_knowns:
             try:
+                status = True
                 r = requests.get(
                     w_url,
-                    allow_redirects=True)
+                    allow_redirects=True,
+                    timeout=5)
                 if not (str(r.status_code).startswith('2')
                         and iden in str(r.json())):
-                    add_finding(
-                        self.findings,
-                        self.xml_path,
-                        'android_manifest_well_known_assetlinks',
-                        (w_url, r.status_code))
+                    status = False
+                    rcode = r.status_code
             except Exception:
-                pass
+                status = False
+                rcode = 0
+            if not status:
+                add_finding(
+                    self.findings,
+                    self.xml_path,
+                    rule
+                    (w_url, rcode))
 
 
 class TaskHijackingChecks:
