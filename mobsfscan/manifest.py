@@ -312,10 +312,11 @@ class AppLinksCheck:
 
     def check_url(self, w_url):
         """Check URL."""
+        rcode = 0
+        iden = 'sha256_cert_fingerprints'
+        rule = 'android_manifest_well_known_assetlinks'
+        status = True
         try:
-            iden = 'sha256_cert_fingerprints'
-            rule = 'android_manifest_well_known_assetlinks'
-            status = True
             r = requests.get(
                 w_url,
                 allow_redirects=True,
@@ -326,7 +327,6 @@ class AppLinksCheck:
                 rcode = r.status_code
         except Exception:
             status = False
-            rcode = 0
         if not status:
             add_finding(
                 self.findings,
