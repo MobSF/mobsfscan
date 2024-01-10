@@ -7,6 +7,8 @@ from xmltodict import parse
 
 import requests
 
+from concurrent.futures import ThreadPoolExecutor
+
 from mobsfscan.logger import init_logger
 from mobsfscan.manifest_metadata import metadata
 
@@ -47,6 +49,7 @@ ANDROID_API_LEVEL_MAP = {
     '31': '12',
     '32': '12L',
     '33': '13',
+    '34': '14',
 }
 
 
@@ -307,11 +310,33 @@ class AppLinksCheck:
                 for act in activities:
                     self.check_in_intents(act)
 
+    def check_url(self, w_url):
+        """Check URL."""
+        try:
+            iden = 'sha256_cert_fingerprints'
+            rule = 'android_manifest_well_known_assetlinks'
+            status = True
+            r = requests.get(
+                w_url,
+                allow_redirects=True,
+                timeout=5)
+            if not (str(r.status_code).startswith('2')
+                    and iden in str(r.json())):
+                status = False
+                rcode = r.status_code
+        except Exception:
+            status = False
+            rcode = 0
+        if not status:
+            add_finding(
+                self.findings,
+                self.xml_path,
+                rule,
+                (w_url, rcode))
+
     def assetlinks_check(self, intent):
         """Well known assetlink check."""
-        iden = 'sha256_cert_fingerprints'
         well_known_path = '/.well-known/assetlinks.json'
-        rule = 'android_manifest_well_known_assetlinks'
         well_knowns = set()
 
         applink_data = intent.get('data')
@@ -325,31 +350,19 @@ class AppLinksCheck:
             scheme = applink.get('@android:scheme')
             # Collect possible well-known paths
             if scheme and scheme in ('http', 'https') and host:
+                host = host.replace('*.', '')
                 if port:
                     c_url = f'{scheme}://{host}:{port}{well_known_path}'
                 else:
                     c_url = f'{scheme}://{host}{well_known_path}'
                 well_knowns.add(c_url)
-        for w_url in well_knowns:
-            try:
-                status = True
-                r = requests.get(
-                    w_url,
-                    allow_redirects=True,
-                    timeout=5)
-                if not (str(r.status_code).startswith('2')
-                        and iden in str(r.json())):
-                    status = False
-                    rcode = r.status_code
-            except Exception:
-                status = False
-                rcode = 0
-            if not status:
-                add_finding(
-                    self.findings,
-                    self.xml_path,
-                    rule,
-                    (w_url, rcode))
+        with ThreadPoolExecutor() as executor:
+            futures = []
+            for w_url in well_knowns:
+                futures.append(
+                    executor.submit(self.check_url, w_url))
+            for future in futures:
+                future.result()
 
 
 class TaskHijackingChecks:
