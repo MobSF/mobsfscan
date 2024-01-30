@@ -10,8 +10,9 @@ rules:
       - java
     severity: WARNING
     metadata:
-      cwe: cwe-73
+      cwe:
+        - 'CWE-73: External Control of File Name or Path'
       owasp-mobile: m7
       masvs: platform-6
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md/#testing-webview-protocol-handlers-mstg-platform-6
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md/#testing-webview-protocol-handlers-mstg-platform-6

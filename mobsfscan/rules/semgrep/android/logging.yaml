@@ -35,8 +35,9 @@ rules:
       - java
     severity: INFO
     metadata:
-      cwe: cwe-532
+      cwe:
+        - 'CWE-532: Insertion of Sensitive Information into Log File'
       owasp-mobile: m1
       masvs: storage-3
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#logs
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#logs

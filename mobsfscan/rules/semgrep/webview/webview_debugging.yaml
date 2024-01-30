@@ -15,8 +15,9 @@ rules:
       - java
     severity: ERROR
     metadata:
-      cwe: cwe-489
+      cwe:
+        - 'CWE-489: Active Debug Code'
       owasp-mobile: m1
       masvs: resilience-2
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-anti-debugging-detection-mstg-resilience-2
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-anti-debugging-detection-mstg-resilience-2

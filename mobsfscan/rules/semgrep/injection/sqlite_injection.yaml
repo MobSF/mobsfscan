@@ -28,8 +28,9 @@ rules:
       - java
     severity: WARNING
     metadata:
-      cwe: cwe-78
+      cwe:
+        - "CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"
       owasp-mobile: m7
       masvs: platform-2
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2

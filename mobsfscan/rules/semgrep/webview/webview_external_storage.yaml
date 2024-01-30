@@ -23,8 +23,9 @@ rules:
       - java
     severity: ERROR
     metadata:
-      cwe: cwe-749
+      cwe:
+        - 'CWE-749: Exposed Dangerous Method or Function'
       owasp-mobile: m1
       masvs: platform-6
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-webview-protocol-handlers-mstg-platform-6
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-webview-protocol-handlers-mstg-platform-6

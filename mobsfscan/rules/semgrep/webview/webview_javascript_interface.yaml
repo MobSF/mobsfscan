@@ -8,14 +8,14 @@ rules:
               $W.addJavascriptInterface(...)
     message: >-
       Ensure that javascript interface is implemented securely.
-      Execution of user controlled code in WebView is a 
-      critical Security issue.
+      Execution of user controlled code in WebView is a  critical Security issue.
     languages:
       - java
     severity: WARNING
     metadata:
-      cwe: cwe-749
+      cwe:
+        - 'CWE-749: Exposed Dangerous Method or Function'
       owasp-mobile: m1
       masvs: platform-7
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#determining-whether-java-objects-are-exposed-through-webviews-mstg-platform-7
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#determining-whether-java-objects-are-exposed-through-webviews-mstg-platform-7
