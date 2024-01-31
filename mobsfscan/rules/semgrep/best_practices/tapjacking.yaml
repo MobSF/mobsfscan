@@ -12,8 +12,9 @@ rules:
       - java
     severity: INFO
     metadata:
-      cwe: cwe-200
+      cwe:
+        - 'CWE-200: Exposure of Sensitive Information to an Unauthorized Actor'
       owasp-mobile: m1
       masvs: platform-9
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-for-overlay-attacks-mstg-platform-9
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-for-overlay-attacks-mstg-platform-9

@@ -9,11 +9,12 @@ rules:
       - java
     severity: WARNING
     metadata:
-      cwe: cwe-276
+      cwe:
+        - 'CWE-276: Incorrect Default Permissions'
       owasp-mobile: m2
       masvs: storage-2
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2
   - id: world_writeable
     patterns:
       - pattern-either:
@@ -26,8 +27,9 @@ rules:
       - java
     severity: WARNING
     metadata:
-      cwe: cwe-276
+      cwe:
+        - 'CWE-276: Incorrect Default Permissions'
       owasp-mobile: m2
       masvs: storage-2
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2

@@ -21,8 +21,9 @@ rules:
       - java
     severity: ERROR
     metadata:
-      cwe: cwe-649
+      cwe:
+        - 'CWE-649: Reliance on Obfuscation or Encryption of Security-Relevant Inputs without Integrity Checking'
       owasp-mobile: m5
       masvs: crypto-3
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#padding-oracle-attacks-due-to-weaker-padding-or-block-operation-implementations
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#padding-oracle-attacks-due-to-weaker-padding-or-block-operation-implementations

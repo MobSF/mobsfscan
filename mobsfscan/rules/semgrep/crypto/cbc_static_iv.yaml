@@ -21,8 +21,9 @@ rules:
       - java
     severity: ERROR
     metadata:
-      cwe: cwe-329
+      cwe:
+        - 'CWE-329: Generation of Predictable IV with CBC Mode'
       owasp-mobile: m5
       masvs: crypto-5
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#predictable-initialization-vector
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#predictable-initialization-vector

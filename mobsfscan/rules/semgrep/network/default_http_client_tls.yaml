@@ -12,8 +12,9 @@ rules:
       - java
     severity: WARNING
     metadata:
-      cwe: cwe-757
+      cwe:
+        - "CWE-757: Selection of Less-Secure Algorithm During Negotiation ('Algorithm Downgrade')"
       owasp-mobile: m3
       masvs: network-2
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2

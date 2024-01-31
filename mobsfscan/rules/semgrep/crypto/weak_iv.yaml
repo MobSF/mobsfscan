@@ -23,8 +23,9 @@ rules:
       - java
     severity: WARNING
     metadata:
-      cwe: cwe-1204
+      cwe:
+        - 'CWE-1204: Generation of Weak Initialization Vector (IV)'
       owasp-mobile: m5
       masvs: crypto-5
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#mobile-app-cryptography
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#mobile-app-cryptography

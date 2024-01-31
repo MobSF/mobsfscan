@@ -10,11 +10,11 @@ rules:
       Java objects is dangerous because malicious actors can create Java object
       streams with unintended consequences. Ensure that the objects being
       deserialized are not user-controlled. Consider using HMACs to sign the
-      data stream to make sure it is not tampered with, or consider only 
-      transmitting object fields and populating a new object.
+      data stream to make sure it is not tampered with, or consider only  transmitting object fields and populating a new object.
     metadata:
-      cwe: cwe-502
+      cwe:
+        - 'CWE-502: Deserialization of Untrusted Data'
       owasp-mobile: m1
       masvs: platform-8
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-object-persistence-mstg-platform-8
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-object-persistence-mstg-platform-8

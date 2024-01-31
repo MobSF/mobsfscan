@@ -11,8 +11,9 @@ rules:
       - java
     severity: WARNING
     metadata:
-      cwe: cwe-330
+      cwe:
+        - 'CWE-330: Use of Insufficiently Random Values'
       owasp-mobile: m5
       masvs: crypto-6
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-random-number-generators
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-random-number-generators

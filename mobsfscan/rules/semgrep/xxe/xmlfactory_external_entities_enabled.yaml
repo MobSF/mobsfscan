@@ -12,8 +12,9 @@ rules:
       - java
     severity: ERROR
     metadata:
-      cwe: cwe-611
+      cwe:
+        - 'CWE-611: Improper Restriction of XML External Entity Reference'
       owasp-mobile: m8
       masvs: platform-2
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2

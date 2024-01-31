@@ -9,14 +9,14 @@ rules:
     message: >-
       The app uses jackson deserialization library. Deserialization of untrusted
       input can result in arbitrary code execution. Consider using HMACs to sign
-      the data stream to make sure it is not tampered with, or consider only 
-      transmitting object fields and populating a new object.
+      the data stream to make sure it is not tampered with, or consider only  transmitting object fields and populating a new object.
     languages:
       - java
     severity: ERROR
     metadata:
-      cwe: cwe-502
+      cwe:
+        - 'CWE-502: Deserialization of Untrusted Data'
       owasp-mobile: m1
       masvs: platform-8
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-object-persistence-mstg-platform-8
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-object-persistence-mstg-platform-8

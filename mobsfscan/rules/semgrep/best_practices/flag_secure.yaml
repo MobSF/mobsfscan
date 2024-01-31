@@ -35,8 +35,9 @@ rules:
       - java
     severity: INFO
     metadata:
-      cwe: cwe-200
+      cwe:
+        - 'CWE-200: Exposure of Sensitive Information to an Unauthorized Actor'
       owasp-mobile: m2
       masvs: storage-9
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#finding-sensitive-information-in-auto-generated-screenshots-mstg-storage-9
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#finding-sensitive-information-in-auto-generated-screenshots-mstg-storage-9

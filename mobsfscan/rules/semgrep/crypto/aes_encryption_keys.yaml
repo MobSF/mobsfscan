@@ -19,8 +19,9 @@ rules:
       - java
     severity: ERROR
     metadata:
-      cwe: cwe-321
+      cwe:
+        - 'CWE-321: Use of Hard-coded Cryptographic Key'
       owasp-mobile: m5
       masvs: crypto-1
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#common-configuration-issues-mstg-crypto-1-mstg-crypto-2-and-mstg-crypto-3
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#common-configuration-issues-mstg-crypto-1-mstg-crypto-2-and-mstg-crypto-3

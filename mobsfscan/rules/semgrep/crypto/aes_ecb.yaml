@@ -12,11 +12,12 @@ rules:
     languages:
       - java
     metadata:
-      cwe: cwe-327
+      cwe:
+        - 'CWE-327: Use of a Broken or Risky Cryptographic Algorithm'
       owasp-mobile: m5
       masvs: crypto-2
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode
   - id: aes_ecb_mode_default
     patterns:
       - pattern-either:
@@ -30,8 +31,9 @@ rules:
     languages:
       - java
     metadata:
-      cwe: cwe-327
+      cwe:
+        - 'CWE-327: Use of a Broken or Risky Cryptographic Algorithm'
       owasp-mobile: m5
       masvs: crypto-2
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode

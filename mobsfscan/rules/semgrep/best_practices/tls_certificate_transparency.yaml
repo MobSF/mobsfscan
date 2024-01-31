@@ -17,8 +17,9 @@ rules:
       - java
     severity: INFO
     metadata:
-      cwe: cwe-295
+      cwe:
+        - 'CWE-295: Improper Certificate Validation'
       owasp-mobile: m3
       masvs: network-4
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4

@@ -17,8 +17,9 @@ rules:
       - java
     severity: ERROR
     metadata:
-      cwe: cwe-780
+      cwe:
+        - 'CWE-780: Use of RSA Algorithm without OAEP'
       owasp-mobile: m5
       masvs: crypto-3
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#mobile-app-cryptography
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#mobile-app-cryptography

@@ -21,8 +21,9 @@ rules:
       - java
     severity: ERROR
     metadata:
-      cwe: cwe-919
+      cwe:
+        - 'CWE-919: Weaknesses in Mobile Applications'
       owasp-mobile: m1
       masvs: storage-7
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-for-sensitive-data-disclosure-through-the-user-interface-mstg-storage-7
+      references:
+        - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-for-sensitive-data-disclosure-through-the-user-interface-mstg-storage-7
