@@ -323,7 +323,7 @@ class AppLinksCheck:
         try:
             r = requests.get(
                 w_url,
-                allow_redirects=True,
+                allow_redirects=False,
                 timeout=5)
             if not (str(r.status_code).startswith('2')
                     and iden in str(r.json())):
