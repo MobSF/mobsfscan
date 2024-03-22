@@ -11,7 +11,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 from mobsfscan.logger import init_logger
 from mobsfscan.manifest_metadata import metadata
-
+from mobsfscan.utils import (
+    is_number,
+    valid_host,
+)
 
 logger = init_logger(__name__)
 ANDROID_8_0_LEVEL = 26
@@ -50,6 +53,7 @@ ANDROID_API_LEVEL_MAP = {
     '32': '12L',
     '33': '13',
     '34': '14',
+    '35': '15',
 }
 
 
@@ -349,9 +353,14 @@ class AppLinksCheck:
             port = applink.get('@android:port')
             scheme = applink.get('@android:scheme')
             # Collect possible well-known paths
-            if scheme and scheme in ('http', 'https') and host:
-                host = host.replace('*.', '')
-                if port:
+            if (scheme
+                    and scheme in ('http', 'https')
+                    and host
+                    and host != '*'):
+                host = host.replace('*.', '').replace('#', '')
+                if not valid_host(host):
+                    continue
+                if port and is_number(port):
                     c_url = f'{scheme}://{host}:{port}{well_known_path}'
                 else:
                     c_url = f'{scheme}://{host}{well_known_path}'
