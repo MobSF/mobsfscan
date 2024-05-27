@@ -5,7 +5,7 @@ from .setup_test import (
 )
 
 from mobsfscan.formatters import (
-    json,
+    json_fmt,
     sarif,
     sonarqube,
 )
@@ -36,7 +36,7 @@ def test_patterns_and_semgrep():
 
 
 def json_output(res):
-    json_out = json.json_output(None, res, '0.0.0')
+    json_out = json_fmt.json_output(None, res, '0.0.0')
     assert json_out is not None
 
 

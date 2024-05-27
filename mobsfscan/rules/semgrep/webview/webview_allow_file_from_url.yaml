@@ -1,0 +1,32 @@
+rules:
+  - id: webview_allow_file_from_url
+    patterns:
+      - pattern-either:
+          - pattern: |
+              setAllowFileAccessFromFileURLs(true)
+          - pattern: |
+              $W.setAllowFileAccessFromFileURLs(true)
+          - pattern: |
+              $X = true;
+              ...
+              $W.setAllowFileAccessFromFileURLs($X);
+          - pattern: |
+              setAllowUniversalAccessFromFileURLs(true)
+          - pattern: |
+              $W.setAllowUniversalAccessFromFileURLs(true)
+          - pattern: |
+              $X = true;
+              ...
+              $W.setAllowUniversalAccessFromFileURLs($X);
+    message: >-
+      Ensure that user controlled URLs never reaches the Webview. Enabling file access
+      from URLs in WebView can leak sensitive information from the file system.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-200
+      owasp-mobile: m1
+      masvs: platform-7
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#static-analysis-6

@@ -1,7 +1,7 @@
 # -*- coding: utf_8 -*-
 """Sonarqube output format."""
 
-from mobsfscan.formatters.json import json_output
+from mobsfscan.formatters.json_fmt import json_output
 
 
 def get_sonarqube_issue(mobsfscan_issue):

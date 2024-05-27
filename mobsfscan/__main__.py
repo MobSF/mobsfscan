@@ -8,7 +8,7 @@ from mobsfscan import __version__
 from mobsfscan.mobsfscan import MobSFScan
 from mobsfscan.formatters import (
     cli,
-    json,
+    json_fmt,
     sarif,
     sonarqube,
 )
@@ -87,7 +87,7 @@ def main():
                 scan_results,
                 __version__)
         elif args.json:
-            json.json_output(
+            json_fmt.json_output(
                 args.output,
                 scan_results,
                 __version__)
