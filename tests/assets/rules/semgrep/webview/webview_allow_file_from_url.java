@@ -13,10 +13,10 @@ public class HelloWebApp extends Activity {
         setContentView(R.layout.main);
         WebView webView = (WebView)findViewById(R.id.webView);
         String badUrl = getIntent().getStringExtra("URL");
+        // ruleid:webview_allow_file_from_url
         boolean x = true;
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        // ruleid:webview_allow_file_from_url
         webSettings.setAllowFileAccessFromFileURLs(x);
         webView.setWebChromeClient(new WebChromeClient());
         webView.loadUrl(badUrl);

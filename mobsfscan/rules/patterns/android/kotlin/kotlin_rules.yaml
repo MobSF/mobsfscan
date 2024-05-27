@@ -84,11 +84,11 @@
   message: >-
     Ensure that user controlled URLs never reaches the Webview. Enabling file access
     from URLs in WebView can leak sensitive information from the file system.
-  type: RegexAnd
+  type: RegexAndOr
   pattern:
     - setJavaScriptEnabled\(true\)
-    - \.setAllowFileAccessFromFileURLs\(true\)
-    - \.setAllowUniversalAccessFromFileURLs\(true\)
+    - - \.setAllowFileAccessFromFileURLs\(true\)
+      - \.setAllowUniversalAccessFromFileURLs\(true\)
   severity: warning
   input_case: exact
   metadata:
