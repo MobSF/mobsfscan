@@ -17,6 +17,7 @@ rules:
     message: >-
       Hidden elements in view can be used to hide data from user. But this data
       can be leaked. If the view contains sensitive data, it might still be accessible through memory inspection.
+      A good practice is to clear sensitive data before hiding it.
     languages:
       - java
     severity: ERROR
@@ -24,5 +25,5 @@ rules:
       cwe: cwe-919
       owasp-mobile: m1
       masvs: storage-7
-      references:
-      - https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-for-sensitive-data-disclosure-through-the-user-interface-mstg-storage-7
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-for-sensitive-data-disclosure-through-the-user-interface-mstg-storage-7
