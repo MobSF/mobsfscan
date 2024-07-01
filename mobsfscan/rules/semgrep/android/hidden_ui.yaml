@@ -16,7 +16,8 @@ rules:
               $X.setVisibility($V);
     message: >-
       Hidden elements in view can be used to hide data from user. But this data
-      can be leaked.
+      can be leaked. If the view contains sensitive data, it might still be accessible through memory inspection.
+      A good practice is to clear sensitive data before hiding it.
     languages:
       - java
     severity: ERROR
