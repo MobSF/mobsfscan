@@ -76,14 +76,15 @@ def add_results(path, scan_results, run):
     rule_indices = {}
 
     for rule_id, issue_dict in res.items():
-        result = create_result(path, rule_id, issue_dict, rules, rule_indices)
-        run.results.append(result)
+        results = create_rule_results(path, rule_id, issue_dict, rules, rule_indices)
+        run.results += results
 
     if len(rules) > 0:
         run.tool.driver.rules = list(rules.values())
 
 
-def create_result(path, rule_id, issue_dict, rules, rule_indices):
+def create_rule_results(path, rule_id, issue_dict, rules, rule_indices):
+    rule_results = []
     if rule_id in rules:
         rule = rules[rule_id]
         rule_index = rule_indices[rule_id]
@@ -105,21 +106,41 @@ def create_result(path, rule_id, issue_dict, rules, rule_indices):
         rules[rule_id] = rule
         rule_indices[rule_id] = rule_index
 
-    locations = []
-    for item in issue_dict.get('files', []):
-        physical_location = om.PhysicalLocation(
-            artifact_location=om.ArtifactLocation(
-                uri=to_uri(item['file_path'])),
-        )
-        physical_location.region = om.Region(
-            start_line=item['match_lines'][0],
-            end_line=item['match_lines'][1],
-            start_column=item['match_position'][0],
-            end_column=item['match_position'][1],
-            snippet=om.ArtifactContent(text=item['match_string']),
-        )
-        locations.append(om.Location(physical_location=physical_location))
-    if not locations:
+    files = issue_dict.get('files', [])
+
+    # if there are locations - we iterate over them and create
+    # a separete result for each location
+    if files:
+        for item in files:
+            locations = []
+            physical_location = om.PhysicalLocation(
+                artifact_location=om.ArtifactLocation(
+                    uri=to_uri(item['file_path'])),
+            )
+            physical_location.region = om.Region(
+                start_line=item['match_lines'][0],
+                end_line=item['match_lines'][1],
+                start_column=item['match_position'][0],
+                end_column=item['match_position'][1],
+                snippet=om.ArtifactContent(text=item['match_string']),
+            )
+            locations.append(om.Location(physical_location=physical_location))
+            rule_results.append(om.Result(
+                    rule_id=rule.id,
+                    rule_index=rule_index,
+                    message=om.Message(text=issue_dict['metadata']['description']),
+                    level=level_from_severity(issue_dict['metadata']['severity']),
+                    locations=locations,
+                    properties={
+                        'owasp-mobile': issue_dict['metadata']['owasp-mobile'],
+                        'masvs': issue_dict['metadata']['masvs'],
+                        'cwe': issue_dict['metadata']['cwe'],
+                        'reference': issue_dict['metadata']['reference'],
+                    },
+                ))
+    # if there are no locations - only create a single resuklt
+    else:
+        locations = []
         artifact = om.PhysicalLocation(
             artifact_location=om.ArtifactLocation(
                 uri=path[0]),
@@ -132,20 +153,21 @@ def create_result(path, rule_id, issue_dict, rules, rule_indices):
             snippet=om.ArtifactContent(text='Missing Best Practice'),
         )
         locations.append(om.Location(physical_location=artifact))
+        rule_results.append(om.Result(
+                rule_id=rule.id,
+                rule_index=rule_index,
+                message=om.Message(text=issue_dict['metadata']['description']),
+                level=level_from_severity(issue_dict['metadata']['severity']),
+                locations=locations,
+                properties={
+                    'owasp-mobile': issue_dict['metadata']['owasp-mobile'],
+                    'masvs': issue_dict['metadata']['masvs'],
+                    'cwe': issue_dict['metadata']['cwe'],
+                    'reference': issue_dict['metadata']['reference'],
+                },
+            ))
 
-    return om.Result(
-        rule_id=rule.id,
-        rule_index=rule_index,
-        message=om.Message(text=issue_dict['metadata']['description']),
-        level=level_from_severity(issue_dict['metadata']['severity']),
-        locations=locations,
-        properties={
-            'owasp-mobile': issue_dict['metadata']['owasp-mobile'],
-            'masvs': issue_dict['metadata']['masvs'],
-            'cwe': issue_dict['metadata']['cwe'],
-            'reference': issue_dict['metadata']['reference'],
-        },
-    )
+    return rule_results
 
 
 def sarif_output(outfile, scan_results, mobsfscan_version, path):

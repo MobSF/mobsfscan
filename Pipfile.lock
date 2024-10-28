@@ -223,15 +223,6 @@
             "markers": "python_version >= '3.7'",
             "version": "==4.17.3"
         },
-        "libsast": {
-            "hashes": [
-                "sha256:2c70f9d94ff95c3302f0a038f05f381eb6a55c2acaeda717c5c1551006a74a2f",
-                "sha256:8bf0ef3ad31864fcdcf073840c5875e9a2fcdb9f895617141f30c953e361577d"
-            ],
-            "index": "pypi",
-            "markers": "python_version >= '3.8' and python_version < '4.0'",
-            "version": "==2.0.3"
-        },
         "packaging": {
             "hashes": [
                 "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb",
