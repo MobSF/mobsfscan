@@ -241,10 +241,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      repository-projects: write
     steps:
     - uses: actions/checkout@v2
     - name: mobsfscan
