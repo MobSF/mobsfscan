@@ -242,7 +242,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4.2.2
+    - uses: actions/setup-python@v5.3.0
+      with:
+        python-version: '3.12'
     - name: mobsfscan
       uses: MobSF/mobsfscan@main
       with:
@@ -267,7 +270,10 @@ jobs:
     name: mobsfscan code scanning
     steps:
     - name: Checkout the code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4.2.2
+    - uses: actions/setup-python@v5.3.0
+      with:
+        python-version: '3.12'
     - name: mobsfscan
       uses: MobSF/mobsfscan@main
       with:
