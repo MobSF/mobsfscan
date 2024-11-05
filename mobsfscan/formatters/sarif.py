@@ -7,7 +7,7 @@ bandit_sarif_formatter/formatter.py
 MIT License, Copyright (c) Microsoft Corporation.
 
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import PurePath
 import urllib.parse as urlparse
 
@@ -132,7 +132,7 @@ def sarif_output(outfile, scan_results, mobsfscan_version, path):
                 version=mobsfscan_version,
             )),
             invocations=[om.Invocation(
-                end_time_utc=datetime.utcnow().strftime(TS_FORMAT),
+                end_time_utc=datetime.now(timezone.utc).strftime(TS_FORMAT),
                 execution_successful=True,
             )])])
     run = log.runs[0]
