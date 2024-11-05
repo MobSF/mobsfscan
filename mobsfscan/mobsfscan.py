@@ -127,6 +127,28 @@ class MobSFScan:
         self.post_ignore_rules()
         self.post_ignore_rules_by_severity()
         self.post_ignore_files()
+        self.deduplicate_files()
+
+    def deduplicate_files(self):
+        """Deduplicate files."""
+        for _, details in self.result['results'].items():
+            files = details.get('files')
+            # some results don't have any files,
+            # so we need to check before we continue
+            if files:
+                # "file" here refers to the dictionary containig
+                # the file_path, match_lines, etc.
+                # for each file we create a tuple with it's contents
+                # then using those tuples as keys and
+                # "file" as values we create a dictionary
+                # This means that for each unique "file"
+                # we will get only one entry as we
+                # can't have duplicate keys
+                # Once this is done - convert the dictionary
+                # back to list by grabbing it's values and passing it to list()
+                unique_files = list(
+                    {tuple(sorted(f.items())): f for f in files}.values())
+                details['files'] = unique_files
 
     def format_semgrep(self, sgrep_output):
         """Format semgrep output."""
