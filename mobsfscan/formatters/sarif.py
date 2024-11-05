@@ -1,31 +1,42 @@
 # -*- coding: utf_8 -*-
 """SARIF output formatter for MobSF scan results.
 
-Based on https://github.com/microsoft/bandit-sarif-formatter/blob/master/bandit_sarif_formatter/formatter.py
+Based on https://github.com/microsoft/
+bandit-sarif-formatter/blob/master/
+bandit_sarif_formatter/formatter.py
 MIT License, Copyright (c) Microsoft Corporation.
 
 """
 from datetime import datetime
 from pathlib import PurePath
 import urllib.parse as urlparse
+
 import sarif_om as om
+
 from jschema_to_python.to_json import to_json
 
 TS_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+
 
 def level_from_severity(severity):
     return {
         'ERROR': 'error',
         'WARNING': 'warning',
-        'INFO': 'note'
+        'INFO': 'note',
     }.get(severity, 'none')
+
 
 def to_uri(file_path):
     pure_path = PurePath(file_path)
-    return pure_path.as_uri() if pure_path.is_absolute() else urlparse.quote(pure_path.as_posix())
+    if pure_path.is_absolute():
+        return pure_path.as_uri()
+    else:
+        return urlparse.quote(pure_path.as_posix())
+
 
 def format_rule_name(rule_id):
     return ''.join(word.capitalize() for word in rule_id.split('_'))
+
 
 def add_results(path, scan_results, run):
     if run.results is None:
@@ -35,25 +46,27 @@ def add_results(path, scan_results, run):
     rule_indices = {}
 
     for rule_id, issue_dict in res.items():
-        rule_results = create_rule_results(path, rule_id, issue_dict, rules, rule_indices)
+        rule_results = create_rule_results(
+            path, rule_id, issue_dict, rules, rule_indices)
         run.results.extend(rule_results)
 
     if rules:
         run.tool.driver.rules = list(rules.values())
 
+
 def create_rule_results(path, rule_id, issue_dict, rules, rule_indices):
     rule_results = []
     rule, rule_index = rules.get(rule_id), rule_indices.get(rule_id)
-
+    ref_url = ('https://mobile-security.gitbook.io/'
+               'mobile-security-testing-guide/')
     if not rule:
-        doc = issue_dict['metadata'].get('reference') or 'https://mobile-security.gitbook.io/mobile-security-testing-guide/'
+        doc = issue_dict['metadata'].get('reference') or ref_url
         cwe_id = issue_dict['metadata']['cwe'].split(':')[0].lower()
         rule = om.ReportingDescriptor(
             id=rule_id,
             name=format_rule_name(rule_id),
             help_uri=doc,
-            properties={'tags': ['security', f'external/cwe/{cwe_id}']}
-        )
+            properties={'tags': ['security', f'external/cwe/{cwe_id}']})
         rule_index = len(rules)
         rules[rule_id] = rule
         rule_indices[rule_id] = rule_index
@@ -71,13 +84,12 @@ def create_rule_results(path, rule_id, issue_dict, rules, rule_indices):
                     end_line=1,
                     start_column=1,
                     end_column=1,
-                    snippet=om.ArtifactContent(text='Missing Best Practice')
-                )
-            )
-        )
-        rule_results.append(create_result(rule, rule_index, issue_dict, [default_location]))
+                    snippet=om.ArtifactContent(text='Missing Best Practice'))))
+        rule_results.append(create_result(
+            rule, rule_index, issue_dict, [default_location]))
 
     return rule_results
+
 
 def create_location(item):
     return om.Location(
@@ -88,10 +100,8 @@ def create_location(item):
                 end_line=item['match_lines'][1],
                 start_column=item['match_position'][0],
                 end_column=item['match_position'][1],
-                snippet=om.ArtifactContent(text=item['match_string'])
-            )
-        )
-    )
+                snippet=om.ArtifactContent(text=item['match_string']))))
+
 
 def create_result(rule, rule_index, issue_dict, locations):
     return om.Result(
@@ -105,26 +115,26 @@ def create_result(rule, rule_index, issue_dict, locations):
             'masvs': issue_dict['metadata']['masvs'],
             'cwe': issue_dict['metadata']['cwe'],
             'reference': issue_dict['metadata']['reference'],
-        }
-    )
+        })
+
 
 def sarif_output(outfile, scan_results, mobsfscan_version, path):
     log = om.SarifLog(
-        schema_uri='https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json',
+        schema_uri=('https://raw.githubusercontent.com/'
+                    'oasis-tcs/sarif-spec/master/Schemata/'
+                    'sarif-schema-2.1.0.json'),
         version='2.1.0',
         runs=[om.Run(
             tool=om.Tool(driver=om.ToolComponent(
                 name='mobsfscan',
                 information_uri='https://github.com/MobSF/mobsfscan',
                 semantic_version=mobsfscan_version,
-                version=mobsfscan_version
+                version=mobsfscan_version,
             )),
             invocations=[om.Invocation(
-                end_time_utc=datetime.utcnow().strftime(TS_FORMAT),
-                execution_successful=True
-            )]
-        )]
-    )
+                end_time_utc=datetime.now(datetime.timezone.utc).strftime(TS_FORMAT),
+                execution_successful=True,
+            )])])
     run = log.runs[0]
     add_results(path, scan_results, run)
     json_out = to_json(log)
