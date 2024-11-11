@@ -237,6 +237,22 @@ class MobSFScan:
             return True
         return False
 
+    def remove_matches(self, file, files):
+        """Remove all matches in the file for the rule."""
+        new_files = []
+        lines = []
+        for af in files:
+            # Collect all match lines for the rule in the file
+            if file['file_path'] == af['file_path']:
+                lines.append(af['match_lines'])
+        # Add all files except the file with matching lines
+        for af in files:
+            if af['match_lines'] not in lines:
+                new_files.append(af)
+            elif af['file_path'] != file['file_path']:
+                new_files.append(af)
+        return new_files
+
     def post_ignore_files(self):
         """Ignore file by rule."""
         del_keys = set()
@@ -244,13 +260,13 @@ class MobSFScan:
             files = details.get('files')
             if not files:
                 continue
-            tmp_files = files.copy()
+            tmp_files = files
             for file in files:
-                mstr = file.get('match_string')
-                if 'mobsf-ignore:' in mstr and rule_id in mstr:
-                    tmp_files.remove(file)
-                elif self.suppress_pm_comments(file, rule_id):
-                    tmp_files.remove(file)
+                # check if ignore comment is present for
+                # any matches in the file for the rule
+                if self.suppress_pm_comments(file, rule_id):
+                    # remove all matches of the file for the rule
+                    tmp_files = self.remove_matches(file, files)
                 if len(tmp_files) == 0:
                     del_keys.add(rule_id)
             details['files'] = tmp_files

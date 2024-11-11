@@ -16,7 +16,7 @@ googleapis-common-protos==1.65.0
 idna==3.10
 importlib_metadata==7.1.0
 jschema-to-python==1.2.3
-jsonpickle==3.3.0
+jsonpickle==3.4.2
 jsonschema==4.23.0
 jsonschema-specifications==2024.10.1
 libsast==3.1.0
@@ -31,7 +31,7 @@ opentelemetry-proto==1.25.0
 opentelemetry-sdk==1.25.0
 opentelemetry-semantic-conventions==0.46b0
 opentelemetry-util-http==0.46b0
-packaging==24.1
+packaging==24.2
 pbr==6.1.0
 peewee==3.17.7
 protobuf==4.25.5
@@ -42,7 +42,7 @@ PyYAML==6.0.2
 referencing==0.35.1
 requests==2.32.3
 rich==13.9.4
-rpds-py==0.20.1
+rpds-py==0.21.0
 ruamel.yaml==0.17.40
 ruamel.yaml.clib==0.2.12
 sarif-om==1.0.4
@@ -54,4 +54,4 @@ urllib3==2.2.3
 wcmatch==8.5.2
 wrapt==1.16.0
 xmltodict==0.14.2
-zipp==3.20.2
+zipp==3.21.0
