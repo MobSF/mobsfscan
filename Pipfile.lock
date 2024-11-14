@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c6418f63576c87eefb1fbd43c524b8244b6aa6fa0a86886e099d1e0b8483ba88"
+            "sha256": "15dd49bd8704d827989909e2557fe13c729b112b822796d174562e7d598b6971"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -31,6 +31,14 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==24.2.0"
+        },
+        "billiard": {
+            "hashes": [
+                "sha256:12b641b0c539073fc8d3f5b8b7be998956665c4233c7c1fcd66a7e677c4fb36f",
+                "sha256:40b59a4ac8806ba2c2369ea98d876bc6108b051c227baffd928c644d15d8f3cb"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==4.2.1"
         },
         "boltons": {
             "hashes": [
@@ -231,11 +239,11 @@
         },
         "googleapis-common-protos": {
             "hashes": [
-                "sha256:2972e6c496f435b92590fd54045060867f3fe9be2c82ab148fc8885035479a63",
-                "sha256:334a29d07cddc3aa01dee4988f9afd9b2916ee2ff49d6b757155dc0d197852c0"
+                "sha256:c3e7b33d15fdca5374cc0a7346dd92ffa847425cc4ea941d970f13680052ec8c",
+                "sha256:d7abcd75fabb2e0ec9f74466401f6c119a0b498e27370e9be4c94cb7e382b8ed"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.65.0"
+            "version": "==1.66.0"
         },
         "idna": {
             "hashes": [
@@ -264,11 +272,11 @@
         },
         "jsonpickle": {
             "hashes": [
-                "sha256:2efa2778859b6397d5804b0a98d52cd2a7d9a70fcb873bc5a3ca5acca8f499ba",
-                "sha256:fd6c273278a02b3b66e3405db3dd2f4dbc8f4a4a3123bfcab3045177c6feb9c3"
+                "sha256:53730b9e094bc41f540bfdd25eaf6e6cf43811590e9e1477abcec44b866ddcd9",
+                "sha256:fc670852b204d77601b08f8f9333149ac37ab6d3fe4e6ed3b578427291f63736"
             ],
-            "markers": "python_version >= '3.7'",
-            "version": "==3.4.2"
+            "markers": "python_version >= '3.8'",
+            "version": "==4.0.0"
         },
         "jsonschema": {
             "hashes": [
@@ -288,12 +296,12 @@
         },
         "libsast": {
             "hashes": [
-                "sha256:030f87f404cd9901e24c55adb9e501874aae8af0e7efcf2cf113fb2c64293b84",
-                "sha256:1d4e35bba35d886e4d58d79363bc6d4e26a7e28f095da01968d016af64960804"
+                "sha256:991fd9014b0745482150ceb0362059ef8249b0012cde0e44ca8c700b28c1b3bc",
+                "sha256:9a291e560b1481af45b98d7afd3cba6dd443e22ba857593573dae033c0059939"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8' and python_version < '4.0'",
-            "version": "==3.1.0"
+            "version": "==3.1.4"
         },
         "markdown-it-py": {
             "hashes": [
@@ -401,9 +409,9 @@
         },
         "peewee": {
             "hashes": [
-                "sha256:6aefc700bd530fc6ac23fa19c9c5b47041751d92985b799169c8e318e97eabaa"
+                "sha256:ce1d05db3438830b989a1b9d0d0aa4e7f6134d5f6fd57686eeaa26a3e6485a8c"
             ],
-            "version": "==3.17.7"
+            "version": "==3.17.8"
         },
         "protobuf": {
             "hashes": [
@@ -784,16 +792,17 @@
                 "sha256:4f0fec59cfbf40f1c1cb9fa71539725cebaad4a9097bd68bc6ae8835edcd3201",
                 "sha256:bedf7c55338fadb39b7a24ae5aa595be155c84b654ba14d1c0a2f65356ff15f3"
             ],
+            "index": "pypi",
             "markers": "python_version >= '3.8'",
             "version": "==1.86.0"
         },
         "setuptools": {
             "hashes": [
-                "sha256:f2504966861356aa38616760c0f66568e535562374995367b4e69c7143cf6bcd",
-                "sha256:fba5dd4d766e97be1b1681d98712680ae8f2f26d7881245f2ce9e40714f1a686"
+                "sha256:5c4ccb41111392671f02bb5f8436dfc5a9a7185e80500531b133f5775c4163ef",
+                "sha256:87cb777c3b96d638ca02031192d40390e0ad97737e27b6b4fa831bea86f2f829"
             ],
-            "markers": "python_version >= '3.8'",
-            "version": "==75.3.0"
+            "markers": "python_version >= '3.9'",
+            "version": "==75.5.0"
         },
         "tabulate": {
             "hashes": [
