@@ -1,5 +1,6 @@
 annotated-types==0.7.0
 attrs==24.2.0
+billiard==4.2.1
 boltons==21.0.0
 bracex==2.5.post1
 certifi==2024.8.30
@@ -12,14 +13,14 @@ Deprecated==1.2.14
 exceptiongroup==1.2.2
 face==24.0.0
 glom==22.1.0
-googleapis-common-protos==1.65.0
+googleapis-common-protos==1.66.0
 idna==3.10
 importlib_metadata==7.1.0
 jschema-to-python==1.2.3
-jsonpickle==3.4.2
+jsonpickle==4.0.0
 jsonschema==4.23.0
 jsonschema-specifications==2024.10.1
-libsast==3.1.0
+libsast==3.1.4
 markdown-it-py==3.0.0
 mdurl==0.1.2
 opentelemetry-api==1.25.0
@@ -33,7 +34,7 @@ opentelemetry-semantic-conventions==0.46b0
 opentelemetry-util-http==0.46b0
 packaging==24.2
 pbr==6.1.0
-peewee==3.17.7
+peewee==3.17.8
 protobuf==4.25.5
 pydantic==2.8.2
 pydantic_core==2.20.1
