@@ -9,7 +9,7 @@ inputs:
   args:
     description: |
       positional arguments:
-      path                  Path can be file(s) or directories with source code
+        path                  Path can be file(s) or directories with source code
 
       optional arguments:
         -h, --help            show this help message and exit
@@ -17,11 +17,16 @@ inputs:
         --sarif               set output format as SARIF 2.1.0
         --sonarqube           set output format compatible with SonarQube
         --html                set output format as HTML
+        --type {android,ios,auto}
+                              optional: force android or ios rules explicitly
         -o OUTPUT, --output OUTPUT
                               output filename to save the result
         -c CONFIG, --config CONFIG
-                              Location to .mobsf config file
+                              location to .mobsf config file
+        -mp {default,billiard,thread}, --multiprocessing {default,billiard,thread}
+                              optional: specify multiprocessing strategy
         -w, --exit-warning    non zero exit code on warning
+        --no-fail             force zero exit code, takes precedence over --exit-warning
         -v, --version         show mobsfscan version
     required: true
 

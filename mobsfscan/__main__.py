@@ -57,6 +57,10 @@ def main():
     parser.add_argument('-c', '--config',
                         help='location to .mobsf config file',
                         required=False)
+    parser.add_argument('-mp', '--multiprocessing',
+                        help='optional: specify multiprocessing strategy',
+                        choices=['default', 'billiard', 'thread'],
+                        default='default')
     parser.add_argument('-w', '--exit-warning',
                         help='non zero exit code on warning',
                         action='store_true',
@@ -80,6 +84,7 @@ def main():
             is_json,
             args.type,
             args.config,
+            args.multiprocessing,
         ).scan()
         if args.sonarqube:
             sonarqube.sonarqube_output(

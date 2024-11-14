@@ -21,7 +21,13 @@ logger = init_logger(__name__)
 
 
 class MobSFScan:
-    def __init__(self, paths, json, scan_type='auto', config=False) -> None:
+    def __init__(
+            self,
+            paths,
+            json,
+            scan_type='auto',
+            config=False,
+            mp='default') -> None:
         self.scan_type = scan_type
         self.conf = get_config(paths, config)
         self.options = {
@@ -35,6 +41,7 @@ class MobSFScan:
             'ignore_rules': self.conf['ignore_rules'],
             'severity_filter': self.conf['severity_filter'],
             'show_progress': not json,
+            'multiprocessing': mp,
         }
         self.paths = paths
         self.result = {

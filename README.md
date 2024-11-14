@@ -31,12 +31,14 @@ Requires Python 3.7+
 
 ```bash
 $ mobsfscan
-usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--html] [--type {android,ios,auto}] [-o OUTPUT] [-c CONFIG] [-w] [--no-fail] [-v] [path ...]
+usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--html] [--type {android,ios,auto}]
+                 [-o OUTPUT] [-c CONFIG] [-mp {default,billiard,thread}] [-w] [--no-fail] [-v]
+                 [path ...]
 
 positional arguments:
   path                  Path can be file(s) or directories with source code
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --json                set output format as JSON
   --sarif               set output format as SARIF 2.1.0
@@ -48,6 +50,8 @@ optional arguments:
                         output filename to save the result
   -c CONFIG, --config CONFIG
                         location to .mobsf config file
+  -mp {default,billiard,thread}, --multiprocessing {default,billiard,thread}
+                        optional: specify multiprocessing strategy
   -w, --exit-warning    non zero exit code on warning
   --no-fail             force zero exit code, takes precedence over --exit-warning
   -v, --version         show mobsfscan version
