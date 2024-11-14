@@ -21,7 +21,13 @@ logger = init_logger(__name__)
 
 
 class MobSFScan:
-    def __init__(self, paths, json, scan_type='auto', config=False, mp='default') -> None:
+    def __init__(
+            self,
+            paths,
+            json,
+            scan_type='auto',
+            config=False,
+            mp='default') -> None:
         self.scan_type = scan_type
         self.conf = get_config(paths, config)
         self.options = {
