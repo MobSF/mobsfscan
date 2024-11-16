@@ -78,6 +78,7 @@
     - \.autocorrectionType\s*=\s*\.No
     - UITextAutocorrectionTypeNo
     - \.disableAutocorrection\s*\(\s*true\s*\)
+    - \.autocorrectionDisabled\s*\(\s*true\s*\)
   severity: INFO
   type: RegexOr
   metadata:
