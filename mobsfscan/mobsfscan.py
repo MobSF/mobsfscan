@@ -273,7 +273,7 @@ class MobSFScan:
                 # any matches in the file for the rule
                 if self.suppress_pm_comments(file, rule_id):
                     # remove all matches of the file for the rule
-                    tmp_files = self.remove_matches(file, files)
+                    tmp_files = self.remove_matches(file, tmp_files)
                 if len(tmp_files) == 0:
                     del_keys.add(rule_id)
             details['files'] = tmp_files
