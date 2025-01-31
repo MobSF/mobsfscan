@@ -89,7 +89,7 @@
     - setJavaScriptEnabled\(true\)
     - - \.setAllowFileAccessFromFileURLs\(true\)
       - \.setAllowUniversalAccessFromFileURLs\(true\)
-  severity: warning
+  severity: WARNING
   input_case: exact
   metadata:
     cvss: 6.1
