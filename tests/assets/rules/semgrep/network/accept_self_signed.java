@@ -203,6 +203,7 @@ try {
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 public class MySSLSocketFactory extends SSLSocketFactory {
+    // ruleid:accept_self_signed_certificate
     SSLContext sslContext = SSLContext.getInstance("TLS");
     public MySSLSocketFactory(KeyStore truststore) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
         super(truststore);
@@ -262,6 +263,7 @@ client.get("https://www.github.com", new AsyncHttpResponseHandler() {
 
 
 public class MySSLSocketFactory extends SSLSocketFactory {
+        // ruleid:accept_self_signed_certificate
         SSLContext sslContext = SSLContext.getInstance("TLS");
 
         public MySSLSocketFactory(KeyStore truststore) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
