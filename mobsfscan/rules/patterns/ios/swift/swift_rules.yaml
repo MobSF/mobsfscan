@@ -24,9 +24,10 @@
     owasp-mobile: m7
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#testing-webview-protocol-handlers-mstg-platform-6
 - id: ios_log
-  message: The App logs information. Sensitive information should never be logged.
+  message: The App logs information to the system console. Sensitive information should never be logged.
   input_case: exact
-  pattern: (print|NSLog|os_log|OSLog|os_signpost)\(
+  # Exclude Swift print(); it writes to stdout, not the system log (#112).
+  pattern: (NSLog|os_log|OSLog|os_signpost)\(
   severity: INFO
   type: Regex
   metadata:
