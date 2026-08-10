@@ -52,55 +52,64 @@ class MobSFScan:
         }
         self.xmls = []
         self.plists = []
-        self.best_practices = None
+        # Extensions whose BP presence hits must be stripped (may be a
+        # superset of languages actually present — see missing_controls).
+        self.best_practices_invert = set()
+        # Extensions for which absent controls are reported as missing.
+        self.best_practices_missing = set()
         self.standards = standards.get_standards()
         self.get_extensions()
         self.get_xmls()
         self.get_plists()
 
-    def rules_selector(self, suffix):
-        """Get rule extensions from suffix."""
-        if self.scan_type == 'android':
-            suffix = '.kt'
-        elif self.scan_type == 'ios':
-            suffix = '.swift'
-        # Default to .kt/.swift best practices if scan_type is specified
-        if suffix in ['.java', '.kt']:
-            if suffix == '.java':
-                self.best_practices = '.java'
-            else:
-                self.best_practices = '.kt'
-            # Android code + best-practice presence checks use Semgrep only.
-            self.options['match_rules'] = None
-            self.options['match_extensions'] = None
-            self.options['sgrep_rules'] = settings.SGREP_RULES_DIR.as_posix()
-            self.options['sgrep_extensions'] = {'.java', '.kt'}
-        elif suffix in {'.swift', '.m'}:
-            if suffix == '.swift':
-                self.best_practices = '.swift'
-            else:
-                self.best_practices = '.m'
-            # Objective-C remains libsast regex; Swift uses Semgrep.
-            self.options['match_rules'] = (
-                settings.IOS_RULES_DIR / 'objectivec').as_posix()
-            self.options['match_extensions'] = {'.m'}
-            self.options['sgrep_rules'] = settings.SGREP_RULES_DIR.as_posix()
-            self.options['sgrep_extensions'] = {'.swift'}
+    def _configure_android(self, present):
+        """Semgrep Android rules; invert both Java and Kotlin BP dialects."""
+        self.options['match_rules'] = None
+        self.options['match_extensions'] = None
+        self.options['sgrep_rules'] = settings.SGREP_RULES_DIR.as_posix()
+        self.options['sgrep_extensions'] = {'.java', '.kt'}
+        # Presence rules for both dialects are loaded; always strip both.
+        self.best_practices_invert = {'.java', '.kt'}
+        # Only report missing controls for languages actually in the scan.
+        self.best_practices_missing = set(present)
+
+    def _configure_ios(self, present):
+        """Swift Semgrep + ObjC regex; invert both iOS BP dialects."""
+        self.options['match_rules'] = (
+            settings.IOS_RULES_DIR / 'objectivec').as_posix()
+        self.options['match_extensions'] = {'.m'}
+        self.options['sgrep_rules'] = settings.SGREP_RULES_DIR.as_posix()
+        self.options['sgrep_extensions'] = {'.swift'}
+        self.best_practices_invert = {'.swift', '.m'}
+        self.best_practices_missing = set(present)
 
     def get_extensions(self) -> set:
-        """Get extensions to scan."""
+        """Discover source suffixes and configure scanners."""
         scan_suffix = {'.java', '.kt', '.swift', '.m'}
+        found = set()
         for path in self.paths:
             pobj = Path(path)
             if pobj.is_dir():
                 for pfile in pobj.rglob('*'):
-                    if pfile.suffix not in scan_suffix:
-                        continue
-                    return self.rules_selector(pfile.suffix)
-            else:
-                if pobj.suffix not in scan_suffix:
-                    continue
-                return self.rules_selector(pobj.suffix)
+                    if pfile.suffix in scan_suffix:
+                        found.add(pfile.suffix)
+            elif pobj.suffix in scan_suffix:
+                found.add(pobj.suffix)
+
+        android = found & {'.java', '.kt'}
+        ios = found & {'.swift', '.m'}
+        # Configure only when matching sources exist (plist/xml-only trees
+        # should not invent missing-control findings for .kt/.swift).
+        if self.scan_type == 'android':
+            if android:
+                self._configure_android(android)
+        elif self.scan_type == 'ios':
+            if ios:
+                self._configure_ios(ios)
+        elif android:
+            self._configure_android(android)
+        elif ios:
+            self._configure_ios(ios)
 
     def get_xmls(self) -> set:
         """Get XML files for scanning."""
@@ -210,25 +219,33 @@ class MobSFScan:
         self.result['results'].update(res_out)
 
     def missing_controls(self):
-        """Check for missing controls."""
-        if not self.best_practices:
+        """Check for missing controls.
+
+        Semgrep loads best-practice *presence* rules for every dialect under
+        SGREP_RULES_DIR. Invert (delete) the union of related dialects so
+        presence hits never leak, but only *report* missing controls for
+        languages actually present in the scan paths.
+        """
+        if not self.best_practices_invert and not self.best_practices_missing:
             return
-        ids, rules = get_best_practices(self.best_practices)
-        result_keys = self.result['results'].keys()
+        invert_ids, _ = get_best_practices(self.best_practices_invert)
+        missing_ids, rules = get_best_practices(self.best_practices_missing)
+        result_keys = set(self.result['results'].keys())
         deleted = set()
-        for rule_id in ids:
+        for rule_id in invert_ids:
             if rule_id in result_keys:
                 # Control Present
                 deleted.add(rule_id)
                 del self.result['results'][rule_id]
-        # Add Missing
-        missing = ids.difference(result_keys)
-        for rule_id in missing:
+        # Add Missing (only for languages present in the scan)
+        for rule_id in missing_ids.difference(result_keys):
             if rule_id in deleted:
+                continue
+            details = rules.get(rule_id)
+            if not details:
                 continue
             self.result['results'][rule_id] = {}
             res = self.result['results'][rule_id]
-            details = rules[rule_id]
             res['metadata'] = details['metadata']
             res['metadata']['description'] = details['message']
             res['metadata']['severity'] = details['severity']

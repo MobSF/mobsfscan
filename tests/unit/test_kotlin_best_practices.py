@@ -46,3 +46,9 @@ def test_kotlin_present_controls_are_inverted_away():
     res = MobSFScan([str(src)], True, mp='thread').scan()
     for rule_id in KOTLIN_BP_IDS:
         assert rule_id not in res['results']
+    # Java-only BP IDs must not be reported missing on a Kotlin-only tree.
+    for rule_id in (
+            'android_safetynet_api',
+            'android_certificate_pinning',
+            'android_detect_tapjacking'):
+        assert rule_id not in res['results']

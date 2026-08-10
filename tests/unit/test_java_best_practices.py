@@ -47,3 +47,38 @@ def test_java_present_controls_are_inverted_away():
     res = MobSFScan([str(src)], True, mp='thread').scan()
     for rule_id in JAVA_BP_IDS:
         assert rule_id not in res['results']
+
+
+def test_type_android_on_java_does_not_leak_or_false_missing():
+    """--type android must invert Java BP IDs, not only Kotlin's."""
+    src = (
+        Path(__file__).resolve().parents[1]
+        / 'assets' / 'src' / 'java_best_practices_present')
+    res = MobSFScan(
+        [str(src)], True, scan_type='android', mp='thread').scan()
+    for rule_id in JAVA_BP_IDS:
+        assert rule_id not in res['results']
+    # Kotlin-only IDs must not be reported missing on a Java-only tree.
+    for rule_id in (
+            'android_safetynet',
+            'android_ssl_pinning',
+            'android_tapjacking'):
+        assert rule_id not in res['results']
+
+
+def test_mixed_java_kotlin_present_does_not_leak_kotlin_bp():
+    """Presence hits for either Android dialect must be inverted away."""
+    base = Path(__file__).resolve().parents[1] / 'assets' / 'src'
+    res = MobSFScan(
+        [
+            str(base / 'java_best_practices_present'),
+            str(base / 'kotlin_best_practices_present'),
+        ],
+        True,
+        mp='thread',
+    ).scan()
+    for rule_id in JAVA_BP_IDS | {
+            'android_safetynet',
+            'android_ssl_pinning',
+            'android_tapjacking'}:
+        assert rule_id not in res['results']

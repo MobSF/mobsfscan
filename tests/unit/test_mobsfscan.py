@@ -13,11 +13,17 @@ from mobsfscan.formatters import (
 
 
 EXPECTED = [
+    # Java missing controls (java_vuln has CT present → not listed)
     'android_safetynet_api',
     'android_prevent_screenshot',
     'android_certificate_pinning',
     'android_root_detection',
     'android_detect_tapjacking',
+    # Kotlin missing controls (mixed scan reports both dialects)
+    'android_safetynet',
+    'android_ssl_pinning',
+    'android_tapjacking',
+    # Code findings
     'android_kotlin_logging',
     'android_kotlin_hiddenui',
     'android_logging',

@@ -142,42 +142,52 @@ def read_yaml(file_obj, text=False):
     return None
 
 
-def get_best_practices(extension):
-    """Get best practices of an extension.
+def get_best_practices(extensions):
+    """Get best practices for one or more extensions.
 
     Best-practice rules match control *presence*. MobSFScan.missing_controls()
     inverts them: delete when present, report when missing across the scan.
     """
+    if isinstance(extensions, str):
+        extensions = [extensions]
     ids = set()
     all_rules = {}
-    if extension == '.java':
-        java_dir = config.BEST_PRACTICES_DIR / 'java'
-        for yml in java_dir.rglob('*.yaml'):
-            rules = read_yaml(yml)
-            for rule in rules['rules']:
+    for extension in extensions:
+        if extension == '.java':
+            java_dir = config.BEST_PRACTICES_DIR / 'java'
+            for yml in java_dir.rglob('*.yaml'):
+                rules = read_yaml(yml)
+                if not rules or 'rules' not in rules:
+                    continue
+                for rule in rules['rules']:
+                    all_rules[rule['id']] = rule
+                    ids.add(rule['id'])
+        elif extension == '.kt':
+            kt_dir = config.BEST_PRACTICES_DIR / 'kotlin'
+            for yml in kt_dir.rglob('*.yaml'):
+                rules = read_yaml(yml)
+                if not rules or 'rules' not in rules:
+                    continue
+                for rule in rules['rules']:
+                    all_rules[rule['id']] = rule
+                    ids.add(rule['id'])
+        elif extension == '.swift':
+            swift_dir = config.BEST_PRACTICES_DIR / 'swift'
+            for yml in swift_dir.rglob('*.yaml'):
+                rules = read_yaml(yml)
+                if not rules or 'rules' not in rules:
+                    continue
+                for rule in rules['rules']:
+                    all_rules[rule['id']] = rule
+                    ids.add(rule['id'])
+        elif extension == '.m':
+            bp = config.IOS_RULES_DIR / 'objectivec' / 'best_practices.yaml'
+            rules = read_yaml(bp)
+            if not rules:
+                continue
+            for rule in rules:
                 all_rules[rule['id']] = rule
                 ids.add(rule['id'])
-    elif extension == '.kt':
-        # Kotlin Semgrep best practices (same inversion as Java).
-        kt_dir = config.BEST_PRACTICES_DIR / 'kotlin'
-        for yml in kt_dir.rglob('*.yaml'):
-            rules = read_yaml(yml)
-            for rule in rules['rules']:
-                all_rules[rule['id']] = rule
-                ids.add(rule['id'])
-    elif extension == '.swift':
-        swift_dir = config.BEST_PRACTICES_DIR / 'swift'
-        for yml in swift_dir.rglob('*.yaml'):
-            rules = read_yaml(yml)
-            for rule in rules['rules']:
-                all_rules[rule['id']] = rule
-                ids.add(rule['id'])
-    elif extension == '.m':
-        bp = config.IOS_RULES_DIR / 'objectivec' / 'best_practices.yaml'
-        rules = read_yaml(bp)
-        for rule in rules:
-            all_rules[rule['id']] = rule
-            ids.add(rule['id'])
     return ids, all_rules
 
 
