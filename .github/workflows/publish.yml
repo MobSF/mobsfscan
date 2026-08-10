@@ -1,12 +1,4 @@
 # Publish to PyPI via Trusted Publishing (OIDC) when a GitHub Release is created.
-# Configure the matching Trusted Publisher on PyPI first:
-#   https://pypi.org/manage/project/mobsfscan/settings/publishing/
-#     Owner: MobSF
-#     Repository: mobsfscan
-#     Workflow: publish.yml
-#     Environment: pypi
-# Then create a GitHub Environment named `pypi` (Settings → Environments).
-# After the first successful trusted publish, remove PYPI_USERNAME / PYPI_PASSWORD secrets.
 
 name: Upload Python Package
 
@@ -22,7 +14,7 @@ jobs:
       url: https://pypi.org/p/mobsfscan
     permissions:
       contents: read
-      id-token: write  # required for PyPI Trusted Publishing (OIDC)
+      id-token: write
 
     steps:
     - uses: actions/checkout@v5
