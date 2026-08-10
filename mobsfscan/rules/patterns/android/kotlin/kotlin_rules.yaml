@@ -125,6 +125,22 @@
     owasp-mobile: m3
     masvs: network-3
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#webview-server-certificate-verification
+- id: android_kotlin_webview_mixed_content
+  message: >-
+    Insecure WebView Implementation. WebView is configured with
+    MIXED_CONTENT_ALWAYS_ALLOW, allowing a page loaded over HTTPS to load
+    content from insecure HTTP origins. This exposes the application to
+    man-in-the-middle content injection.
+  type: Regex
+  pattern: setMixedContentMode\(.{0,48}MIXED_CONTENT_ALWAYS_ALLOW
+  severity: ERROR
+  input_case: exact
+  metadata:
+    cvss: 7.4
+    cwe: cwe-319
+    owasp-mobile: m3
+    masvs: network-1
+    reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md
 - id: android_kotlin_sql_raw_query
   message: >-
     App uses SQLite Database and execute raw SQL query. Untrusted user input in
@@ -217,6 +233,7 @@
   type: RegexOr
   pattern:
     - MODE_WORLD_WRITABLE
+    - \.getSharedPreferences\([^)]{0,50}?,\s*2\s*\)
     - 'openFileOutput\(\s*".{1,48}"\s*,\s*2\s*\)'
   severity: WARNING
   input_case: exact
@@ -230,6 +247,7 @@
   type: RegexOr
   pattern:
     - MODE_WORLD_READABLE
+    - \.getSharedPreferences\([^)]{0,50}?,\s*1\s*\)
     - 'openFileOutput\(\s*".{1,48}"\s*,\s*1\s*\)'
   severity: WARNING
   input_case: exact

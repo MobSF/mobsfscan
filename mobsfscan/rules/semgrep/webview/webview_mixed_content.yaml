@@ -1,0 +1,26 @@
+rules:
+  - id: webview_mixed_content
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $W.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW)
+          - pattern: |
+              setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW)
+          - pattern: |
+              $W.setMixedContentMode($S.MIXED_CONTENT_ALWAYS_ALLOW)
+          - pattern: |
+              setMixedContentMode($S.MIXED_CONTENT_ALWAYS_ALLOW)
+    message: >-
+      Insecure WebView Implementation. WebView is configured with
+      MIXED_CONTENT_ALWAYS_ALLOW, allowing a page loaded over HTTPS to load
+      content from insecure HTTP origins. This exposes the application to
+      man-in-the-middle content injection.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-319
+      owasp-mobile: m3
+      masvs: network-1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md
