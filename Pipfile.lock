@@ -466,7 +466,12 @@
             "version": "==2025.9.1"
         },
         "libsast": {
-            "version": "==3.1.7"
+            "hashes": [
+                "sha256:43b9a818e81af6d8db7666f97ad5b1b67a14982b7881dff4e62a6d7c180e817e",
+                "sha256:a5a5a5a0bc8b0aa1ba61170335ec36a9644d48432e7cbfae6b73dde8cb66e3d8"
+            ],
+            "index": "pypi",
+            "version": "==3.1.6"
         },
         "markdown-it-py": {
             "hashes": [
