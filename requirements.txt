@@ -25,7 +25,7 @@ jschema-to-python==1.2.3
 jsonpickle==4.1.2
 jsonschema==4.25.1
 jsonschema-specifications==2025.9.1
-libsast==3.1.6
+libsast==3.1.7
 markdown-it-py==4.2.0
 mcp==1.23.3
 mdurl==0.1.2
