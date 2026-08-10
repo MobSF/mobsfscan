@@ -1,5 +1,6 @@
 # -*- coding: utf_8 -*-
-"""Parse Android Manifest and NSC."""
+"""Parse Android manifest, network security config, and resource XML."""
+import re
 from operator import itemgetter
 from copy import deepcopy
 
@@ -20,6 +21,10 @@ logger = init_logger(__name__)
 ANDROID_8_0_LEVEL = 26
 ANDROID_9_0_LEVEL = 28
 ANDROID_10_0_LEVEL = 29
+SENSITIVE_INPUT_NAME = re.compile(
+    r'(?:password|passcode|pin|secret|otp|token)',
+    re.IGNORECASE,
+)
 ANDROID_API_LEVEL_MAP = {
     '1': '1.0',
     '2': '1.1',
@@ -114,7 +119,7 @@ def mobsfscan_format(results):
 
 
 def do_checks(xml_path, p):
-    """Run checks on android manifest and network security config."""
+    """Run checks on supported Android XML documents."""
     findings = []
     if p.get('manifest') and p.get('manifest').get('application'):
         # Android Manifest
@@ -146,7 +151,44 @@ def do_checks(xml_path, p):
         # Network Security Config
         nsc = NetworkSecurityChecks(findings, xml_path)
         nsc.network_security_checks(p)
+    else:
+        layout_sensitive_input_checks(findings, xml_path, p)
     return findings
+
+
+def layout_sensitive_input_checks(findings, xml_path, document):
+    """Find sensitive EditText controls that permit keyboard suggestions."""
+    def walk(node):
+        if isinstance(node, list):
+            for item in node:
+                yield from walk(item)
+            return
+        if not isinstance(node, dict):
+            return
+        for tag, child in node.items():
+            if isinstance(child, (dict, list)):
+                yield tag, child
+                yield from walk(child)
+
+    for tag, attrs in walk(document):
+        if not tag.lower().endswith('edittext') or not isinstance(attrs, dict):
+            continue
+        identity = ' '.join(str(attrs.get(name, '')) for name in (
+            '@android:id',
+            '@android:hint',
+            '@android:contentDescription',
+            '@android:autofillHints',
+        ))
+        if not SENSITIVE_INPUT_NAME.search(identity):
+            continue
+        input_type = str(attrs.get('@android:inputType', '')).lower()
+        if 'password' in input_type or 'nosuggestions' in input_type:
+            continue
+        add_finding(
+            findings,
+            xml_path,
+            'android_layout_sensitive_input_keyboard_cache',
+        )
 
 
 def add_finding(findings, xml_file, rule_id, dynamic=None):

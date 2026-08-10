@@ -319,6 +319,23 @@ metadata = {
                 'Communication.md'),
         },
     },
+    'android_layout_sensitive_input_keyboard_cache': {
+        'message': (
+            'A sensitive input field is configured without a password '
+            'input type or textNoSuggestions. Disable suggestions for '
+            'sensitive input to reduce exposure through keyboard learning '
+            'and suggestion history.'),
+        'severity': 'WARNING',
+        'reference': 'sensitive EditText without protected inputType',
+        'metadata': {
+            'cwe': 'cwe-524',
+            'owasp-mobile': 'm1',
+            'masvs': 'storage-5',
+            'reference': (
+                'https://mas.owasp.org/MASTG/tests/android/'
+                'MASVS-STORAGE/MASTG-TEST-0005/'),
+        },
+    },
     # iOS App Transport Security (Info.plist)
     'ios_ats_arbitrary_loads': {
         'message': (

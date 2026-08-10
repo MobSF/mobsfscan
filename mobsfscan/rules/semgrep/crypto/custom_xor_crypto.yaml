@@ -1,0 +1,29 @@
+# Security concept informed by:
+# https://github.com/mindedsecurity/semgrep-rules-android-security
+rules:
+  - id: android_custom_xor_crypto
+    patterns:
+      - pattern-inside: |
+          $RET $METHOD(...) {
+            ...
+          }
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: (?i).*(?:encrypt|decrypt|crypt).*
+      - pattern-either:
+          - pattern: $LEFT ^ $RIGHT
+          - pattern: $VALUE ^= $KEY
+    message: >-
+      A cryptography-named method uses XOR directly. Custom cryptographic
+      schemes are difficult to validate and commonly fail to provide
+      confidentiality or integrity. Use a standard authenticated-encryption
+      construction from a supported cryptographic provider.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-2
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-CRYPTO/MASTG-TEST-0013/

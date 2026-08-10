@@ -1,0 +1,27 @@
+# Security concept informed by:
+# https://github.com/mindedsecurity/semgrep-rules-android-security
+rules:
+  - id: android_sensitive_notification
+    patterns:
+      - pattern-either:
+          - pattern: $BUILDER.setContentText($DATA)
+          - pattern: $BUILDER.setContentTitle($DATA)
+          - pattern: $BUILDER.setSubText($DATA)
+          - pattern: $BUILDER.setTicker($DATA)
+      - metavariable-regex:
+          metavariable: $DATA
+          regex: >-
+            (?i).*(?:password|passcode|pin|secret|otp|token|auth(?:entication)?code).*
+    message: >-
+      Secret-like data is displayed in a notification. Notifications can
+      expose content on the lock screen or to notification listeners. Avoid
+      placing credentials, one-time codes, tokens, or other secrets in them.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-200
+      owasp-mobile: m1
+      masvs: storage-7
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-STORAGE/MASTG-TEST-0010/

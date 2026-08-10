@@ -362,3 +362,77 @@
     cwe: cwe-798
     owasp-mobile: m9
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#storing-a-key---example
+- id: android_kotlin_insecure_tls_version
+  message: >-
+    TLS 1.0 and TLS 1.1 are deprecated and have known weaknesses. Use TLS 1.2
+    or TLS 1.3 and avoid explicitly enabling older protocol versions.
+  type: RegexOr
+  pattern:
+    - 'SSLContext\.getInstance\(\s*"TLSv1(?:\.0|\.1)?"'
+    - 'setEnabledProtocols\([^)]{0,512}"TLSv1(?:\.0|\.1)?"'
+  input_case: exact
+  severity: ERROR
+  metadata:
+    cwe: cwe-326
+    owasp-mobile: m5
+    masvs: network-2
+    reference: https://mas.owasp.org/MASTG/tests/android/MASVS-NETWORK/MASTG-TEST-0020/
+- id: android_kotlin_weak_tls_cipher_suite
+  message: >-
+    The explicitly enabled TLS cipher suites include a null, anonymous,
+    export-grade, RC4, DES/3DES, or MD5-based suite.
+  type: Regex
+  pattern: >-
+    (?i)setEnabledCipherSuites\([^)]{0,512}(?:_NULL_|_ANON_|_EXPORT_|_RC4_|_DES_|3DES|_MD5)
+  input_case: exact
+  severity: ERROR
+  metadata:
+    cwe: cwe-327
+    owasp-mobile: m5
+    masvs: network-2
+    reference: https://mas.owasp.org/MASTG/tests/android/MASVS-NETWORK/MASTG-TEST-0020/
+- id: android_kotlin_sensitive_input_keyboard_cache
+  message: >-
+    A sensitive input field is configured without a password variation or
+    TYPE_TEXT_FLAG_NO_SUGGESTIONS. Disable suggestions for sensitive input.
+  type: RegexOr
+  pattern:
+    - >-
+      (?i)(?:password|passcode|pin|secret|otp|token)\w*\.setInputType\((?![^)]*(?:TYPE_TEXT_VARIATION_PASSWORD|TYPE_TEXT_VARIATION_VISIBLE_PASSWORD|TYPE_NUMBER_VARIATION_PASSWORD|TYPE_TEXT_FLAG_NO_SUGGESTIONS))[^)]*\)
+    - >-
+      (?i)(?:password|passcode|pin|secret|otp|token)\w*\.inputType\s*=\s*(?![^\n]*(?:TYPE_TEXT_VARIATION_PASSWORD|TYPE_TEXT_VARIATION_VISIBLE_PASSWORD|TYPE_NUMBER_VARIATION_PASSWORD|TYPE_TEXT_FLAG_NO_SUGGESTIONS))[^\n]+
+  input_case: exact
+  severity: WARNING
+  metadata:
+    cwe: cwe-524
+    owasp-mobile: m1
+    masvs: storage-5
+    reference: https://mas.owasp.org/MASTG/tests/android/MASVS-STORAGE/MASTG-TEST-0005/
+- id: android_kotlin_custom_xor_crypto
+  message: >-
+    A cryptography-named function uses XOR directly. Use a standard
+    authenticated-encryption construction instead of custom cryptography.
+  type: Regex
+  pattern: >-
+    (?i)fun\s+\w*(?:encrypt|decrypt|crypt)\w*\s*\([^)]*\)[^\n]{0,512}(?:\s+xor\s+|\.xor\()
+  input_case: exact
+  severity: WARNING
+  metadata:
+    cwe: cwe-327
+    owasp-mobile: m5
+    masvs: crypto-2
+    reference: https://mas.owasp.org/MASTG/tests/android/MASVS-CRYPTO/MASTG-TEST-0013/
+- id: android_kotlin_sensitive_notification
+  message: >-
+    Secret-like data is displayed in a notification and may be exposed on the
+    lock screen or to notification listeners.
+  type: Regex
+  pattern: >-
+    (?i)\.set(?:ContentText|ContentTitle|SubText|Ticker)\(\s*\w*(?:password|passcode|pin|secret|otp|token|auth(?:entication)?code)\w*
+  input_case: exact
+  severity: WARNING
+  metadata:
+    cwe: cwe-200
+    owasp-mobile: m1
+    masvs: storage-7
+    reference: https://mas.owasp.org/MASTG/tests/android/MASVS-STORAGE/MASTG-TEST-0010/

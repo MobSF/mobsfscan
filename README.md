@@ -223,6 +223,7 @@ A `.mobsf` file in the root of the source code directory allows you to configure
 ```
 
 `severity-overrides` changes the reported severity for specific rule IDs (`INFO`, `WARNING`, or `ERROR`). Overrides are applied before `severity-filter` and affect CLI output, exit codes, and report formats (SARIF, SonarQube, GitLab SAST).
+
 ## Suppress Findings
 
 You can suppress findings from source files by adding the comment `// mobsf-ignore: rule_id1, rule_id2` on the line that triggers the finding. Only that match is suppressed; other matches of the same rule in the file still report.
@@ -254,8 +255,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4.2.2
-    - uses: actions/setup-python@v5.3.0
+    - uses: actions/checkout@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: '3.12'
     - name: mobsfscan
@@ -280,10 +281,14 @@ jobs:
   mobsfscan:
     runs-on: ubuntu-latest
     name: mobsfscan code scanning
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
     steps:
     - name: Checkout the code
-      uses: actions/checkout@v4.2.2
-    - uses: actions/setup-python@v5.3.0
+      uses: actions/checkout@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: '3.12'
     - name: mobsfscan
@@ -291,7 +296,7 @@ jobs:
       with:
         args: '. --sarif --output results.sarif || true'
     - name: Upload mobsfscan report
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v4
       with:
         sarif_file: results.sarif
 ```
@@ -356,7 +361,7 @@ version: 2.1
 jobs:
   mobsfscan:
     docker:
-      - image: cimg/python:3.9.6
+      - image: cimg/python:3.12
     steps:
       - checkout
       - run:
