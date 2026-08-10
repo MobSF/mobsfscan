@@ -5,7 +5,7 @@ Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82
 
 [![PyPI version](https://badge.fury.io/py/mobsfscan.svg)](https://badge.fury.io/py/mobsfscan)
 [![License](https://img.shields.io/:license-lgpl3.0+-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
-[![python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://www.python.org/downloads/)
 [![platform](https://img.shields.io/badge/platform-osx%2Flinux-green.svg)](https://github.com/MobSF/mobsfscan/)
 [![Build](https://github.com/MobSF/mobsfscan/workflows/Build/badge.svg)](https://github.com/MobSF/mobsfscan/actions?query=workflow%3ABuild)
 
@@ -25,7 +25,7 @@ If you liked mobsfscan and find it useful, please consider donating.
 
 `pip install mobsfscan`
 
-Requires Python 3.10+
+Requires Python 3.10–3.14
 
 ## Command Line Options
 
@@ -327,7 +327,7 @@ version: 2.1
 jobs:
   mobsfscan:
     docker:
-      - image: cimg/python:3.10
+      - image: cimg/python:3.9.6
     steps:
       - checkout
       - run:
