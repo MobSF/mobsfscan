@@ -1,7 +1,8 @@
 # -*- coding: utf_8 -*-
 """SonarQube generic issue format (SonarQube 10.3+).
 
-See: https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/importing-external-issues/generic-issue-import-format
+See:
+https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/importing-external-issues/generic-issue-import-format
 """
 import json
 
@@ -108,7 +109,7 @@ def build_issue(rule_id, issue_dict):
 
 
 def sonarqube_output(outfile, scan_results, version):
-    """SonarQube generic issues JSON (rules + issues)."""
+    """Return SonarQube generic issues JSON (rules + issues)."""
     del version  # kept for CLI signature compatibility
     rules = []
     issues = []

@@ -1,12 +1,13 @@
 # -*- coding: utf_8 -*-
 """Tests for SARIF rule naming and dashboard metadata."""
+import json
+
 from mobsfscan.formatters.sarif import (
     build_tags,
     format_rule_name,
     sarif_output,
     security_severity_score,
 )
-import json
 
 
 def test_format_rule_name_uses_description_and_cwe():

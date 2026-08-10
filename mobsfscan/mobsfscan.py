@@ -40,6 +40,7 @@ class MobSFScan:
             'ignore_paths': self.conf['ignore_paths'],
             'ignore_rules': self.conf['ignore_rules'],
             'severity_filter': self.conf['severity_filter'],
+            'severity_overrides': self.conf['severity_overrides'],
             'show_progress': not json,
             'multiprocessing': mp,
         }
@@ -132,6 +133,7 @@ class MobSFScan:
         self.format_pattern(results.get('xml_checks'))
         self.missing_controls()
         self.post_ignore_rules()
+        self.post_override_severities()
         self.post_ignore_rules_by_severity()
         self.post_ignore_files()
         self.deduplicate_files()
@@ -220,6 +222,20 @@ class MobSFScan:
         for rule_id in self.options['ignore_rules']:
             if rule_id in self.result['results']:
                 del self.result['results'][rule_id]
+
+    def post_override_severities(self):
+        """Override finding severities from .mobsf severity-overrides."""
+        overrides = self.options.get('severity_overrides') or {}
+        if not overrides:
+            return
+        for rule_id, severity in overrides.items():
+            details = self.result['results'].get(rule_id)
+            if not details:
+                continue
+            meta = details.get('metadata')
+            if not isinstance(meta, dict):
+                continue
+            meta['severity'] = severity
 
     def post_ignore_rules_by_severity(self):
         """Filter findings by rule severity."""

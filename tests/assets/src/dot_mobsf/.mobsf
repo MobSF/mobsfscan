@@ -17,3 +17,7 @@
   - android_safetynet
   - android_ssl_pinning
   - android_tapjacking
+
+  severity-overrides:
+    default_http_client_tls: ERROR
+    android_kotlin_hiddenui: INFO

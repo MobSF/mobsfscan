@@ -21,6 +21,31 @@ def filter_none(user_list):
     return list(filter(lambda item: item is not None, user_list))
 
 
+VALID_SEVERITIES = {'INFO', 'WARNING', 'ERROR'}
+
+
+def normalize_severity_overrides(raw):
+    """Parse severity-overrides map; return {rule_id: SEVERITY}."""
+    if not raw or not isinstance(raw, dict):
+        return {}
+    overrides = {}
+    for rule_id, severity in raw.items():
+        if rule_id is None or severity is None:
+            continue
+        rid = str(rule_id).strip()
+        sev = str(severity).strip().upper()
+        if not rid:
+            continue
+        if sev not in VALID_SEVERITIES:
+            logger.warning(
+                'Invalid severity `%s` for rule `%s` in '
+                'severity-overrides. Use INFO, WARNING, or ERROR.',
+                severity, rid)
+            continue
+        overrides[rid] = sev
+    return overrides
+
+
 def get_config(base_path, config_file):
     options = {
         'ignore_filenames': config.IGNORE_FILENAMES,
@@ -28,6 +53,7 @@ def get_config(base_path, config_file):
         'ignore_paths': config.IGNORE_PATHS,
         'ignore_rules': set(),
         'severity_filter': config.SEVERITY_FILTER,
+        'severity_overrides': {},
     }
     if config_file:
         cfile = Path(config_file)
@@ -43,6 +69,8 @@ def get_config(base_path, config_file):
         usr_igonre_paths = filter_none(root.get('ignore-paths'))
         usr_ignore_rules = filter_none(root.get('ignore-rules'))
         usr_severity_filter = filter_none(root.get('severity-filter'))
+        usr_severity_overrides = normalize_severity_overrides(
+            root.get('severity-overrides'))
         if usr_ignore_files:
             options['ignore_filenames'].update(usr_ignore_files)
         if usr_igonre_paths:
@@ -51,6 +79,8 @@ def get_config(base_path, config_file):
             options['ignore_rules'].update(usr_ignore_rules)
         if usr_severity_filter:
             options['severity_filter'] = usr_severity_filter
+        if usr_severity_overrides:
+            options['severity_overrides'] = usr_severity_overrides
     return options
 
 
@@ -64,9 +94,19 @@ def validate_config(extras, options):
         root = extras[0]
     valid = True
     for key, value in root.items():
-        if key.replace('-', '_') not in options.keys():
+        opt_key = key.replace('-', '_')
+        if opt_key not in options.keys():
             valid = False
             logger.warning('The config `%s` is not supported.', key)
+            continue
+        if opt_key == 'severity_overrides':
+            if not isinstance(value, dict):
+                valid = False
+                logger.warning(
+                    'The value `%s` for the config `%s` is invalid.'
+                    ' Only a mapping of rule_id: severity is supported.',
+                    value, key)
+            continue
         if not isinstance(value, list):
             valid = False
             logger.warning('The value `%s` for the config `%s` is invalid.'
