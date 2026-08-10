@@ -249,51 +249,49 @@ class MobSFScan:
                 del self.result['results'][rid]
 
     def suppress_pm_comments(self, obj, rule_id):
-        """Suppress pattern matcher."""
-        file_path = obj['file_path']
-        lines = obj['match_lines']
-        if lines[0] != lines[1]:
-            # Skip multiline for now
+        """Return True if this match has a mobsf-ignore for rule_id."""
+        file_path = obj.get('file_path')
+        lines = obj.get('match_lines') or (0, 0)
+        start, end = int(lines[0]), int(lines[1])
+        if start <= 0:
             return False
-        match_line = getline(file_path, lines[0])
-        if 'mobsf-ignore:' in match_line and rule_id in match_line:
-            return True
+        if end < start:
+            end = start
+        # Check every line in the reported span (covers libsast
+        # off-by-one when a match starts at column 0).
+        for lineno in range(start, end + 1):
+            match_line = getline(file_path, lineno)
+            if self._line_ignores_rule(match_line, rule_id):
+                return True
         return False
 
-    def remove_matches(self, file, files):
-        """Remove all matches in the file for the rule."""
-        new_files = []
-        lines = []
-        for af in files:
-            # Collect all match lines for the rule in the file
-            if file['file_path'] == af['file_path']:
-                lines.append(af['match_lines'])
-        # Add all files except the file with matching lines
-        for af in files:
-            if af['match_lines'] not in lines:
-                new_files.append(af)
-            elif af['file_path'] != file['file_path']:
-                new_files.append(af)
-        return new_files
+    @staticmethod
+    def _line_ignores_rule(match_line, rule_id):
+        """Parse // mobsf-ignore: id1, id2 on a source line."""
+        if not match_line or 'mobsf-ignore:' not in match_line:
+            return False
+        marker = match_line.split('mobsf-ignore:', 1)[1]
+        # Stop at end of line comment content; split rule ids
+        ids = []
+        for part in marker.replace(',', ' ').split():
+            token = part.strip().strip(',')
+            if token:
+                ids.append(token)
+        return rule_id in ids
 
     def post_ignore_files(self):
-        """Ignore file by rule."""
+        """Drop individual matches suppressed by mobsf-ignore comments."""
         del_keys = set()
         for rule_id, details in self.result['results'].items():
             files = details.get('files')
             if not files:
                 continue
-            tmp_files = files
-            for file in files:
-                # check if ignore comment is present for
-                # any matches in the file for the rule
-                if self.suppress_pm_comments(file, rule_id):
-                    # remove all matches of the file for the rule
-                    tmp_files = self.remove_matches(file, files)
-                if len(tmp_files) == 0:
-                    del_keys.add(rule_id)
-            details['files'] = tmp_files
-        # Remove Rule IDs marked for deletion.
+            kept = [
+                match for match in files
+                if not self.suppress_pm_comments(match, rule_id)
+            ]
+            details['files'] = kept
+            if not kept:
+                del_keys.add(rule_id)
         for rid in del_keys:
-            if rid in self.result['results']:
-                del self.result['results'][rid]
+            self.result['results'].pop(rid, None)

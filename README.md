@@ -225,7 +225,7 @@ A `.mobsf` file in the root of the source code directory allows you to configure
 `severity-overrides` changes the reported severity for specific rule IDs (`INFO`, `WARNING`, or `ERROR`). Overrides are applied before `severity-filter` and affect CLI output, exit codes, and report formats (SARIF, SonarQube, GitLab SAST).
 ## Suppress Findings
 
-You can suppress findings from source files by adding the comment `// mobsf-ignore: rule_id1, rule_id2` to the line that trigger the findings.
+You can suppress findings from source files by adding the comment `// mobsf-ignore: rule_id1, rule_id2` on the line that triggers the finding. Only that match is suppressed; other matches of the same rule in the file still report.
 
 Example:
 
