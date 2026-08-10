@@ -31,8 +31,9 @@ Requires Python 3.10–3.14
 
 ```bash
 $ mobsfscan
-usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--html] [--type {android,ios,auto}]
-                 [-o OUTPUT] [-c CONFIG] [-mp {default,billiard,thread}] [-w] [--no-fail] [-v]
+usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--gitlab-sast] [--html]
+                 [--type {android,ios,auto}] [-o OUTPUT] [-c CONFIG]
+                 [-mp {default,billiard,thread}] [-w] [--no-fail] [-v]
                  [path ...]
 
 positional arguments:
@@ -43,6 +44,7 @@ options:
   --json                set output format as JSON
   --sarif               set output format as SARIF 2.1.0
   --sonarqube           set output format compatible with SonarQube
+  --gitlab-sast         set output format as GitLab SAST report
   --html                set output format as HTML
   --type {android,ios,auto}
                         optional: force android or ios rules explicitly
@@ -295,15 +297,27 @@ Add the following to the file `.gitlab-ci.yml`.
 
 ```yaml
 stages:
-    - test
+  - test
+
 mobsfscan:
-    image: python
-    before_script:
-        - pip3 install --upgrade mobsfscan
-    script:
-        - mobsfscan .
+  image: python:3.12
+  stage: test
+  before_script:
+    - pip3 install --upgrade mobsfscan
+  script:
+    - mobsfscan . --gitlab-sast -o gl-sast-report.json
+  artifacts:
+    reports:
+      sast: gl-sast-report.json
 ```
-Example: 
+
+Example command (local):
+
+```bash
+mobsfscan . --gitlab-sast -o gl-sast-report.json
+```
+
+This writes a native [GitLab SAST report](https://docs.gitlab.com/user/application_security/sast/) so findings appear in the Vulnerability Report / MR security widget without a SARIF converter.
 
 
 #### Travis CI

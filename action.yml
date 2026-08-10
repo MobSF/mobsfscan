@@ -16,6 +16,7 @@ inputs:
         --json                set output format as JSON
         --sarif               set output format as SARIF 2.1.0
         --sonarqube           set output format compatible with SonarQube
+        --gitlab-sast         set output format as GitLab SAST report
         --html                set output format as HTML
         --type {android,ios,auto}
                               optional: force android or ios rules explicitly
