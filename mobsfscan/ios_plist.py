@@ -4,6 +4,7 @@ from plistlib import load
 
 from mobsfscan.logger import init_logger
 from mobsfscan.manifest import add_finding, mobsfscan_format
+from mobsfscan.utils import report_path
 
 
 logger = init_logger(__name__)
@@ -35,7 +36,7 @@ def scan_plists(plist_paths, validate_func):
             continue
         findings.extend(
             check_transport_security(
-                plist_path.resolve().as_posix(),
+                report_path(plist_path),
                 plist,
             ),
         )

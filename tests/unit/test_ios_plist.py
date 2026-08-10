@@ -27,6 +27,11 @@ def test_ats_info_plist_scan():
     insecure = res['results']['ios_ats_insecure_http_loads']
     assert 'insecure.example' in insecure['metadata']['description']
     assert 'localhost' not in insecure['metadata']['description']
+    # Same path normalization as XML (#109): prefer cwd-relative paths.
+    files = insecure.get('files') or []
+    assert files
+    assert files[0]['file_path'].endswith('Info.plist')
+    assert not Path(files[0]['file_path']).is_absolute()
 
 
 def test_ats_safe_plist_has_no_findings():

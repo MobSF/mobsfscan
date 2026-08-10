@@ -14,6 +14,7 @@ from mobsfscan.logger import init_logger
 from mobsfscan.manifest_metadata import metadata
 from mobsfscan.utils import (
     is_number,
+    report_path,
     valid_host,
 )
 
@@ -80,7 +81,7 @@ def scan_manifest(xml_paths, validate_func):
             logger.warning('Failed to parse XML: %s', xml_path)
         if p:
             findings = do_checks(
-                xml_path.resolve().as_posix(), p)
+                report_path(xml_path), p)
             if findings:
                 results.extend(findings)
     return mobsfscan_format(results)

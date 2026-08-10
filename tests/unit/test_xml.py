@@ -31,3 +31,5 @@ def test_sensitive_layout_input_keyboard_cache():
     files = [item['file_path'] for item in finding['files']]
     assert len(files) == 1
     assert files[0].endswith('unsafe_login.xml')
+    # #109: XML findings should prefer cwd-relative paths (like source).
+    assert not Path(files[0]).is_absolute()

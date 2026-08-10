@@ -14,6 +14,19 @@ import yaml
 logger = init_logger(__name__)
 
 
+def report_path(path):
+    """Prefer cwd-relative POSIX paths in findings (matches Semgrep/source).
+
+    Absolute paths cause duplicate findings in ASOC/VM tools when the same
+    project is scanned from different working directories (#109).
+    """
+    p = Path(path)
+    try:
+        return p.resolve().relative_to(Path.cwd().resolve()).as_posix()
+    except (ValueError, OSError):
+        return p.as_posix()
+
+
 def filter_none(user_list):
     """Filter and remove None values from user supplied config."""
     if not user_list:
