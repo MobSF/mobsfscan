@@ -40,10 +40,11 @@ def security_severity_score(metadata=None):
     if cvss is not None:
         try:
             score = float(cvss)
-            if 0.1 <= score <= 10.0:
-                return f'{score:.1f}'
         except (TypeError, ValueError):
-            pass
+            # Non-numeric CVSS in rule metadata; use severity map below.
+            score = None
+        if score is not None and 0.1 <= score <= 10.0:
+            return f'{score:.1f}'
     return {
         'ERROR': '9.0',
         'WARNING': '5.5',
