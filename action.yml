@@ -15,7 +15,7 @@ inputs:
         -h, --help            show this help message and exit
         --json                set output format as JSON
         --sarif               set output format as SARIF 2.1.0
-        --sonarqube           set output format compatible with SonarQube
+        --sonarqube           set output format as SonarQube generic issues (10.3+)
         --gitlab-sast         set output format as GitLab SAST report
         --html                set output format as HTML
         --type {android,ios,auto}

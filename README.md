@@ -43,7 +43,7 @@ options:
   -h, --help            show this help message and exit
   --json                set output format as JSON
   --sarif               set output format as SARIF 2.1.0
-  --sonarqube           set output format compatible with SonarQube
+  --sonarqube           set output format as SonarQube generic issues (10.3+)
   --gitlab-sast         set output format as GitLab SAST report
   --html                set output format as HTML
   --type {android,ios,auto}
@@ -319,6 +319,15 @@ mobsfscan . --gitlab-sast -o gl-sast-report.json
 
 This writes a native [GitLab SAST report](https://docs.gitlab.com/user/application_security/sast/) so findings appear in the Vulnerability Report / MR security widget without a SARIF converter.
 
+#### SonarQube / SonarCloud
+
+`--sonarqube` writes the [generic issue format](https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/importing-external-issues/generic-issue-import-format) (SonarQube 10.3+ / SonarCloud), with separate `rules` and `issues` arrays:
+
+```bash
+mobsfscan . --sonarqube -o mobsfscan-sonar.json
+```
+
+Import with `sonar.externalIssuesReportPaths=mobsfscan-sonar.json`.
 
 #### Travis CI
 

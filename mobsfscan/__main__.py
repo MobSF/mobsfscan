@@ -43,7 +43,8 @@ def main():
                         help='set output format as SARIF 2.1.0',
                         action='store_true')
     parser.add_argument('--sonarqube',
-                        help='set output format compatible with SonarQube',
+                        help=('set output format as SonarQube generic '
+                              'issues (10.3+)'),
                         action='store_true')
     parser.add_argument('--gitlab-sast',
                         help='set output format as GitLab SAST report',
