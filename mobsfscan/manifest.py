@@ -249,7 +249,8 @@ class NetworkSecurityChecks:
 
     def cert_instance_check(self, config, typ):
         """Check for cert instance."""
-        certs = config.get('trust-anchors').get('certificates')
+        trust_anchors = config.get('trust-anchors') or {}
+        certs = trust_anchors.get('certificates')
         if isinstance(certs, dict):
             # Single cert instance
             self.trust_cert_and_cert_pinning_bypass(
@@ -260,35 +261,43 @@ class NetworkSecurityChecks:
                 self.trust_cert_and_cert_pinning_bypass(
                     cert, typ)
 
+    def _as_config_list(self, conf):
+        """xmltodict: one node -> dict, many siblings -> list."""
+        if not conf:
+            return []
+        if isinstance(conf, list):
+            return conf
+        return [conf]
+
+    def _check_domain_config(self, domain_conf):
+        """Check one domain-config (and nested domain-config children)."""
+        if not isinstance(domain_conf, dict):
+            return
+        typ = 'domain'
+        self.clear_text_traffic_permitted(domain_conf, typ)
+        for nested in self._as_config_list(domain_conf.get('domain-config')):
+            self._check_domain_config(nested)
+        trust_anchors = domain_conf.get('trust-anchors')
+        if trust_anchors and trust_anchors.get('certificates'):
+            self.cert_instance_check(domain_conf, typ)
+
     def network_security_checks(self, parsed_xml):
         """Android Network Security Config checks."""
+        nsc = parsed_xml.get('network-security-config') or {}
         # Base Config
-        if parsed_xml.get('network-security-config').get('base-config'):
+        if nsc.get('base-config'):
             typ = 'base'
-            base_conf = parsed_xml.get(
-                'network-security-config').get('base-config')
-            # Clear text traffic
-            self.clear_text_traffic_permitted(base_conf, typ)
-            if (base_conf.get('trust-anchors')
-                    and base_conf.get('trust-anchors').get('certificates')):
-                # Trust user certs
-                self.cert_instance_check(base_conf, typ)
+            base_conf = nsc.get('base-config')
+            if isinstance(base_conf, dict):
+                # Clear text traffic
+                self.clear_text_traffic_permitted(base_conf, typ)
+                trust_anchors = base_conf.get('trust-anchors')
+                if trust_anchors and trust_anchors.get('certificates'):
+                    self.cert_instance_check(base_conf, typ)
 
-        # Domain config
-        if parsed_xml.get('network-security-config').get('domain-config'):
-            typ = 'domain'
-            domain_conf = parsed_xml.get(
-                'network-security-config').get('domain-config')
-            # Domain config clear text
-            self.clear_text_traffic_permitted(domain_conf, typ)
-            if domain_conf.get('domain-config'):
-                # Nested domain config clear text
-                self.clear_text_traffic_permitted(
-                    domain_conf.get('domain-config'), typ)
-            if (domain_conf.get('trust-anchors')
-                    and domain_conf.get('trust-anchors').get('certificates')):
-                # Trust user certs
-                self.cert_instance_check(domain_conf, typ)
+        # Domain config (one or many sibling blocks — see #87)
+        for domain_conf in self._as_config_list(nsc.get('domain-config')):
+            self._check_domain_config(domain_conf)
 
 
 class AppLinksCheck:
