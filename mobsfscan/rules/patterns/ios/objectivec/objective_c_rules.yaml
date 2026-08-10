@@ -3,7 +3,8 @@
     passwords, keys etc.
   input_case: lower
   # Avoid matching UserDefaults/lookup names ending in Key (e.g. languageKey); see #111.
-  pattern: (password\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|(pass\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|(username\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|(secret\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|((?<![a-z0-9_])key|(?:api|secret|private|access|encryption|auth)_?key)\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5}
+  # Allow long literals (hex keys/PEMs); .{1,100} caused false negatives (#88).
+  pattern: (password\s*=\s*[\'|\"].{1,8192}[\'|\"]\s{0,5})|(pass\s*=\s*[\'|\"].{1,8192}[\'|\"]\s{0,5})|(username\s*=\s*[\'|\"].{1,8192}[\'|\"]\s{0,5})|(secret\s*=\s*[\'|\"].{1,8192}[\'|\"]\s{0,5})|((?<![a-z0-9_])key|(?:api|secret|private|access|encryption|auth)_?key)\s*=\s*[\'|\"].{1,8192}[\'|\"]\s{0,5}
   severity: WARNING
   type: Regex
   metadata:

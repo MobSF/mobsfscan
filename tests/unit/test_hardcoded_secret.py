@@ -1,5 +1,5 @@
 # -*- coding: utf_8 -*-
-"""Tests for ios_hardcoded_secret false-positive tuning (#111)."""
+"""Tests for hardcoded secret rules (#88, #111)."""
 from pathlib import Path
 
 from mobsfscan.mobsfscan import MobSFScan
@@ -24,3 +24,17 @@ def test_ios_hardcoded_secret_skips_lookup_key_names():
             or 'api_key' in m.lower()
             or 'secretkey' in m.lower().replace('_', ''))
         for m in matches)
+
+
+def test_kotlin_long_hardcoded_key_detected():
+    """Issue #88: values longer than 100 chars were false negatives."""
+    src = (
+        Path(__file__).resolve().parents[1]
+        / 'assets' / 'src' / 'kotlin_long_secret')
+    res = MobSFScan([str(src)], True, mp='thread').scan()
+    finding = res['results'].get('android_kotlin_hardcoded')
+    assert finding is not None
+    matches = finding.get('files') or []
+    assert matches
+    assert any('key =' in (m.get('match_string') or '').lower() for m in matches)
+    assert any(len(m.get('match_string') or '') > 100 for m in matches)
