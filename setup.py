@@ -30,7 +30,7 @@ setup(
     author='Ajin Abraham',
     author_email='ajin25@gmail.com',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         ('License :: OSI Approved :: GNU Lesser '
          'General Public License v3 or later (LGPLv3+)'),

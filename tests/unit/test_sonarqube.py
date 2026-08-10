@@ -2,6 +2,7 @@
 """Tests for SonarQube generic issue formatter (10.3+)."""
 import json
 
+from mobsfscan import __version__
 from mobsfscan.formatters.sonarqube import (
     IMPACT_SEVERITY_MAP,
     SEVERITY_MAP,
@@ -53,7 +54,7 @@ def test_sonarqube_new_format_shape():
             },
         },
     }
-    raw = sonarqube_output(None, scan_results, '0.4.6')
+    raw = sonarqube_output(None, scan_results, __version__)
     report = json.loads(raw)
 
     assert set(report.keys()) == {'rules', 'issues'}
@@ -100,5 +101,5 @@ def test_sonarqube_new_format_shape():
 
 
 def test_sonarqube_empty_results():
-    report = json.loads(sonarqube_output(None, {'results': {}}, '0.0.0'))
+    report = json.loads(sonarqube_output(None, {'results': {}}, __version__))
     assert report == {'rules': [], 'issues': []}

@@ -4,6 +4,7 @@ from .setup_test import (
     scanner,
 )
 
+from mobsfscan import __version__
 from mobsfscan.formatters import (
     json_fmt,
     sarif,
@@ -36,15 +37,15 @@ def test_patterns_and_semgrep():
 
 
 def json_output(res):
-    json_out = json_fmt.json_output(None, res, '0.0.0')
+    json_out = json_fmt.json_output(None, res, __version__)
     assert json_out is not None
 
 
 def sonar_output(res):
-    sonar_out = sonarqube.sonarqube_output(None, res, '0.0.0')
+    sonar_out = sonarqube.sonarqube_output(None, res, __version__)
     assert sonar_out is not None
 
 
 def sarif_output(res):
-    sarif_out = sarif.sarif_output(None, res, '0.0.0', '/tmp/')
+    sarif_out = sarif.sarif_output(None, res, __version__, '/tmp/')
     assert sarif_out is not None

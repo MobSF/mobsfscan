@@ -2,6 +2,7 @@
 """Tests for GitLab SAST report formatter."""
 import json
 
+from mobsfscan import __version__
 from mobsfscan.formatters.gitlab_sast import (
     SCHEMA_VERSION,
     gitlab_sast_output,
@@ -57,13 +58,13 @@ def test_gitlab_sast_report_shape(tmp_path):
         },
     }
     outfile = tmp_path / 'gl-sast-report.json'
-    gitlab_sast_output(str(outfile), scan_results, '0.4.6')
+    gitlab_sast_output(str(outfile), scan_results, __version__)
     report = json.loads(outfile.read_text())
 
     assert report['version'] == SCHEMA_VERSION
     assert report['scan']['type'] == 'sast'
     assert report['scan']['scanner']['id'] == 'mobsfscan'
-    assert report['scan']['scanner']['version'] == '0.4.6'
+    assert report['scan']['scanner']['version'] == __version__
     assert len(report['vulnerabilities']) == 2
 
     by_file = {v['location']['file']: v for v in report['vulnerabilities']}
@@ -97,7 +98,7 @@ def test_gitlab_sast_missing_control_location(tmp_path):
         },
     }
     outfile = tmp_path / 'gl-sast-report.json'
-    gitlab_sast_output(str(outfile), scan_results, '0.4.6')
+    gitlab_sast_output(str(outfile), scan_results, __version__)
     report = json.loads(outfile.read_text())
     vuln = report['vulnerabilities'][0]
     assert vuln['location']['file'] == '.'

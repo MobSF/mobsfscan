@@ -2,6 +2,7 @@
 """Tests for SARIF rule naming and dashboard metadata."""
 import json
 
+from mobsfscan import __version__
 from mobsfscan.formatters.sarif import (
     build_tags,
     format_rule_name,
@@ -64,10 +65,13 @@ def test_sarif_includes_dashboard_fields(tmp_path):
         },
     }
     outfile = tmp_path / 'out.sarif'
-    sarif_output(str(outfile), scan_results, '0.4.6', ['app'])
+    sarif_output(str(outfile), scan_results, __version__, ['app'])
     out = json.loads(outfile.read_text())
-    rule = out['runs'][0]['tool']['driver']['rules'][0]
+    driver = out['runs'][0]['tool']['driver']
+    rule = driver['rules'][0]
     result = out['runs'][0]['results'][0]
+    assert driver['version'] == __version__
+    assert driver['semanticVersion'] == __version__
 
     assert rule['id'] == 'ios_cert_pinning'
     assert rule['name'] == (
