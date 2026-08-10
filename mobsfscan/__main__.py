@@ -8,6 +8,7 @@ from mobsfscan import __version__
 from mobsfscan.mobsfscan import MobSFScan
 from mobsfscan.formatters import (
     cli,
+    gitlab_sast,
     json_fmt,
     sarif,
     sonarqube,
@@ -42,7 +43,11 @@ def main():
                         help='set output format as SARIF 2.1.0',
                         action='store_true')
     parser.add_argument('--sonarqube',
-                        help='set output format compatible with SonarQube',
+                        help=('set output format as SonarQube generic '
+                              'issues (10.3+)'),
+                        action='store_true')
+    parser.add_argument('--gitlab-sast',
+                        help='set output format as GitLab SAST report',
                         action='store_true')
     parser.add_argument('--html',
                         help='set output format as HTML',
@@ -78,7 +83,11 @@ def main():
                         action='store_true')
     args = parser.parse_args()
     if args.path:
-        is_json = args.json or args.sonarqube or args.sarif
+        is_json = (
+            args.json
+            or args.sonarqube
+            or args.sarif
+            or args.gitlab_sast)
         scan_results = MobSFScan(
             args.path,
             is_json,
@@ -88,6 +97,11 @@ def main():
         ).scan()
         if args.sonarqube:
             sonarqube.sonarqube_output(
+                args.output,
+                scan_results,
+                __version__)
+        elif args.gitlab_sast:
+            gitlab_sast.gitlab_sast_output(
                 args.output,
                 scan_results,
                 __version__)

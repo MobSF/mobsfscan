@@ -1,0 +1,27 @@
+# Security concept informed by:
+# https://github.com/mindedsecurity/semgrep-rules-android-security
+rules:
+  - id: android_sensitive_input_keyboard_cache
+    patterns:
+      - pattern: $FIELD.setInputType($INPUT_TYPE)
+      - metavariable-regex:
+          metavariable: $FIELD
+          regex: >-
+            (?i).*(?:password|passcode|pin|secret|otp|token).*
+      - metavariable-regex:
+          metavariable: $INPUT_TYPE
+          regex: >-
+            ^(?!.*(?:TYPE_TEXT_VARIATION_PASSWORD|TYPE_TEXT_VARIATION_VISIBLE_PASSWORD|TYPE_NUMBER_VARIATION_PASSWORD|TYPE_TEXT_FLAG_NO_SUGGESTIONS)).*$
+    message: >-
+      A sensitive input field is configured without a password variation or
+      TYPE_TEXT_FLAG_NO_SUGGESTIONS. Disable suggestions for sensitive input
+      to reduce exposure through keyboard learning and suggestion history.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-524
+      owasp-mobile: m1
+      masvs: storage-5
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-STORAGE/MASTG-TEST-0005/

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "579ae981222a3cb09de2a1607a025b6e4f72ae1e123d191ba100ac8ec12af599"
+            "sha256": "d63d1c7f14a3d770e2e657177df05da593dc770dec48e2542b85370a7d31f3df"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -467,12 +467,12 @@
         },
         "libsast": {
             "hashes": [
-                "sha256:191002e6e9a6b9f81206bec2bf3bdea5c57034459a9537c02748e66a64650db6",
-                "sha256:6321d6d00a72b39aa7fadc7053ae84bc24681ffe4f6925cc8b6b2bb7c0635ad7"
+                "sha256:67b2d968b6cc23c6a0694856f9bae5d2cd8ca21bbf45d9f9346fffbfba1f35c0",
+                "sha256:94dadd4a8aa2447c477b2de4f3b58c39d16412a10f2416bde998517d9656e934"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.10'",
-            "version": "==3.1.7"
+            "markers": "python_version >= '3.10' and python_version < '4.0'",
+            "version": "==3.1.8"
         },
         "markdown-it-py": {
             "hashes": [

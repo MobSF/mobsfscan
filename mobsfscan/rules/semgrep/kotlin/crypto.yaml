@@ -1,0 +1,330 @@
+rules:
+  - id: android_kotlin_insecure_random
+    patterns:
+      - pattern-either:
+          - pattern: |
+              java.util.Random(...)
+          - pattern: |
+              Random()
+    message: The App uses an insecure Random Number Generator.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-330
+      owasp-mobile: m5
+      masvs: crypto-6
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-random-number-generators
+  - id: android_kotlin_aes_ecb
+    patterns:
+      - pattern: |
+          Cipher.getInstance("=~/AES\/ECB.*/i")
+    message: >-
+      The App uses ECB mode in Cryptographic encryption algorithm. ECB mode is
+      known to be weak as it results in the same ciphertext for identical blocks
+      of plaintext.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode
+  - id: android_kotlin_aes_ecb_default
+    patterns:
+      - pattern: |
+          Cipher.getInstance("AES")
+    message: >-
+      Calling Cipher.getInstance("AES") will return AES ECB mode by default. ECB mode is
+      known to be weak as it results in the same ciphertext for identical blocks
+      of plaintext.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-block-cipher-mode
+  - id: cbc_kotlin_padding_oracle
+    patterns:
+      - pattern-either:
+          - pattern: |
+              Cipher.getInstance("=~/.*\/CBC\/PKCS5Padding.*/i")
+          - pattern: |
+              Cipher.getInstance("=~/.*\/CBC\/PKCS7Padding.*/i")
+    message: The App uses the encryption mode CBC with PKCS5/PKCS7 padding. This configuration is vulnerable to padding oracle attacks.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-649
+      owasp-mobile: m5
+      masvs: crypto-3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+  - id: android_kotlin_rsa_no_oaep
+    patterns:
+      - pattern: |
+          Cipher.getInstance("=~/rsa\/.{1,48}\/nopadding/i")
+    message: >-
+      This App uses RSA Crypto without OAEP padding. The purpose of the padding
+      scheme is to prevent a number of attacks on RSA that only work when the
+      encryption is performed without padding.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-780
+      owasp-mobile: m5
+      masvs: crypto-3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#mobile-app-cryptography
+  - id: android_kotlin_weak_hash
+    patterns:
+      - pattern: |
+          $D.getInstance("=~/MD4/i")
+    message: Weak Hash algorithm used. The hash algorithm is known to have hash collisions.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-4
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+  - id: android_kotlin_weak_ciphers
+    patterns:
+      - pattern-either:
+          - pattern: |
+              Cipher.getInstance("=~/(?i)(des|desede|rc2|rc4|blowfish).*/")
+    message: Weak Encryption algorithm used
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-4
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+  - id: android_kotlin_md5
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $D.getInstance("=~/MD5/i")
+          - pattern: |
+              DigestUtils.md5(...)
+    message: MD5 is a weak hash known to have hash collisions.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-4
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+  - id: android_kotlin_sha1
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $D.getInstance("=~/SHA-?1/i")
+          - pattern: |
+              DigestUtils.sha(...)
+    message: SHA-1 is a weak hash known to have hash collisions.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-4
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+  - id: android_kotlin_weak_iv
+    patterns:
+      - pattern-either:
+          - pattern-regex: '0x00\s*,\s*0x00\s*,\s*0x00\s*,\s*0x00\s*,\s*0x00\s*,\s*0x00\s*,\s*0x00\s*,\s*0x00'
+          - pattern-regex: '0x01\s*,\s*0x02\s*,\s*0x03\s*,\s*0x04\s*,\s*0x05\s*,\s*0x06\s*,\s*0x07'
+    message: >-
+      The App may use weak IVs like "0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00" or
+      "0x01,0x02,0x03,0x04,0x05,0x06,0x07". Not using a random IV makes the
+      resulting ciphertext much more predictable and susceptible to a dictionary
+      attack.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-1204
+      owasp-mobile: m5
+      masvs: crypto-5
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#mobile-app-cryptography
+  - id: android_kotlin_custom_xor_crypto
+    patterns:
+      - pattern-either:
+          - pattern: |
+              fun $N(...) = $A xor $B
+          - pattern: |
+              fun $N(...): $R = $A xor $B
+          - pattern: |
+              fun $N(...) {
+                ...
+                $A xor $B
+                ...
+              }
+          - pattern: |
+              fun $N(...) {
+                ...
+                $A.xor($B)
+                ...
+              }
+      - metavariable-regex:
+          metavariable: $N
+          regex: (?i).*(?:encrypt|decrypt|crypt).*
+    message: >-
+      A cryptography-named function uses XOR directly. Use a standard
+      authenticated-encryption construction instead of custom cryptography.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-2
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-CRYPTO/MASTG-TEST-0013/
+  - id: android_kotlin_aes_hardcoded_key
+    patterns:
+      - pattern-either:
+          - pattern: |
+              val $S = SecretKeySpec("...".toByteArray(), "AES")
+              ...
+              $C.init(..., $S)
+          - pattern: |
+              val $S = SecretKeySpec("...".getBytes(), "AES")
+              ...
+              $C.init(..., $S)
+          - pattern: |
+              val $P = "..."
+              ...
+              val $S = SecretKeySpec($P.toByteArray(), "AES")
+              ...
+              $C.init(..., $S)
+    message: >-
+      Hardcoded encryption key makes AES symmetric encryption useless. An
+      attacker can easily reverse engineer the application and recover the keys.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-321
+      owasp-mobile: m5
+      masvs: crypto-1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#common-configuration-issues-mstg-crypto-1-mstg-crypto-2-and-mstg-crypto-3
+  - id: android_kotlin_cbc_static_iv
+    patterns:
+      - pattern-either:
+          - pattern: |
+              val $X = "...".toByteArray()
+              ...
+              val $Y = IvParameterSpec($X, ...)
+              ...
+              Cipher.getInstance("=~/AES/CBC.*/i")
+          - pattern: |
+              val $X = "...".getBytes()
+              ...
+              val $Y = IvParameterSpec($X, ...)
+              ...
+              Cipher.getInstance("=~/AES/CBC.*/i")
+          - pattern: |
+              val $X = byteArrayOf(...)
+              ...
+              val $Y = IvParameterSpec($X, ...)
+              ...
+              Cipher.getInstance("=~/AES/CBC.*/i")
+    message: >-
+      The IV for AES CBC mode should be random. A static IV makes the ciphertext
+      vulnerable to Chosen Plaintext Attack.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-329
+      owasp-mobile: m5
+      masvs: crypto-5
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#predictable-initialization-vector
+  - id: android_kotlin_insecure_sslv3
+    patterns:
+      - pattern: |
+          SSLContext.getInstance("SSLv3")
+    message: SSLv3 is insecure and has multiple known vulnerabilities.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: crypto-4
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+  - id: android_kotlin_weak_key_size
+    patterns:
+      - pattern-either:
+          - pattern: |
+              val $K = KeyPairGenerator.getInstance("RSA")
+              ...
+              $K.initialize(1024)
+          - pattern: |
+              val $K = KeyPairGenerator.getInstance("RSA")
+              ...
+              $K.initialize(512)
+          - pattern: |
+              val $K = KeyPairGenerator.getInstance("EC")
+              ...
+              $K.initialize(ECGenParameterSpec("secp112r1"))
+          - pattern: |
+              val $K = KeyPairGenerator.getInstance("EC")
+              ...
+              val $S = ECGenParameterSpec("secp112r1")
+              ...
+              $K.initialize($S)
+          - pattern: |
+              val $K = KeyPairGenerator.getInstance("EC")
+              ...
+              $K.initialize(ECGenParameterSpec("secp224r1"))
+          - pattern: |
+              val $K = KeyPairGenerator.getInstance("EC")
+              ...
+              val $S = ECGenParameterSpec("secp224r1")
+              ...
+              $K.initialize($S)
+          - pattern: |
+              val $K = KeyGenerator.getInstance("Blowfish")
+              ...
+              $K.init(64)
+          - pattern: |
+              val $K = KeyGenerator.getInstance("AES")
+              ...
+              $K.init(64)
+    message: >-
+      Cryptographic implementations with insufficient key length is susceptible
+      to bruteforce attacks.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-326
+      owasp-mobile: m5
+      masvs: crypto-3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#common-configuration-issues-mstg-crypto-1-mstg-crypto-2-and-mstg-crypto-3
+

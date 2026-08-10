@@ -4,6 +4,7 @@ from .setup_test import (
     scanner,
 )
 
+from mobsfscan import __version__
 from mobsfscan.formatters import (
     json_fmt,
     sarif,
@@ -12,11 +13,17 @@ from mobsfscan.formatters import (
 
 
 EXPECTED = [
+    # Java missing controls (java_vuln has CT present → not listed)
     'android_safetynet_api',
     'android_prevent_screenshot',
     'android_certificate_pinning',
     'android_root_detection',
     'android_detect_tapjacking',
+    # Kotlin missing controls (mixed scan reports both dialects)
+    'android_safetynet',
+    'android_ssl_pinning',
+    'android_tapjacking',
+    # Code findings
     'android_kotlin_logging',
     'android_kotlin_hiddenui',
     'android_logging',
@@ -36,15 +43,15 @@ def test_patterns_and_semgrep():
 
 
 def json_output(res):
-    json_out = json_fmt.json_output(None, res, '0.0.0')
+    json_out = json_fmt.json_output(None, res, __version__)
     assert json_out is not None
 
 
 def sonar_output(res):
-    sonar_out = sonarqube.sonarqube_output(None, res, '0.0.0')
+    sonar_out = sonarqube.sonarqube_output(None, res, __version__)
     assert sonar_out is not None
 
 
 def sarif_output(res):
-    sarif_out = sarif.sarif_output(None, res, '0.0.0', '/tmp/')
+    sarif_out = sarif.sarif_output(None, res, __version__, '/tmp/')
     assert sarif_out is not None

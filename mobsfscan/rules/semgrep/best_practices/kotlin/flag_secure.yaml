@@ -1,0 +1,30 @@
+rules:
+  - id: android_prevent_screenshot
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $W.setFlags(WindowManager.LayoutParams.FLAG_SECURE, ...)
+          - pattern: |
+              $W.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+          - pattern: |
+              $W.addFlags(WindowManager.LayoutParams.FLAG_SECURE, ...)
+          - pattern: |
+              val $V = WindowManager.LayoutParams.FLAG_SECURE
+              ...
+              $W.setFlags($V, ...)
+          - pattern: |
+              val $V = WindowManager.LayoutParams.FLAG_SECURE
+              ...
+              $W.addFlags($V)
+    message: >-
+      This app does not have capabilities to prevent against Screenshots from Recent Task
+      History/ Now On Tap etc.
+    languages:
+      - kotlin
+    severity: INFO
+    metadata:
+      cwe: cwe-200
+      owasp-mobile: m2
+      masvs: storage-9
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#finding-sensitive-information-in-auto-generated-screenshots-mstg-storage-9

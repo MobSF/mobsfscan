@@ -1,0 +1,77 @@
+rules:
+  - id: android_kotlin_insecure_ssl
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $X.ALLOW_ALL_HOSTNAME_VERIFIER
+          - pattern: |
+              $X.setDefaultHostnameVerifier(...)
+          - pattern: |
+              NullHostnameVerifier(...)
+          - pattern: |
+              TrustAllSSLSocketFactory(...)
+          - pattern: |
+              AllTrustSSLSocketFactory(...)
+          - pattern: |
+              NonValidatingSSLSocketFactory(...)
+          - pattern: |
+              SSLCertificateSocketFactory(...)
+    message: >-
+      Insecure Implementation of SSL. Trusting all the certificates or accepting
+      self signed certificates is a critical Security Hole. This application is
+      vulnerable to MITM attacks
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-295
+      owasp-mobile: m3
+      masvs: network-3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#android-network-apis
+  - id: android_kotlin_insecure_tls_version
+    patterns:
+      - pattern-either:
+          - pattern: |
+              SSLContext.getInstance("TLSv1")
+          - pattern: |
+              SSLContext.getInstance("TLSv1.0")
+          - pattern: |
+              SSLContext.getInstance("TLSv1.1")
+          - pattern: |
+              $S.setEnabledProtocols(arrayOf(..., "TLSv1", ...))
+          - pattern: |
+              $S.setEnabledProtocols(arrayOf(..., "TLSv1.0", ...))
+          - pattern: |
+              $S.setEnabledProtocols(arrayOf(..., "TLSv1.1", ...))
+    message: >-
+      TLS 1.0 and TLS 1.1 are deprecated and have known weaknesses. Use TLS 1.2
+      or TLS 1.3 and avoid explicitly enabling older protocol versions.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-326
+      owasp-mobile: m5
+      masvs: network-2
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-NETWORK/MASTG-TEST-0020/
+  - id: android_kotlin_weak_tls_cipher_suite
+    patterns:
+      - pattern: |
+          $S.setEnabledCipherSuites($A)
+      - metavariable-regex:
+          metavariable: $A
+          regex: (?i).*(?:_NULL_|_ANON_|_EXPORT_|_RC4_|_DES_|3DES|_MD5).*
+    message: >-
+      The explicitly enabled TLS cipher suites include a null, anonymous,
+      export-grade, RC4, DES/3DES, or MD5-based suite.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: network-2
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-NETWORK/MASTG-TEST-0020/

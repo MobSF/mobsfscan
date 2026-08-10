@@ -8,9 +8,6 @@ BASE_DIR = Path(__file__).resolve().parent
 SGREP_RULES_DIR = (
     BASE_DIR / 'rules' / 'semgrep'
 )
-ANDROID_RULES_DIR = (
-    BASE_DIR / 'rules' / 'patterns' / 'android'
-)
 IOS_RULES_DIR = (
     BASE_DIR / 'rules' / 'patterns' / 'ios'
 )

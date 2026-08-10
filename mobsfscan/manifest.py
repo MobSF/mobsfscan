@@ -1,5 +1,6 @@
 # -*- coding: utf_8 -*-
-"""Parse Android Manifest and NSC."""
+"""Parse Android manifest, network security config, and resource XML."""
+import re
 from operator import itemgetter
 from copy import deepcopy
 
@@ -13,6 +14,7 @@ from mobsfscan.logger import init_logger
 from mobsfscan.manifest_metadata import metadata
 from mobsfscan.utils import (
     is_number,
+    report_path,
     valid_host,
 )
 
@@ -20,6 +22,10 @@ logger = init_logger(__name__)
 ANDROID_8_0_LEVEL = 26
 ANDROID_9_0_LEVEL = 28
 ANDROID_10_0_LEVEL = 29
+SENSITIVE_INPUT_NAME = re.compile(
+    r'(?:password|passcode|pin|secret|otp|token)',
+    re.IGNORECASE,
+)
 ANDROID_API_LEVEL_MAP = {
     '1': '1.0',
     '2': '1.1',
@@ -75,7 +81,7 @@ def scan_manifest(xml_paths, validate_func):
             logger.warning('Failed to parse XML: %s', xml_path)
         if p:
             findings = do_checks(
-                xml_path.resolve().as_posix(), p)
+                report_path(xml_path), p)
             if findings:
                 results.extend(findings)
     return mobsfscan_format(results)
@@ -114,7 +120,7 @@ def mobsfscan_format(results):
 
 
 def do_checks(xml_path, p):
-    """Run checks on android manifest and network security config."""
+    """Run checks on supported Android XML documents."""
     findings = []
     if p.get('manifest') and p.get('manifest').get('application'):
         # Android Manifest
@@ -146,7 +152,44 @@ def do_checks(xml_path, p):
         # Network Security Config
         nsc = NetworkSecurityChecks(findings, xml_path)
         nsc.network_security_checks(p)
+    else:
+        layout_sensitive_input_checks(findings, xml_path, p)
     return findings
+
+
+def layout_sensitive_input_checks(findings, xml_path, document):
+    """Find sensitive EditText controls that permit keyboard suggestions."""
+    def walk(node):
+        if isinstance(node, list):
+            for item in node:
+                yield from walk(item)
+            return
+        if not isinstance(node, dict):
+            return
+        for tag, child in node.items():
+            if isinstance(child, (dict, list)):
+                yield tag, child
+                yield from walk(child)
+
+    for tag, attrs in walk(document):
+        if not tag.lower().endswith('edittext') or not isinstance(attrs, dict):
+            continue
+        identity = ' '.join(str(attrs.get(name, '')) for name in (
+            '@android:id',
+            '@android:hint',
+            '@android:contentDescription',
+            '@android:autofillHints',
+        ))
+        if not SENSITIVE_INPUT_NAME.search(identity):
+            continue
+        input_type = str(attrs.get('@android:inputType', '')).lower()
+        if 'password' in input_type or 'nosuggestions' in input_type:
+            continue
+        add_finding(
+            findings,
+            xml_path,
+            'android_layout_sensitive_input_keyboard_cache',
+        )
 
 
 def add_finding(findings, xml_file, rule_id, dynamic=None):
@@ -249,7 +292,8 @@ class NetworkSecurityChecks:
 
     def cert_instance_check(self, config, typ):
         """Check for cert instance."""
-        certs = config.get('trust-anchors').get('certificates')
+        trust_anchors = config.get('trust-anchors') or {}
+        certs = trust_anchors.get('certificates')
         if isinstance(certs, dict):
             # Single cert instance
             self.trust_cert_and_cert_pinning_bypass(
@@ -260,35 +304,43 @@ class NetworkSecurityChecks:
                 self.trust_cert_and_cert_pinning_bypass(
                     cert, typ)
 
+    def _as_config_list(self, conf):
+        """xmltodict: one node -> dict, many siblings -> list."""
+        if not conf:
+            return []
+        if isinstance(conf, list):
+            return conf
+        return [conf]
+
+    def _check_domain_config(self, domain_conf):
+        """Check one domain-config (and nested domain-config children)."""
+        if not isinstance(domain_conf, dict):
+            return
+        typ = 'domain'
+        self.clear_text_traffic_permitted(domain_conf, typ)
+        for nested in self._as_config_list(domain_conf.get('domain-config')):
+            self._check_domain_config(nested)
+        trust_anchors = domain_conf.get('trust-anchors')
+        if trust_anchors and trust_anchors.get('certificates'):
+            self.cert_instance_check(domain_conf, typ)
+
     def network_security_checks(self, parsed_xml):
         """Android Network Security Config checks."""
+        nsc = parsed_xml.get('network-security-config') or {}
         # Base Config
-        if parsed_xml.get('network-security-config').get('base-config'):
+        if nsc.get('base-config'):
             typ = 'base'
-            base_conf = parsed_xml.get(
-                'network-security-config').get('base-config')
-            # Clear text traffic
-            self.clear_text_traffic_permitted(base_conf, typ)
-            if (base_conf.get('trust-anchors')
-                    and base_conf.get('trust-anchors').get('certificates')):
-                # Trust user certs
-                self.cert_instance_check(base_conf, typ)
+            base_conf = nsc.get('base-config')
+            if isinstance(base_conf, dict):
+                # Clear text traffic
+                self.clear_text_traffic_permitted(base_conf, typ)
+                trust_anchors = base_conf.get('trust-anchors')
+                if trust_anchors and trust_anchors.get('certificates'):
+                    self.cert_instance_check(base_conf, typ)
 
-        # Domain config
-        if parsed_xml.get('network-security-config').get('domain-config'):
-            typ = 'domain'
-            domain_conf = parsed_xml.get(
-                'network-security-config').get('domain-config')
-            # Domain config clear text
-            self.clear_text_traffic_permitted(domain_conf, typ)
-            if domain_conf.get('domain-config'):
-                # Nested domain config clear text
-                self.clear_text_traffic_permitted(
-                    domain_conf.get('domain-config'), typ)
-            if (domain_conf.get('trust-anchors')
-                    and domain_conf.get('trust-anchors').get('certificates')):
-                # Trust user certs
-                self.cert_instance_check(domain_conf, typ)
+        # Domain config (one or many sibling blocks — see #87)
+        for domain_conf in self._as_config_list(nsc.get('domain-config')):
+            self._check_domain_config(domain_conf)
 
 
 class AppLinksCheck:

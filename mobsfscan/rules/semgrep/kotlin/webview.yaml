@@ -1,0 +1,147 @@
+rules:
+  - id: android_kotlin_webview
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $W.addJavascriptInterface(...)
+          - pattern: |
+              addJavascriptInterface(...)
+    message: >-
+      Insecure WebView Implementation. Execution of user controlled code in
+      WebView is a critical Security Hole.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-749
+      owasp-mobile: m1
+      masvs: platform-7
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-javascript-execution-in-webviews-mstg-platform-5
+  - id: android_kotlin_webview_allow_file_from_url
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $S.setAllowFileAccessFromFileURLs(true)
+          - pattern: |
+              $S.setAllowUniversalAccessFromFileURLs(true)
+          - pattern: |
+              $S.allowFileAccessFromFileURLs = true
+          - pattern: |
+              $S.allowUniversalAccessFromFileURLs = true
+    message: >-
+      Ensure that user controlled URLs never reaches the Webview. Enabling file access
+      from URLs in WebView can leak sensitive information from the file system.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-200
+      owasp-mobile: m1
+      masvs: platform-7
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#static-analysis-6
+  - id: android_kotlin_webview_debug
+    patterns:
+      - pattern-either:
+          - pattern: |
+              WebView.setWebContentsDebuggingEnabled(true)
+          - pattern: |
+              $W.setWebContentsDebuggingEnabled(true)
+    message: Remote WebView debugging is enabled.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-489
+      owasp-mobile: m1
+      masvs: resilience-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-anti-debugging-detection-mstg-resilience-2
+  - id: android_kotlin_webview_ignore_ssl
+    patterns:
+      - pattern-either:
+          - pattern: |
+              override fun onReceivedSslError($W: WebView, $H: SslErrorHandler, $E: SslError) {
+                ...
+                $H.proceed()
+                ...
+              }
+          - pattern: |
+              fun onReceivedSslError($W: WebView, $H: SslErrorHandler, $E: SslError) {
+                ...
+                $H.proceed()
+                ...
+              }
+    message: >-
+      Insecure WebView Implementation. WebView ignores SSL Certificate errors and
+      accept any SSL Certificate. This application is vulnerable to MITM attacks
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-295
+      owasp-mobile: m3
+      masvs: network-3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#webview-server-certificate-verification
+  - id: android_kotlin_webview_mixed_content
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $S.setMixedContentMode($X.MIXED_CONTENT_ALWAYS_ALLOW)
+          - pattern: |
+              $S.mixedContentMode = $X.MIXED_CONTENT_ALWAYS_ALLOW
+    message: >-
+      Insecure WebView Implementation. WebView is configured with
+      MIXED_CONTENT_ALWAYS_ALLOW, allowing a page loaded over HTTPS to load
+      content from insecure HTTP origins. This exposes the application to
+      man-in-the-middle content injection.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-319
+      owasp-mobile: m3
+      masvs: network-1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md
+  - id: android_kotlin_webview_external
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $W.loadUrl($E.getExternalStorageDirectory().$M())
+          - pattern: |
+              $W.loadUrl(<... getExternalStorageDirectory() ...>)
+          - pattern-regex: '\.loadUrl\([^)\n]{0,200}getExternalStorageDirectory\('
+    message: >-
+      WebView load files from external storage. Files in external storage can be
+      modified by any application.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-749
+      owasp-mobile: m1
+      masvs: platform-6
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#static-analysis-7
+  - id: android_kotlin_webview_set_allow_file_access
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $S.setAllowFileAccess(true)
+          - pattern: |
+              $S.allowFileAccess = true
+    message: >-
+      WebView File System Access is enabled. An attacker able to inject script into a WebView, could exploit the opportunity to access local resources.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-73
+      owasp-mobile: m7
+      masvs: platform-6
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md/#testing-webview-protocol-handlers-mstg-platform-6
+

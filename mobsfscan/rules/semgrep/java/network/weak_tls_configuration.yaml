@@ -1,0 +1,44 @@
+# Security concepts informed by:
+# https://github.com/mindedsecurity/semgrep-rules-android-security
+rules:
+  - id: insecure_tls_version
+    patterns:
+      - pattern-either:
+          - pattern: $C.getInstance("TLSv1")
+          - pattern: $C.getInstance("TLSv1.0")
+          - pattern: $C.getInstance("TLSv1.1")
+          - pattern: $S.setEnabledProtocols(new String[] { ..., "TLSv1", ... })
+          - pattern: $S.setEnabledProtocols(new String[] { ..., "TLSv1.0", ... })
+          - pattern: $S.setEnabledProtocols(new String[] { ..., "TLSv1.1", ... })
+    message: >-
+      TLS 1.0 and TLS 1.1 are deprecated and have known weaknesses. Use TLS
+      1.2 or TLS 1.3 and avoid explicitly enabling older protocol versions.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-326
+      owasp-mobile: m5
+      masvs: network-2
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-NETWORK/MASTG-TEST-0020/
+  - id: weak_tls_cipher_suite
+    patterns:
+      - pattern: $S.setEnabledCipherSuites($SUITES)
+      - metavariable-regex:
+          metavariable: $SUITES
+          regex: >-
+            (?i).*(?:_NULL_|_ANON_|_EXPORT_|_RC4_|_DES_|3DES|_MD5).*
+    message: >-
+      The explicitly enabled TLS cipher suites include a null, anonymous,
+      export-grade, RC4, DES/3DES, or MD5-based suite. Remove weak suites and
+      rely on current platform defaults or a modern restricted configuration.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-327
+      owasp-mobile: m5
+      masvs: network-2
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-NETWORK/MASTG-TEST-0020/

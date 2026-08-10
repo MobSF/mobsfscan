@@ -1,5 +1,5 @@
 # mobsfscan
-**mobsfscan** is a static analysis tool that can find insecure code patterns in your Android and iOS source code. Supports Java, Kotlin, Android XML, Swift and Objective C Code. mobsfscan uses [MobSF](https://github.com/MobSF/Mobile-Security-Framework-MobSF) static analysis rules and is powered by [semgrep](https://github.com/returntocorp/semgrep) and [libsast](https://github.com/ajinabraham/libsast) pattern matcher.
+**mobsfscan** is a static analysis tool that can find insecure code patterns in your Android and iOS source code. Supports Java, Kotlin, Android XML, iOS Info.plist, Swift and Objective C Code. mobsfscan uses [MobSF](https://github.com/MobSF/Mobile-Security-Framework-MobSF) static analysis rules and is powered by [semgrep](https://github.com/returntocorp/semgrep) and [libsast](https://github.com/ajinabraham/libsast) pattern matcher.
 
 Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82e3a63c-4813-11e6-9430-6015d98aeaab.png) in India  [![Tweet](https://img.shields.io/twitter/url?url=https://github.com/MobSF/mobsfscan)](https://twitter.com/intent/tweet/?text=mobsfscan%20is%20a%20static%20analysis%20tool%20that%20can%20find%20insecure%20code%20patterns%20in%20your%20Android%20and%20iOS%20source%20code.%20Supports%20Java,%20Kotlin,%20Swift,%20and%20Objective%20C%20Code.%20by%20%40ajinabraham%20%40OpenSecurity_IN&url=https://github.com/MobSF/mobsfscan)
 
@@ -31,8 +31,9 @@ Requires Python 3.10–3.14
 
 ```bash
 $ mobsfscan
-usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--html] [--type {android,ios,auto}]
-                 [-o OUTPUT] [-c CONFIG] [-mp {default,billiard,thread}] [-w] [--no-fail] [-v]
+usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--gitlab-sast] [--html]
+                 [--type {android,ios,auto}] [-o OUTPUT] [-c CONFIG]
+                 [-mp {default,billiard,thread}] [-w] [--no-fail] [-v]
                  [path ...]
 
 positional arguments:
@@ -42,7 +43,8 @@ options:
   -h, --help            show this help message and exit
   --json                set output format as JSON
   --sarif               set output format as SARIF 2.1.0
-  --sonarqube           set output format compatible with SonarQube
+  --sonarqube           set output format as SonarQube generic issues (10.3+)
+  --gitlab-sast         set output format as GitLab SAST report
   --html                set output format as HTML
   --type {android,ios,auto}
                         optional: force android or ios rules explicitly
@@ -214,10 +216,17 @@ A `.mobsf` file in the root of the source code directory allows you to configure
   severity-filter:
   - WARNING
   - ERROR
+
+  severity-overrides:
+    ios_log: ERROR
+    android_logging: WARNING
 ```
+
+`severity-overrides` changes the reported severity for specific rule IDs (`INFO`, `WARNING`, or `ERROR`). Overrides are applied before `severity-filter` and affect CLI output, exit codes, and report formats (SARIF, SonarQube, GitLab SAST).
+
 ## Suppress Findings
 
-You can suppress findings from source files by adding the comment `// mobsf-ignore: rule_id1, rule_id2` to the line that trigger the findings.
+You can suppress findings from source files by adding the comment `// mobsf-ignore: rule_id1, rule_id2` on the line that triggers the finding. Only that match is suppressed; other matches of the same rule in the file still report.
 
 Example:
 
@@ -246,8 +255,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4.2.2
-    - uses: actions/setup-python@v5.3.0
+    - uses: actions/checkout@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: '3.12'
     - name: mobsfscan
@@ -272,10 +281,14 @@ jobs:
   mobsfscan:
     runs-on: ubuntu-latest
     name: mobsfscan code scanning
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
     steps:
     - name: Checkout the code
-      uses: actions/checkout@v4.2.2
-    - uses: actions/setup-python@v5.3.0
+      uses: actions/checkout@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: '3.12'
     - name: mobsfscan
@@ -283,7 +296,7 @@ jobs:
       with:
         args: '. --sarif --output results.sarif || true'
     - name: Upload mobsfscan report
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v4
       with:
         sarif_file: results.sarif
 ```
@@ -295,16 +308,37 @@ Add the following to the file `.gitlab-ci.yml`.
 
 ```yaml
 stages:
-    - test
-mobsfscan:
-    image: python
-    before_script:
-        - pip3 install --upgrade mobsfscan
-    script:
-        - mobsfscan .
-```
-Example: 
+  - test
 
+mobsfscan:
+  image: python:3.12
+  stage: test
+  before_script:
+    - pip3 install --upgrade mobsfscan
+  script:
+    - mobsfscan . --gitlab-sast -o gl-sast-report.json
+  artifacts:
+    reports:
+      sast: gl-sast-report.json
+```
+
+Example command (local):
+
+```bash
+mobsfscan . --gitlab-sast -o gl-sast-report.json
+```
+
+This writes a native [GitLab SAST report](https://docs.gitlab.com/user/application_security/sast/) so findings appear in the Vulnerability Report / MR security widget without a SARIF converter.
+
+#### SonarQube / SonarCloud
+
+`--sonarqube` writes the [generic issue format](https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/importing-external-issues/generic-issue-import-format) (SonarQube 10.3+ / SonarCloud), with separate `rules` and `issues` arrays:
+
+```bash
+mobsfscan . --sonarqube -o mobsfscan-sonar.json
+```
+
+Import with `sonar.externalIssuesReportPaths=mobsfscan-sonar.json`.
 
 #### Travis CI
 
@@ -327,7 +361,7 @@ version: 2.1
 jobs:
   mobsfscan:
     docker:
-      - image: cimg/python:3.9.6
+      - image: cimg/python:3.12
     steps:
       - checkout
       - run:

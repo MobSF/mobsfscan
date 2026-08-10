@@ -1,0 +1,33 @@
+# Security concept informed by:
+# https://github.com/mindedsecurity/semgrep-rules-android-security
+rules:
+  - id: android_biometric_without_crypto
+    patterns:
+      - pattern-inside: |
+          class $CALLBACK extends BiometricPrompt.AuthenticationCallback {
+            ...
+          }
+      - pattern: |
+          void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult $RESULT) {
+            ...
+          }
+      - pattern-not: |
+          void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult $RESULT) {
+            ...
+            $RESULT.getCryptoObject();
+            ...
+          }
+    message: >-
+      Biometric authentication succeeds without using the cryptographic object
+      from AuthenticationResult. Bind authentication to a Keystore-backed
+      cryptographic operation so the protected operation cannot proceed solely
+      from the callback result.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-287
+      owasp-mobile: m4
+      masvs: auth-8
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-AUTH/MASTG-TEST-0018/

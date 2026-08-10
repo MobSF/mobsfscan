@@ -1,0 +1,55 @@
+rules:
+  - id: ios_tls3_not_used
+    patterns:
+      - pattern-regex: 'TLSMinimumSupportedProtocolVersion\s*=\s*(?:tls_protocol_version_t\.)?\.?TLSv1[01]\b'
+    message: The app uses TLS 1.0 or TLS 1.1. TLS 1.3 should be used instead.
+    languages:
+      - swift
+    severity: ERROR
+    metadata:
+      cwe: cwe-757
+      masvs: network-2
+      owasp-mobile: m3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
+  - id: ios_tls12_used
+    patterns:
+      - pattern-regex: 'TLSMinimumSupportedProtocolVersion\s*=\s*(?:tls_protocol_version_t\.)?\.?TLSv12\b'
+    message: This app uses TLS 1.2. TLS 1.3 should be used instead.
+    languages:
+      - swift
+    severity: WARNING
+    metadata:
+      cwe: cwe-757
+      masvs: network-2
+      owasp-mobile: m3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
+  - id: ios_dtls1_used
+    patterns:
+      - pattern-regex: 'TLSMinimumSupportedProtocolVersion\s*=\s*(?:tls_protocol_version_t\.)?\.?DTLSv10\b'
+    message: DTLS 1.2 should be used. Detected old version - DTLS 1.0.
+    languages:
+      - swift
+    severity: WARNING
+    metadata:
+      cwe: cwe-757
+      masvs: network-2
+      owasp-mobile: m3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2
+  - id: ios_depr_tls_min
+    patterns:
+      - pattern-regex: '\.tlsMinimumSupportedProtocol\b'
+    message: >-
+      Use of deprecated property tlsMinimumSupportedProtocol. To avoid potential
+      security risks, use tlsMinimumSupportedProtocolVersion
+    languages:
+      - swift
+    severity: WARNING
+    metadata:
+      cwe: cwe-757
+      masvs: network-2
+      owasp-mobile: m3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04f-Testing-Network-Communication.md#verifying-data-encryption-on-the-network-mstg-network-1-and-mstg-network-2

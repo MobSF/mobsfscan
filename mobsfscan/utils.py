@@ -14,11 +14,49 @@ import yaml
 logger = init_logger(__name__)
 
 
+def report_path(path):
+    """Prefer cwd-relative POSIX paths in findings (matches Semgrep/source).
+
+    Absolute paths cause duplicate findings in ASOC/VM tools when the same
+    project is scanned from different working directories (#109).
+    """
+    p = Path(path)
+    try:
+        return p.resolve().relative_to(Path.cwd().resolve()).as_posix()
+    except (ValueError, OSError):
+        return p.as_posix()
+
+
 def filter_none(user_list):
     """Filter and remove None values from user supplied config."""
     if not user_list:
         return None
     return list(filter(lambda item: item is not None, user_list))
+
+
+VALID_SEVERITIES = {'INFO', 'WARNING', 'ERROR'}
+
+
+def normalize_severity_overrides(raw):
+    """Parse severity-overrides map; return {rule_id: SEVERITY}."""
+    if not raw or not isinstance(raw, dict):
+        return {}
+    overrides = {}
+    for rule_id, severity in raw.items():
+        if rule_id is None or severity is None:
+            continue
+        rid = str(rule_id).strip()
+        sev = str(severity).strip().upper()
+        if not rid:
+            continue
+        if sev not in VALID_SEVERITIES:
+            logger.warning(
+                'Invalid severity `%s` for rule `%s` in '
+                'severity-overrides. Use INFO, WARNING, or ERROR.',
+                severity, rid)
+            continue
+        overrides[rid] = sev
+    return overrides
 
 
 def get_config(base_path, config_file):
@@ -28,6 +66,7 @@ def get_config(base_path, config_file):
         'ignore_paths': config.IGNORE_PATHS,
         'ignore_rules': set(),
         'severity_filter': config.SEVERITY_FILTER,
+        'severity_overrides': {},
     }
     if config_file:
         cfile = Path(config_file)
@@ -43,6 +82,8 @@ def get_config(base_path, config_file):
         usr_igonre_paths = filter_none(root.get('ignore-paths'))
         usr_ignore_rules = filter_none(root.get('ignore-rules'))
         usr_severity_filter = filter_none(root.get('severity-filter'))
+        usr_severity_overrides = normalize_severity_overrides(
+            root.get('severity-overrides'))
         if usr_ignore_files:
             options['ignore_filenames'].update(usr_ignore_files)
         if usr_igonre_paths:
@@ -51,6 +92,8 @@ def get_config(base_path, config_file):
             options['ignore_rules'].update(usr_ignore_rules)
         if usr_severity_filter:
             options['severity_filter'] = usr_severity_filter
+        if usr_severity_overrides:
+            options['severity_overrides'] = usr_severity_overrides
     return options
 
 
@@ -64,9 +107,19 @@ def validate_config(extras, options):
         root = extras[0]
     valid = True
     for key, value in root.items():
-        if key.replace('-', '_') not in options.keys():
+        opt_key = key.replace('-', '_')
+        if opt_key not in options.keys():
             valid = False
             logger.warning('The config `%s` is not supported.', key)
+            continue
+        if opt_key == 'severity_overrides':
+            if not isinstance(value, dict):
+                valid = False
+                logger.warning(
+                    'The value `%s` for the config `%s` is invalid.'
+                    ' Only a mapping of rule_id: severity is supported.',
+                    value, key)
+            continue
         if not isinstance(value, list):
             valid = False
             logger.warning('The value `%s` for the config `%s` is invalid.'
@@ -89,31 +142,52 @@ def read_yaml(file_obj, text=False):
     return None
 
 
-def get_best_practices(extension):
-    """Get best practices of an extension."""
+def get_best_practices(extensions):
+    """Get best practices for one or more extensions.
+
+    Best-practice rules match control *presence*. MobSFScan.missing_controls()
+    inverts them: delete when present, report when missing across the scan.
+    """
+    if isinstance(extensions, str):
+        extensions = [extensions]
     ids = set()
     all_rules = {}
-    if extension == '.java':
-        for yml in config.BEST_PRACTICES_DIR.rglob('*.yaml'):
-            rules = read_yaml(yml)
-            for rule in rules['rules']:
+    for extension in extensions:
+        if extension == '.java':
+            java_dir = config.BEST_PRACTICES_DIR / 'java'
+            for yml in java_dir.rglob('*.yaml'):
+                rules = read_yaml(yml)
+                if not rules or 'rules' not in rules:
+                    continue
+                for rule in rules['rules']:
+                    all_rules[rule['id']] = rule
+                    ids.add(rule['id'])
+        elif extension == '.kt':
+            kt_dir = config.BEST_PRACTICES_DIR / 'kotlin'
+            for yml in kt_dir.rglob('*.yaml'):
+                rules = read_yaml(yml)
+                if not rules or 'rules' not in rules:
+                    continue
+                for rule in rules['rules']:
+                    all_rules[rule['id']] = rule
+                    ids.add(rule['id'])
+        elif extension == '.swift':
+            swift_dir = config.BEST_PRACTICES_DIR / 'swift'
+            for yml in swift_dir.rglob('*.yaml'):
+                rules = read_yaml(yml)
+                if not rules or 'rules' not in rules:
+                    continue
+                for rule in rules['rules']:
+                    all_rules[rule['id']] = rule
+                    ids.add(rule['id'])
+        elif extension == '.m':
+            bp = config.IOS_RULES_DIR / 'objectivec' / 'best_practices.yaml'
+            rules = read_yaml(bp)
+            if not rules:
+                continue
+            for rule in rules:
                 all_rules[rule['id']] = rule
                 ids.add(rule['id'])
-    elif extension in ['.kt', '.m', '.swift']:
-        if extension == '.kt':
-            os_dir = config.ANDROID_RULES_DIR
-            lang = 'kotlin'
-        elif extension == '.m':
-            os_dir = config.IOS_RULES_DIR
-            lang = 'objectivec'
-        elif extension == '.swift':
-            os_dir = config.IOS_RULES_DIR
-            lang = 'swift'
-        kt = os_dir / lang / 'best_practices.yaml'
-        rules = read_yaml(kt)
-        for rule in rules:
-            all_rules[rule['id']] = rule
-            ids.add(rule['id'])
     return ids, all_rules
 
 

@@ -30,7 +30,7 @@ setup(
     author='Ajin Abraham',
     author_email='ajin25@gmail.com',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         ('License :: OSI Approved :: GNU Lesser '
          'General Public License v3 or later (LGPLv3+)'),
@@ -55,7 +55,7 @@ setup(
     long_description_content_type='text/markdown',
     install_requires=[
         'colorama>=0.4.5',
-        'libsast>=3.1.7',
+        'libsast>=3.1.8',
         'semgrep==1.172.0',
         'sarif-om>=1.0.4',
         'jschema-to-python>=1.2.3',

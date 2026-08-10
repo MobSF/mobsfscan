@@ -1,0 +1,29 @@
+rules:
+  - id: ios_file_no_special
+    patterns:
+      - pattern-regex: '(?i)\.noFileProtection\b'
+    message: The file has no special protections associated with it.
+    languages:
+      - swift
+    severity: ERROR
+    metadata:
+      cwe: cwe-311
+      masvs: storage-1
+      owasp-mobile: m2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06d-Testing-Data-Storage.md#ios-data-storage
+  - id: ios_general_paste
+    patterns:
+      - pattern: |
+          UIPasteboard.generalPasteboard
+    message: >-
+      Usage of generalPasteboard should be avoided. A malicious app can monitor the pasteboard in the background in iOS versions below 9.
+    languages:
+      - swift
+    severity: INFO
+    metadata:
+      cwe: cwe-919
+      masvs: platform-4
+      owasp-mobile: m1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#uipasteboard
