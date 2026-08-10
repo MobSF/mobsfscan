@@ -1,0 +1,66 @@
+rules:
+  - id: ios_sha1_collision
+    patterns:
+      - pattern-either:
+          - pattern-regex: '(?i)\bSHA1\s*\('
+          - pattern-regex: 'CC_SHA1\s*\('
+    message: SHA1 is a weak hash known to have hash collisions.
+    languages:
+      - swift
+    severity: WARNING
+    metadata:
+      cwe: cwe-327
+      masvs: crypto-4
+      owasp-mobile: m5
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+  - id: ios_weak_hash
+    patterns:
+      - pattern-either:
+          - pattern-regex: '(?i)\bMD2\s*\('
+          - pattern-regex: 'CC_MD2\s*\('
+          - pattern-regex: '(?i)\bMD4\s*\('
+          - pattern-regex: 'CC_MD4\s*\('
+          - pattern-regex: '(?i)\bMD5\s*\('
+          - pattern-regex: 'CC_MD5\s*\('
+          - pattern-regex: '(?i)\bMD6\s*\('
+          - pattern-regex: 'CC_MD6\s*\('
+    message: Weak Hash algorithm used. The hash algorithm is known to have hash collisions.
+    languages:
+      - swift
+    severity: WARNING
+    metadata:
+      cwe: cwe-327
+      masvs: crypto-4
+      owasp-mobile: m5
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#identifying-insecure-andor-deprecated-cryptographic-algorithms-mstg-crypto-4
+  - id: ios_insecure_random_no_generator
+    patterns:
+      - pattern-either:
+          - pattern: |
+              Int.random(...)
+          - pattern: |
+              Bool.random(...)
+          - pattern: |
+              Float.random(...)
+          - pattern: |
+              Double.random(...)
+          - pattern: |
+              arc4random()
+          - pattern: |
+              arc4random_uniform(...)
+          - pattern: |
+              SystemRandomNumberGenerator()
+          - pattern-regex: '\brand\s*\('
+          - pattern-regex: '\brandom\s*\('
+    message: The App uses an insecure Random Number Generator.
+    languages:
+      - swift
+    severity: WARNING
+    metadata:
+      cwe: cwe-330
+      owasp-mobile: m5
+      masvs: crypto-6
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04g-Testing-Cryptography.md#weak-random-number-generators

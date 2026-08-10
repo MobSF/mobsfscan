@@ -70,17 +70,22 @@ class MobSFScan:
                 self.best_practices = '.java'
             else:
                 self.best_practices = '.kt'
-            self.options['match_rules'] = settings.ANDROID_RULES_DIR.as_posix()
+            # Android code + best-practice presence checks use Semgrep only.
+            self.options['match_rules'] = None
+            self.options['match_extensions'] = None
             self.options['sgrep_rules'] = settings.SGREP_RULES_DIR.as_posix()
-            self.options['sgrep_extensions'] = {'.java'}
-            self.options['match_extensions'] = {'.kt'}
+            self.options['sgrep_extensions'] = {'.java', '.kt'}
         elif suffix in {'.swift', '.m'}:
             if suffix == '.swift':
                 self.best_practices = '.swift'
             else:
                 self.best_practices = '.m'
-            self.options['match_rules'] = settings.IOS_RULES_DIR.as_posix()
-            self.options['match_extensions'] = {'.m', '.swift'}
+            # Objective-C remains libsast regex; Swift uses Semgrep.
+            self.options['match_rules'] = (
+                settings.IOS_RULES_DIR / 'objectivec').as_posix()
+            self.options['match_extensions'] = {'.m'}
+            self.options['sgrep_rules'] = settings.SGREP_RULES_DIR.as_posix()
+            self.options['sgrep_extensions'] = {'.swift'}
 
     def get_extensions(self) -> set:
         """Get extensions to scan."""
@@ -151,7 +156,6 @@ class MobSFScan:
     def format_output(self, results) -> dict:
         """Format to mobsfscan friendly output."""
         self.format_semgrep(results.get('semantic_grep'))
-        # TODO: When we support kotlin semgrep, this needs rework
         self.format_pattern(results.get('pattern_matcher'))
         self.format_pattern(results.get('xml_checks'))
         self.format_pattern(results.get('plist_checks'))

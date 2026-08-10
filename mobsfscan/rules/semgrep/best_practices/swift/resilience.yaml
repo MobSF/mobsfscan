@@ -1,0 +1,29 @@
+rules:
+  - id: ios_detect_reversing
+    patterns:
+      - pattern-regex: '"FridaGadget"[\s\S]{0,5000}"cynject"[\s\S]{0,5000}"libcycript"[\s\S]{0,5000}"/usr/sbin/frida-server"'
+    message: This app does not have Reverse engineering detection capabilities.
+    languages:
+      - swift
+    severity: INFO
+    metadata:
+      owasp-mobile: m9
+      masvs: resilience-4
+      cwe: cwe-919
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md#ios-anti-reversing-defenses
+  - id: ios_cert_pinning
+    patterns:
+      - pattern-either:
+          - pattern-regex: 'PinnedCertificatesTrustEvaluator'
+          - pattern-regex: 'TrustKit\.initSharedInstance'
+    message: This app does not have Certificate Pinning implemented in code.
+    languages:
+      - swift
+    severity: INFO
+    metadata:
+      cwe: cwe-295
+      masvs: network-4
+      owasp-mobile: m3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4

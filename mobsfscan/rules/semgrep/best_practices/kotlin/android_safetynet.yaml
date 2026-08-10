@@ -1,0 +1,25 @@
+rules:
+  - id: android_safetynet
+    patterns:
+      - pattern-either:
+          - pattern: |
+              SafetyNet.getClient(...)
+          - pattern: |
+              val $C = SafetyNet.getClient(...)
+              ...
+              $C.attest(...)
+          - pattern-regex: 'com\.google\.android\.gms\.safetynet\.SafetyNetApi'
+    message: >-
+      This app does not uses SafetyNet Attestation API that provides
+      cryptographically-signed attestation, assessing the device's integrity.
+      This check helps to ensure that the servers are interacting with the
+      genuine app running on a genuine Android device.
+    languages:
+      - kotlin
+    severity: INFO
+    metadata:
+      cwe: cwe-353
+      owasp-mobile: m8
+      masvs: resilience-1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-root-detection-mstg-resilience-1

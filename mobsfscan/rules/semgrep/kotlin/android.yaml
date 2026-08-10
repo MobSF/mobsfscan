@@ -1,0 +1,186 @@
+rules:
+  - id: android_kotlin_hiddenui
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $V.visibility = View.GONE
+          - pattern: |
+              $V.visibility = View.INVISIBLE
+          - pattern: |
+              $V.visibility = if ($C) View.GONE else $E
+          - pattern: |
+              $V.visibility = if ($C) View.INVISIBLE else $E
+          - pattern: |
+              $V.setVisibility(View.GONE)
+          - pattern: |
+              $V.setVisibility(View.INVISIBLE)
+    message: >-
+      Hidden elements in view can be used to hide data from user. But this data
+      can be leaked.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-919
+      owasp-mobile: m1
+      masvs: storage-7
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-for-sensitive-data-disclosure-through-the-user-interface-mstg-storage-7
+  - id: android_kotlin_logging
+    patterns:
+      - pattern-either:
+          - pattern: |
+              Log.$M(...)
+          - pattern: |
+              System.out.print(...)
+          - pattern: |
+              System.out.println(...)
+          - pattern: |
+              System.err.print(...)
+          - pattern: |
+              System.err.println(...)
+    message: The App logs information. Sensitive information should never be logged.
+    languages:
+      - kotlin
+    severity: INFO
+    metadata:
+      cwe: cwe-532
+      owasp-mobile: m1
+      masvs: storage-3
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#logs
+  - id: android_kotlin_hardcoded
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $X = "..."
+          - pattern: |
+              val $X = "..."
+          - pattern: |
+              var $X = "..."
+          - pattern: |
+              const val $X = "..."
+      - pattern-not: |
+          $X = ""
+      - pattern-not: |
+          val $X = ""
+      - pattern-not: |
+          var $X = ""
+      - metavariable-regex:
+          metavariable: $X
+          regex: '(?i)^(?:password|pass|username|secret|key|(?:api|secret|private|access|encryption|auth)_?key)$'
+    message: >-
+      Files may contain hardcoded sensitive information like usernames,
+      passwords, keys etc.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-798
+      owasp-mobile: m9
+      masvs: storage-14
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#storing-a-key---example
+  - id: android_kotlin_world_writable
+    patterns:
+      - pattern-either:
+          - pattern: |
+              Context.MODE_WORLD_WRITEABLE
+          - pattern: |
+              $C.getSharedPreferences($N, 2)
+          - pattern: |
+              $C.openFileOutput($N, 2)
+    message: The file is World Writable. Any App can write to the file
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-276
+      owasp-mobile: m2
+      masvs: storage-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2
+  - id: android_kotlin_world_readable
+    patterns:
+      - pattern-either:
+          - pattern: |
+              Context.MODE_WORLD_READABLE
+          - pattern: |
+              $C.getSharedPreferences($N, 1)
+          - pattern: |
+              $C.openFileOutput($N, 1)
+    message: The file is World Readable. Any App can read from the file
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-276
+      owasp-mobile: m2
+      masvs: storage-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2
+  - id: android_kotlin_world_read_write
+    patterns:
+      - pattern: |
+          $C.openFileOutput($N, 3)
+    message: The file is World Readable and Writable. Any App can read/write to the file
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-276
+      owasp-mobile: m2
+      masvs: storage-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#testing-local-storage-for-sensitive-data-mstg-storage-1-and-mstg-storage-2
+  - id: android_kotlin_sensitive_input_keyboard_cache
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $F.setInputType($T)
+          - pattern: |
+              $F.inputType = $T
+      - metavariable-regex:
+          metavariable: $F
+          regex: (?i).*(?:password|passcode|pin|secret|otp|token).*
+      - metavariable-regex:
+          metavariable: $T
+          regex: '^(?!.*(?:TYPE_TEXT_VARIATION_PASSWORD|TYPE_TEXT_VARIATION_VISIBLE_PASSWORD|TYPE_NUMBER_VARIATION_PASSWORD|TYPE_TEXT_FLAG_NO_SUGGESTIONS)).*$'
+    message: >-
+      A sensitive input field is configured without a password variation or
+      TYPE_TEXT_FLAG_NO_SUGGESTIONS. Disable suggestions for sensitive input.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-524
+      owasp-mobile: m1
+      masvs: storage-5
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-STORAGE/MASTG-TEST-0005/
+  - id: android_kotlin_sensitive_notification
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $B.setContentText($D)
+          - pattern: |
+              $B.setContentTitle($D)
+          - pattern: |
+              $B.setSubText($D)
+          - pattern: |
+              $B.setTicker($D)
+      - metavariable-regex:
+          metavariable: $D
+          regex: (?i).*(?:password|passcode|pin|secret|otp|token|auth(?:entication)?code).*
+    message: >-
+      Secret-like data is displayed in a notification and may be exposed on the
+      lock screen or to notification listeners.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-200
+      owasp-mobile: m1
+      masvs: storage-7
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-STORAGE/MASTG-TEST-0010/

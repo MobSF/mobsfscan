@@ -1,0 +1,34 @@
+rules:
+  - id: ios_custom_keyboard_disabled
+    patterns:
+      - pattern-regex: 'extensionPointIdentifier\s*==.{0,100}\.keyboard'
+    message: This app does not have custom keyboards disabled.
+    languages:
+      - swift
+    severity: INFO
+    metadata:
+      cwe: cwe-919
+      masvs: platform-11
+      owasp-mobile: m1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#app-extensions
+  - id: ios_keyboard_cache
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $T.autocorrectionType = .no
+          - pattern: |
+              $T.autocorrectionType = .No
+          - pattern-regex: 'UITextAutocorrectionTypeNo'
+          - pattern-regex: '\.disableAutocorrection\s*\(\s*true\s*\)'
+          - pattern-regex: '\.autocorrectionDisabled\s*\(\s*true\s*\)'
+    message: This app does not disable Keyboard cache. It must be disabled for all sensitive data inputs.
+    languages:
+      - swift
+    severity: INFO
+    metadata:
+      cwe: cwe-919
+      masvs: storage-5
+      owasp-mobile: m2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06d-Testing-Data-Storage.md#finding-sensitive-data-in-the-keyboard-cache-mstg-storage-5

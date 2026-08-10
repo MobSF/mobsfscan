@@ -130,27 +130,38 @@ def read_yaml(file_obj, text=False):
 
 
 def get_best_practices(extension):
-    """Get best practices of an extension."""
+    """Get best practices of an extension.
+
+    Best-practice rules match control *presence*. MobSFScan.missing_controls()
+    inverts them: delete when present, report when missing across the scan.
+    """
     ids = set()
     all_rules = {}
     if extension == '.java':
-        for yml in config.BEST_PRACTICES_DIR.rglob('*.yaml'):
+        java_dir = config.BEST_PRACTICES_DIR / 'java'
+        for yml in java_dir.rglob('*.yaml'):
             rules = read_yaml(yml)
             for rule in rules['rules']:
                 all_rules[rule['id']] = rule
                 ids.add(rule['id'])
-    elif extension in ['.kt', '.m', '.swift']:
-        if extension == '.kt':
-            os_dir = config.ANDROID_RULES_DIR
-            lang = 'kotlin'
-        elif extension == '.m':
-            os_dir = config.IOS_RULES_DIR
-            lang = 'objectivec'
-        elif extension == '.swift':
-            os_dir = config.IOS_RULES_DIR
-            lang = 'swift'
-        kt = os_dir / lang / 'best_practices.yaml'
-        rules = read_yaml(kt)
+    elif extension == '.kt':
+        # Kotlin Semgrep best practices (same inversion as Java).
+        kt_dir = config.BEST_PRACTICES_DIR / 'kotlin'
+        for yml in kt_dir.rglob('*.yaml'):
+            rules = read_yaml(yml)
+            for rule in rules['rules']:
+                all_rules[rule['id']] = rule
+                ids.add(rule['id'])
+    elif extension == '.swift':
+        swift_dir = config.BEST_PRACTICES_DIR / 'swift'
+        for yml in swift_dir.rglob('*.yaml'):
+            rules = read_yaml(yml)
+            for rule in rules['rules']:
+                all_rules[rule['id']] = rule
+                ids.add(rule['id'])
+    elif extension == '.m':
+        bp = config.IOS_RULES_DIR / 'objectivec' / 'best_practices.yaml'
+        rules = read_yaml(bp)
         for rule in rules:
             all_rules[rule['id']] = rule
             ids.add(rule['id'])

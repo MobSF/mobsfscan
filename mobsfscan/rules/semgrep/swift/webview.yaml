@@ -1,0 +1,32 @@
+rules:
+  - id: ios_load_html_string
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $W.loadHTMLString(...)
+          - pattern: |
+              loadHTMLString(...)
+    message: User input in "loadHTMLString" will result in JavaScript Injection.
+    languages:
+      - swift
+    severity: INFO
+    metadata:
+      cwe: cwe-95
+      masvs: platform-5
+      owasp-mobile: m7
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#testing-webview-protocol-handlers-mstg-platform-6
+  - id: ios_uiwebview
+    patterns:
+      - pattern-regex: '\bUIWebView\b'
+    message: >-
+      This app uses UIWebView. For security reasons, It is recommended to use WKWebView instead.
+    languages:
+      - swift
+    severity: INFO
+    metadata:
+      cwe: cwe-919
+      masvs: platform-5
+      owasp-mobile: m1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#testing-ios-webviews-mstg-platform-5

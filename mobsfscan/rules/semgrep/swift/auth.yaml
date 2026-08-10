@@ -1,0 +1,59 @@
+rules:
+  - id: ios_biometric_bool
+    patterns:
+      - pattern: |
+          $C.evaluatePolicy(...)
+      - pattern-regex: '\.deviceOwnerAuthentication\b'
+    message: >-
+      Biometric authentication should be hardware and keychain backed, local authentication returns a boolean that can be bypassed by runtime instrumentation tools like Frida. This is not applicable if authentication data in keychain is protected with a biometric only access control.
+    languages:
+      - swift
+    severity: WARNING
+    metadata:
+      cwe: cwe-303
+      masvs: auth-8
+      owasp-mobile: m1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06f-Testing-Local-Authentication.md#local-authentication-framework
+  - id: ios_biometric_acl
+    patterns:
+      - pattern-regex: 'SecAccessControlCreateWithFlags\([^)\n]*\.(biometryAny|userPresence|touchIDAny)\b'
+    message: >-
+      Weak biometric ACL flag is associated with a key stored in Keychain. With `.biometryAny/.userPresence/.touchIDAny` flag, an attacker with the ability to add a biometry to the device can authenticate as the user. Use `.biometryCurrentSet/.touchIDCurrentSet` instead.
+    languages:
+      - swift
+    severity: ERROR
+    metadata:
+      cwe: cwe-305
+      masvs: auth-8
+      owasp-mobile: m1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06f-Testing-Local-Authentication.md#local-authentication-framework
+  - id: ios_keychain_weak_acl_device_passcode
+    patterns:
+      - pattern-regex: 'SecAccessControlCreateWithFlags\([^)\n]*\.devicePasscode\b'
+    message: >-
+      A key stored in the Keychain is not making use of stronger biometric backed ACL. Use `.biometryCurrentSet` instead.
+    languages:
+      - swift
+    severity: WARNING
+    metadata:
+      cwe: cwe-305
+      masvs: auth-8
+      owasp-mobile: m1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06f-Testing-Local-Authentication.md
+  - id: ios_keychain_weak_accessibility_value
+    patterns:
+      - pattern-regex: '\bkSecAttrAccessibleAlways\b|\bkSecAttrAccessibleAfterFirstUnlock\b'
+    message: >-
+      A key stored in the Keychain is using a weak accessibility value. Use stronger ACLs like `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly/kSecAttrAccessibleWhenUnlocked/kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`.
+    languages:
+      - swift
+    severity: WARNING
+    metadata:
+      cwe: cwe-305
+      masvs: auth-8
+      owasp-mobile: m1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06f-Testing-Local-Authentication.md

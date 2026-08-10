@@ -1,0 +1,189 @@
+rules:
+  - id: android_kotlin_sql_raw_query
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $D.rawQuery(...)
+          - pattern: |
+              $D.execSQL(...)
+    message: >-
+      App uses SQLite Database and execute raw SQL query. Untrusted user input in
+      raw SQL queries can cause SQL Injection. Also sensitive information should
+      be encrypted and written to the database.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-78
+      owasp-mobile: m7
+      masvs: platform-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2
+  - id: android_kotlin_jackson_deserialize
+    patterns:
+      - pattern: |
+          $M.enableDefaultTyping(...)
+    message: >-
+      The app uses jackson deserialization library. Deserialization of untrusted
+      input can result in arbitrary code execution.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-502
+      owasp-mobile: m7
+      masvs: platform-8
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-object-persistence-mstg-platform-8
+  - id: android_kotlin_command_injection
+    patterns:
+      - pattern-not: |
+          Runtime.getRuntime().exec("...")
+      - pattern-not: |
+          Runtime.getRuntime().exec(arrayOf("...", ...))
+      - pattern: |
+          Runtime.getRuntime().exec(...)
+    message: User controlled strings in exec() will result in command execution.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-78
+      owasp-mobile: m7
+      masvs: platform-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2
+  - id: android_kotlin_command_injection_warning
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $RUNTIME.exec($X + $Y)
+          - pattern: |
+              $RUNTIME.exec(String.format(...))
+          - pattern: |
+              $RUNTIME.loadLibrary($X + $Y)
+          - pattern: |
+              $RUNTIME.loadLibrary(String.format(...))
+          - pattern: |
+              $RUNTIME.exec("=~/(sh|bash|ksh|csh|tcsh|zsh)/", "-c", $ARG, ...)
+          - pattern: |
+              $RUNTIME.exec(arrayOf("=~/(sh|bash|ksh|csh|tcsh|zsh)/", "-c", $ARG, ...))
+      - pattern-inside: |
+          val $RUNTIME = Runtime.getRuntime()
+          ...
+    message: >-
+      A formatted or concatenated string was detected as input to a
+      java.lang.Runtime call. This is dangerous if a variable is controlled by
+      user input and could result in a command injection. Ensure your variables
+      are not controlled by users or sufficiently sanitized.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-78
+      owasp-mobile: m7
+      masvs: platform-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2
+  - id: android_kotlin_object_deserialization
+    patterns:
+      - pattern: |
+          ObjectInputStream(...)
+    message: >-
+      Found object deserialization using ObjectInputStream. Deserializing entire
+      Java objects is dangerous because malicious actors can create Java object
+      streams with unintended consequences. Ensure that the objects being
+      deserialized are not user-controlled.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-502
+      owasp-mobile: m1
+      masvs: platform-8
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-object-persistence-mstg-platform-8
+  - id: android_kotlin_xmlinputfactory_xxe
+    patterns:
+      - pattern-not-inside: |
+          fun $METHOD(...) {
+            ...
+            $XMLFACTORY.setProperty("javax.xml.stream.isSupportingExternalEntities", false)
+            ...
+          }
+      - pattern-either:
+          - pattern: |
+              val $XMLFACTORY = XMLInputFactory.newFactory(...)
+          - pattern: |
+              val $XMLFACTORY = XMLInputFactory.newInstance(...)
+          - pattern: |
+              XMLInputFactory.newFactory(...)
+          - pattern: |
+              XMLInputFactory.newInstance(...)
+    message: >-
+      XML external entities are not explicitly disabled for this
+      XMLInputFactory. This could be vulnerable to XML external entity
+      vulnerabilities. Explicitly disable external entities by setting
+      "javax.xml.stream.isSupportingExternalEntities" to false.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-611
+      owasp-mobile: m8
+      masvs: platform-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2
+  - id: android_kotlin_xmlinputfactory_xxe_enabled
+    patterns:
+      - pattern: |
+          $XMLFACTORY.setProperty("javax.xml.stream.isSupportingExternalEntities", true)
+    message: >-
+      XML external entities are enabled for this XMLInputFactory. This is
+      vulnerable to XML external entity attacks. Disable external entities by
+      setting "javax.xml.stream.isSupportingExternalEntities" to false.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-611
+      owasp-mobile: m8
+      masvs: platform-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2
+  - id: android_kotlin_xml_decoder_xxe
+    patterns:
+      - pattern: |
+          fun $METHOD(...): $R {
+            ...
+            XMLDecoder(...)
+            ...
+          }
+      - pattern-not: |
+          fun $METHOD(...): $R {
+            ...
+            XMLDecoder("...")
+            ...
+          }
+      - pattern-not: |
+          fun $METHOD(...): $R {
+            ...
+            val $STR = "..."
+            ...
+            XMLDecoder($STR)
+            ...
+          }
+    message: >-
+      XMLDecoder should not be used to parse untrusted data.
+      Deserializing user input can lead to arbitrary code execution.
+      Use an alternative and explicitly disable external entities.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-611
+      owasp-mobile: m8
+      masvs: platform-2
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2
+

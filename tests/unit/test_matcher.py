@@ -20,6 +20,17 @@ def test_new_android_kotlin_rules():
         'android_kotlin_sensitive_input_keyboard_cache',
         'android_kotlin_custom_xor_crypto',
         'android_kotlin_sensitive_notification',
+        'android_kotlin_biometric_without_crypto',
+        'android_kotlin_aes_hardcoded_key',
+        'android_kotlin_cbc_static_iv',
+        'android_kotlin_insecure_sslv3',
+        'android_kotlin_weak_key_size',
+        'android_kotlin_webview_set_allow_file_access',
+        'android_kotlin_command_injection',
+        'android_kotlin_object_deserialization',
+        'android_kotlin_xmlinputfactory_xxe',
+        'android_kotlin_xmlinputfactory_xxe_enabled',
+        'android_kotlin_xml_decoder_xxe',
     }
     assert expected.issubset(res['results'])
 

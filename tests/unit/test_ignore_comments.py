@@ -35,6 +35,10 @@ def test_ios_log_line_level_and_bol_ignore():
     files = res['results']['ios_log']['files']
     # Two suppressed NSLog lines removed; unsuppressed NSLog + os_log remain
     assert len(files) == 2
-    assert sorted(f['match_string'] for f in files) == ['NSLog(', 'os_log(']
+    lines = sorted(f['match_lines'][0] for f in files)
+    assert lines == [5, 6]
+    src_text = (src / 'IgnoreLog.swift').read_text(encoding='utf-8')
+    assert 'NSLog("still reported")' in src_text
+    assert 'os_log("also reported")' in src_text
     for match in files:
         assert not scan.suppress_pm_comments(match, 'ios_log')

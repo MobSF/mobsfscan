@@ -1,0 +1,37 @@
+rules:
+  - id: android_ssl_pinning
+    patterns:
+      - pattern-either:
+          - pattern: |
+              CertificatePinner.Builder()
+          - pattern: |
+              CertificatePinner.Builder(...)
+          - pattern: |
+              PinningHelper.getPinnedHttpsURLConnection(...)
+          - pattern: |
+              PinningHelper.getPinnedHttpClient(...)
+          - pattern: |
+              PinningSSLSocketFactory(...)
+          - pattern: |
+              PinningHostnameVerifier(...)
+          - pattern: |
+              DynamicPinningHostnameVerifier(...)
+          - pattern: |
+              TrustManagerFactory.getInstance(...)
+          - pattern: |
+              $X.setHostnameVerifier(...)
+          - pattern: |
+              $KS.setCertificateEntry(...)
+          - pattern-regex: 'org\.thoughtcrime\.ssl\.pinning'
+    message: >-
+      This app does not use TLS/SSL certificate or public key pinning to detect
+      or prevent MITM attacks in secure communication channel.
+    languages:
+      - kotlin
+    severity: INFO
+    metadata:
+      cwe: cwe-295
+      owasp-mobile: m3
+      masvs: network-4
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4

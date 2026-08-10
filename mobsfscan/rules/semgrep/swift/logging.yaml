@@ -1,0 +1,23 @@
+rules:
+  - id: ios_log
+    patterns:
+      - pattern-either:
+          - pattern: |
+              NSLog(...)
+          - pattern: |
+              os_log(...)
+          - pattern: |
+              OSLog(...)
+          - pattern: |
+              os_signpost(...)
+    message: >-
+      The App logs information to the system console. Sensitive information should never be logged.
+    languages:
+      - swift
+    severity: INFO
+    metadata:
+      cwe: cwe-532
+      masvs: storage-3
+      owasp-mobile: m1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06i-Testing-Code-Quality-and-Build-Settings.md#finding-debugging-code-and-verbose-error-logging-mstg-code-4
