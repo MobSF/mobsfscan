@@ -351,8 +351,9 @@
     Files may contain hardcoded sensitive information like usernames,
     passwords, keys etc.
   input_case: lower
+  # Avoid matching lookup names ending in Key; same as ios_hardcoded_secret (#111).
   pattern: >-
-    (password\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|(pass\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|(username\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|(secret\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|(key\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})
+    (password\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|(pass\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|(username\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|(secret\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5})|((?<![a-z0-9_])key|(?:api|secret|private|access|encryption|auth)_?key)\s*=\s*[\'|\"].{1,100}[\'|\"]\s{0,5}
   severity: WARNING
   type: Regex
   metadata:
