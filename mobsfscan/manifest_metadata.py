@@ -319,4 +319,137 @@ metadata = {
                 'Communication.md'),
         },
     },
+    # iOS App Transport Security (Info.plist)
+    'ios_ats_arbitrary_loads': {
+        'message': (
+            'App Transport Security is disabled for all network '
+            'connections by NSAllowsArbitraryLoads.'),
+        'severity': 'ERROR',
+        'reference': 'NSAllowsArbitraryLoads=true',
+        'metadata': {
+            'cwe': 'cwe-319',
+            'owasp-mobile': 'm5',
+            'masvs': 'network-1',
+            'reference': (
+                'https://developer.apple.com/documentation/bundleresources/'
+                'information-property-list/nsapptransportsecurity'),
+        },
+    },
+    'ios_ats_arbitrary_loads_for_media': {
+        'message': (
+            'App Transport Security is disabled for media loaded through '
+            'AVFoundation.'),
+        'severity': 'ERROR',
+        'reference': 'NSAllowsArbitraryLoadsForMedia=true',
+        'metadata': {
+            'cwe': 'cwe-319',
+            'owasp-mobile': 'm5',
+            'masvs': 'network-1',
+            'reference': (
+                'https://developer.apple.com/documentation/bundleresources/'
+                'information-property-list/nsapptransportsecurity'),
+        },
+    },
+    'ios_ats_arbitrary_loads_in_web_content': {
+        'message': (
+            'App Transport Security is disabled for requests made from '
+            'WebViews.'),
+        'severity': 'ERROR',
+        'reference': 'NSAllowsArbitraryLoadsInWebContent=true',
+        'metadata': {
+            'cwe': 'cwe-319',
+            'owasp-mobile': 'm5',
+            'masvs': 'network-1',
+            'reference': (
+                'https://developer.apple.com/documentation/bundleresources/'
+                'information-property-list/nsapptransportsecurity'),
+        },
+    },
+    'ios_ats_local_networking': {
+        'message': (
+            'App Transport Security restrictions are disabled for local '
+            'network connections.'),
+        'severity': 'INFO',
+        'reference': 'NSAllowsLocalNetworking=true',
+        'metadata': {
+            'cwe': 'cwe-319',
+            'owasp-mobile': 'm5',
+            'masvs': 'network-1',
+            'reference': (
+                'https://developer.apple.com/documentation/bundleresources/'
+                'information-property-list/nsapptransportsecurity'),
+        },
+    },
+    'ios_ats_insecure_http_loads': {
+        'message': 'ATS permits insecure HTTP loads for domain {}.',
+        'severity': 'ERROR',
+        'reference': 'NSExceptionAllowsInsecureHTTPLoads=true',
+        'metadata': {
+            'cwe': 'cwe-319',
+            'owasp-mobile': 'm5',
+            'masvs': 'network-1',
+            'reference': (
+                'https://developer.apple.com/documentation/bundleresources/'
+                'information-property-list/nsapptransportsecurity/'
+                'nsexceptiondomains'),
+        },
+    },
+    'ios_ats_weak_tls': {
+        'message': 'ATS minimum TLS version is {} for domain {}.',
+        'severity': 'ERROR',
+        'reference': 'NSExceptionMinimumTLSVersion=TLSv1.0/TLSv1.1',
+        'metadata': {
+            'cwe': 'cwe-326',
+            'owasp-mobile': 'm5',
+            'masvs': 'network-2',
+            'reference': (
+                'https://developer.apple.com/documentation/bundleresources/'
+                'information-property-list/nsapptransportsecurity/'
+                'nsexceptiondomains'),
+        },
+    },
+    'ios_ats_tls12': {
+        'message': (
+            'ATS minimum TLS version is TLSv1.2 for domain {}; prefer '
+            'TLSv1.3 where supported.'),
+        'severity': 'WARNING',
+        'reference': 'NSExceptionMinimumTLSVersion=TLSv1.2',
+        'metadata': {
+            'cwe': 'cwe-326',
+            'owasp-mobile': 'm5',
+            'masvs': 'network-2',
+            'reference': (
+                'https://developer.apple.com/documentation/bundleresources/'
+                'information-property-list/nsapptransportsecurity/'
+                'nsexceptiondomains'),
+        },
+    },
+    'ios_ats_forward_secrecy_disabled': {
+        'message': 'ATS forward secrecy is disabled for domain {}.',
+        'severity': 'ERROR',
+        'reference': 'NSExceptionRequiresForwardSecrecy=false',
+        'metadata': {
+            'cwe': 'cwe-326',
+            'owasp-mobile': 'm5',
+            'masvs': 'network-2',
+            'reference': (
+                'https://developer.apple.com/documentation/bundleresources/'
+                'information-property-list/nsapptransportsecurity/'
+                'nsexceptiondomains'),
+        },
+    },
+    'ios_ats_certificate_transparency_disabled': {
+        'message': 'ATS certificate transparency is disabled for domain {}.',
+        'severity': 'WARNING',
+        'reference': 'NSRequiresCertificateTransparency=false',
+        'metadata': {
+            'cwe': 'cwe-295',
+            'owasp-mobile': 'm5',
+            'masvs': 'network-3',
+            'reference': (
+                'https://developer.apple.com/documentation/bundleresources/'
+                'information-property-list/nsapptransportsecurity/'
+                'nsexceptiondomains'),
+        },
+    },
 }

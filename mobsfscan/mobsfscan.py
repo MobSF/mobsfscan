@@ -11,6 +11,7 @@ from libsast import (
 from mobsfscan.logger import init_logger
 from mobsfscan import settings
 from mobsfscan import manifest
+from mobsfscan import ios_plist
 from mobsfscan.utils import (
     get_best_practices,
     get_config,
@@ -50,10 +51,12 @@ class MobSFScan:
             'errors': [],
         }
         self.xmls = []
+        self.plists = []
         self.best_practices = None
         self.standards = standards.get_standards()
         self.get_extensions()
         self.get_xmls()
+        self.get_plists()
 
     def rules_selector(self, suffix):
         """Get rule extensions from suffix."""
@@ -106,6 +109,16 @@ class MobSFScan:
                 if pobj.suffix == '.xml':
                     self.xmls.append(pobj)
 
+    def get_plists(self) -> set:
+        """Get Info.plist files for scanning."""
+        for path in self.paths:
+            pobj = Path(path)
+            if pobj.is_dir():
+                for pfile in pobj.rglob('Info.plist'):
+                    self.plists.append(pfile)
+            elif pobj.name == 'Info.plist':
+                self.plists.append(pobj)
+
     def scan(self) -> dict:
         """Start Scan."""
         scanner = Scanner(self.options, self.paths)
@@ -120,6 +133,16 @@ class MobSFScan:
             logger.warning(
                 'Android XML checks failed. '
                 'Please report to mobsfscan project')
+        try:
+            if self.plists and self.scan_type in ('auto', 'ios'):
+                result['plist_checks'] = ios_plist.scan_plists(
+                    self.plists,
+                    scanner.validate_file,
+                )
+        except Exception:
+            logger.warning(
+                'iOS Info.plist checks failed. '
+                'Please report to mobsfscan project')
 
         if result:
             self.format_output(result)
@@ -131,6 +154,7 @@ class MobSFScan:
         # TODO: When we support kotlin semgrep, this needs rework
         self.format_pattern(results.get('pattern_matcher'))
         self.format_pattern(results.get('xml_checks'))
+        self.format_pattern(results.get('plist_checks'))
         self.missing_controls()
         self.post_ignore_rules()
         self.post_override_severities()
