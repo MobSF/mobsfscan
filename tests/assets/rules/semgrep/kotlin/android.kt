@@ -1,13 +1,19 @@
 
-fun hidden(v: android.view.View, show: Boolean) {
+fun hidden(passwordView: android.view.View, headerDivider: android.view.View, show: Boolean) {
     // ruleid:android_kotlin_hiddenui
-    v.visibility = View.GONE
+    passwordView.visibility = View.GONE
     // ruleid:android_kotlin_hiddenui
-    v.visibility = View.INVISIBLE
+    passwordView.visibility = View.INVISIBLE
     // ruleid:android_kotlin_hiddenui
-    v.visibility = if (show) View.GONE else View.VISIBLE
+    passwordView.visibility = if (show) View.GONE else View.VISIBLE
+    // ruleid:android_kotlin_hiddenui
+    passwordView.setVisibility(View.GONE)
     // ok:android_kotlin_hiddenui
-    v.visibility = View.VISIBLE
+    passwordView.visibility = View.VISIBLE
+    // ok:android_kotlin_hiddenui
+    headerDivider.visibility = View.GONE
+    // ok:android_kotlin_hiddenui
+    headerDivider.setVisibility(View.INVISIBLE)
 }
 
 fun logging() {
