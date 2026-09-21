@@ -14,12 +14,15 @@ rules:
               $V.setVisibility(View.GONE)
           - pattern: |
               $V.setVisibility(View.INVISIBLE)
+      - metavariable-regex:
+          metavariable: $V
+          regex: (?i).*(?:password|passcode|pin|cvv|card(?:num|number)?|secret|token|otp|auth).*
     message: >-
       Hidden elements in view can be used to hide data from user. But this data
       can be leaked.
     languages:
       - kotlin
-    severity: ERROR
+    severity: WARNING
     metadata:
       cwe: cwe-919
       owasp-mobile: m1

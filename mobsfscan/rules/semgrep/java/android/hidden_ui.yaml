@@ -14,13 +14,16 @@ rules:
               $V = View.INVISIBLE;
               ...
               $X.setVisibility($V);
+      - metavariable-regex:
+          metavariable: $X
+          regex: (?i).*(?:password|passcode|pin|cvv|card(?:num|number)?|secret|token|otp|auth).*
     message: >-
       Hidden elements in view can be used to hide data from user. But this data
       can be leaked. If the view contains sensitive data, it might still be accessible through memory inspection.
       A good practice is to clear sensitive data before hiding it.
     languages:
       - java
-    severity: ERROR
+    severity: WARNING
     metadata:
       cwe: cwe-919
       owasp-mobile: m1
