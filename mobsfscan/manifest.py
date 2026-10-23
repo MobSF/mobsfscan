@@ -79,6 +79,7 @@ def scan_manifest(xml_paths, validate_func):
             p = parse(xml_path.read_text())
         except Exception:
             logger.warning('Failed to parse XML: %s', xml_path)
+            continue
         if p:
             findings = do_checks(
                 report_path(xml_path), p)
