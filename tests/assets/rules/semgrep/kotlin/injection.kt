@@ -79,7 +79,11 @@ class BadProvider {
         return null
     }
 
-    override fun openTypedAssetFile(uri: Uri, mime: String): ParcelFileDescriptor? {
+    override fun openTypedAssetFile(
+        uri: Uri,
+        mimeTypeFilter: String,
+        opts: Bundle?,
+    ): ParcelFileDescriptor? {
         // ruleid:android_kotlin_provider_path_traversal
         val file = File(uri.path)
         return null

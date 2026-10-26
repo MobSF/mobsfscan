@@ -36,7 +36,7 @@ def test_sensitive_layout_input_keyboard_cache():
     assert not Path(files[0]).is_absolute()
 
 
-def test_xml_google_key_and_pem_merge_with_source():
+def test_xml_google_key_merges_with_source():
     src = (
         Path(__file__).resolve().parents[1]
         / 'assets' / 'src' / 'android_xml_secrets')
@@ -46,11 +46,8 @@ def test_xml_google_key_and_pem_merge_with_source():
         for item in res['results']['google_api_key']['files']]
     assert any(path.endswith('Secrets.java') for path in key_files)
     assert any(path.endswith('strings.xml') for path in key_files)
-    pem_files = [
-        item['file_path']
-        for item in res['results']['private_key_pem']['files']]
-    assert any(path.endswith('strings.xml') for path in pem_files)
-    assert not any(path.endswith('Secrets.java') for path in pem_files)
+    # PEM material in XML is not a manifest/resource pattern.
+    assert 'private_key_pem' not in res['results']
 
 
 def test_unparsable_xml_does_not_reuse_previous_document(tmp_path):

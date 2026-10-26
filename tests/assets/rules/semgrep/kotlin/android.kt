@@ -83,6 +83,15 @@ fun goodPending(context: Context, intent: Intent) {
     PendingIntent.getBroadcast(context, 0, intent, sdkFlags)
 }
 
+fun badUnrelatedIf(context: Context, intent: Intent, immutableRequested: Boolean) {
+    var flags = PendingIntent.FLAG_UPDATE_CURRENT
+    if (immutableRequested) {
+        flags = flags or PendingIntent.FLAG_IMMUTABLE
+    }
+    // ruleid:android_kotlin_pending_intent_not_immutable
+    PendingIntent.getBroadcast(context, 0, intent, flags)
+}
+
 fun externalDb(context: Context) {
     // ruleid:android_kotlin_db_on_external_storage
     val path = context.getExternalFilesDir(null)!!.path + "/app.db"
@@ -95,6 +104,10 @@ fun externalDb(context: Context) {
     SQLiteDatabase.openOrCreateDatabase(db.absolutePath, null)
     // ok:android_kotlin_db_on_external_storage
     SQLiteDatabase.openOrCreateDatabase("app.db", null)
+    // ruleid:android_kotlin_db_on_external_storage
+    val publicPath = Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_DOWNLOADS).path + "/app.db"
+    SQLiteDatabase.openDatabase(publicPath, null, SQLiteDatabase.OPEN_READWRITE)
 }
 
 // ruleid:android_kotlin_db_on_external_storage

@@ -58,7 +58,7 @@ rules:
           ...
           PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS);
       - pattern-not-inside: |
-          if (...) {
+          if (<... Build.VERSION.SDK_INT ...>) {
             ...
             $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
             ...
@@ -66,7 +66,7 @@ rules:
           ...
           PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS);
       - pattern-not-inside: |
-          if (...) {
+          if (<... Build.VERSION.SDK_INT ...>) {
             ...
             $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
             ...
@@ -74,7 +74,7 @@ rules:
           ...
           PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS);
       - pattern-not-inside: |
-          if (...) {
+          if (<... Build.VERSION.SDK_INT ...>) {
             ...
             $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
             ...
@@ -82,7 +82,7 @@ rules:
           ...
           PendingIntent.getService($CTX, $REQ, $I, $FLAGS);
       - pattern-not-inside: |
-          if (...) {
+          if (<... Build.VERSION.SDK_INT ...>) {
             ...
             $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
             ...
@@ -97,7 +97,7 @@ rules:
       required.
     languages:
       - java
-    severity: WARNING
+    severity: INFO
     metadata:
       cwe: cwe-926
       owasp-mobile: m1

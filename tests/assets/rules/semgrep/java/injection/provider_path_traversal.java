@@ -49,6 +49,15 @@ class GoodPathProvider {
     }
 }
 
+class UnusedCanonicalPath {
+    ParcelFileDescriptor openFile(Uri uri, String mode) throws Exception {
+        // ruleid:android_provider_path_traversal
+        File file = new File(getContext().getFilesDir(), uri.getLastPathSegment());
+        String unused = file.getCanonicalPath();
+        return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+    }
+}
+
 class NotAProvider {
     File helper(Uri uri) {
         // ok:android_provider_path_traversal

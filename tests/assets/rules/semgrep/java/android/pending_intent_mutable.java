@@ -52,6 +52,15 @@ class PendingIntentSamples {
         PendingIntent.getBroadcast(context, 0, intent, flags);
     }
 
+    void badUnrelatedIf(Context context, Intent intent, boolean immutableRequested) {
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (immutableRequested) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        // ruleid:android_pending_intent_not_immutable
+        PendingIntent.getBroadcast(context, 0, intent, flags);
+    }
+
     void goodBare(Context context, Intent intent) {
         int flags = FLAG_IMMUTABLE | FLAG_UPDATE_CURRENT;
         // ok:android_pending_intent_not_immutable

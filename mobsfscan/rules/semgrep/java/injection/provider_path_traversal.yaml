@@ -32,7 +32,7 @@ rules:
       - pattern-not-inside: |
           $FILE = new File(...);
           ...
-          if (<... $FILE.getCanonicalPath() ...>) {
+          if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
             ...
           }
       - pattern-not-inside: |
@@ -40,6 +40,9 @@ rules:
           ...
           $CANON = $FILE.getCanonicalPath();
           ...
+          if (<... $CANON.startsWith(...) ...>) {
+            ...
+          }
     message: >-
       ContentProvider openFile() or openAssetFile() builds a filesystem path
       from the URI without checking that file's canonical path. If the

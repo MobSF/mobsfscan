@@ -73,6 +73,15 @@ class HelperFiles extends SQLiteOpenHelper {
     }
 }
 
+class NotADatabase {
+    NotADatabase(Context context) {
+        // ok:android_db_on_external_storage
+        super(
+            context,
+            new File(context.getExternalFilesDir(null), "images").getAbsolutePath());
+    }
+}
+
 class HelperInternal extends SQLiteOpenHelper {
     HelperInternal(Context context) {
         // ok:android_db_on_external_storage

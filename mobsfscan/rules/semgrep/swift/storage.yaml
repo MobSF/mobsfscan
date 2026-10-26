@@ -36,7 +36,7 @@ rules:
       version is at least 2.1.4 and that the archive is trusted.
     languages:
       - swift
-    severity: WARNING
+    severity: INFO
     metadata:
       cwe: cwe-22
       owasp-mobile: m1

@@ -34,7 +34,7 @@ rules:
       - pattern-not-inside: |
           $FILE = new File(...);
           ...
-          if (<... $FILE.getCanonicalPath() ...>) {
+          if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
             ...
           }
       - pattern-not-inside: |
@@ -42,6 +42,9 @@ rules:
           ...
           $CANON = $FILE.getCanonicalPath();
           ...
+          if (<... $CANON.startsWith(...) ...>) {
+            ...
+          }
     message: >-
       ZipEntry file name flows into new File() without a canonical-path
       check on that file. A malicious archive entry using ../ paths can

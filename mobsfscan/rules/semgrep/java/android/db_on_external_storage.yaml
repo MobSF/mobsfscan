@@ -72,14 +72,18 @@ rules:
               SQLiteDatabase.openOrCreateDatabase(new File(Environment.getExternalStorageDirectory(), $N), ...)
           - pattern: |
               SQLiteDatabase.openDatabase(new File(Environment.getExternalStorageDirectory(), $N), ...)
-          - pattern: |
-              super($CTX, <... Environment.getExternalStorageDirectory() ...>, ...)
-          - pattern: |
-              super($CTX, <... Environment.getExternalStoragePublicDirectory(...) ...>, ...)
-          - pattern: |
-              super($CTX, new File($C.getExternalFilesDir(...), $N).getAbsolutePath(), ...)
-          - pattern: |
-              super($CTX, new File(Environment.getExternalStorageDirectory(), $N).getAbsolutePath(), ...)
+          - patterns:
+              - pattern-inside: |
+                  class $CLS extends SQLiteOpenHelper { ... }
+              - pattern-either:
+                  - pattern: |
+                      super($CTX, <... Environment.getExternalStorageDirectory() ...>, ...)
+                  - pattern: |
+                      super($CTX, <... Environment.getExternalStoragePublicDirectory(...) ...>, ...)
+                  - pattern: |
+                      super($CTX, new File($C.getExternalFilesDir(...), $N).getAbsolutePath(), ...)
+                  - pattern: |
+                      super($CTX, new File(Environment.getExternalStorageDirectory(), $N).getAbsolutePath(), ...)
           - pattern-inside: |
               $DIR = Environment.getExternalStoragePublicDirectory(...);
               ...

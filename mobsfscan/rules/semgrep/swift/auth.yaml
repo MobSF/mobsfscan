@@ -75,7 +75,7 @@ rules:
       (code / PKCE verifier). Prefer universal links (https) redirects.
     languages:
       - swift
-    severity: WARNING
+    severity: INFO
     metadata:
       cwe: cwe-601
       owasp-mobile: m2

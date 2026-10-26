@@ -26,11 +26,6 @@ func startAuthExplicit(url: URL) {
         completionHandler: { callbackURL, error in })
 }
 
-// Should match ios_wkwebview_script_message_handler
-func setupBridge(webView: WKWebView) {
-    webView.configuration.userContentController.add(self, name: "bridge")
-}
-
 // Should match ios_ssziparchive_unzip
 func extract(archive: String, dest: String) {
     SSZipArchive.unzipFile(atPath: archive, toDestination: dest)

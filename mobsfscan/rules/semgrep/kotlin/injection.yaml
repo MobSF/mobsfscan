@@ -199,9 +199,9 @@ rules:
           - pattern-inside: |
               override fun openAssetFile($URI: Uri, $MODE: String): $RET { ... }
           - pattern-inside: |
-              fun openTypedAssetFile($URI: Uri, $MODE: String): $RET { ... }
+              fun openTypedAssetFile($URI: Uri, ...): $RET { ... }
           - pattern-inside: |
-              override fun openTypedAssetFile($URI: Uri, $MODE: String): $RET { ... }
+              override fun openTypedAssetFile($URI: Uri, ...): $RET { ... }
       - pattern-either:
           - pattern: File($BASE, $URI.lastPathSegment)
           - pattern: File($URI.lastPathSegment)
@@ -241,13 +241,13 @@ rules:
       - pattern-not-inside: |
           $FILE = File(...)
           ...
-          if (<... $FILE.canonicalPath ...>) {
+          if (<... $FILE.canonicalPath.startsWith(...) ...>) {
             ...
           }
       - pattern-not-inside: |
           $FILE = File(...)
           ...
-          if (<... $FILE.getCanonicalPath() ...>) {
+          if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
             ...
           }
       - pattern-not-inside: |
@@ -255,11 +255,17 @@ rules:
           ...
           $CANON = $FILE.canonicalPath
           ...
+          if (<... $CANON.startsWith(...) ...>) {
+            ...
+          }
       - pattern-not-inside: |
           $FILE = File(...)
           ...
           $CANON = $FILE.getCanonicalPath()
           ...
+          if (<... $CANON.startsWith(...) ...>) {
+            ...
+          }
     message: >-
       ContentProvider openFile() or openAssetFile() builds a filesystem path
       from the URI without checking that file's canonical path. If the
@@ -299,7 +305,7 @@ rules:
       - pattern-not-inside: |
           $FILE = File(...)
           ...
-          if (<... $FILE.canonicalPath ...>) {
+          if (<... $FILE.canonicalPath.startsWith(...) ...>) {
             ...
           }
       - pattern-not-inside: |
@@ -307,6 +313,9 @@ rules:
           ...
           $CANON = $FILE.canonicalPath
           ...
+          if (<... $CANON.startsWith(...) ...>) {
+            ...
+          }
     message: >-
       ZipEntry file name flows into File() without a canonical-path check on
       that file. A malicious archive entry using ../ paths can write outside

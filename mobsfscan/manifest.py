@@ -29,9 +29,6 @@ SENSITIVE_INPUT_NAME = re.compile(
 GOOGLE_API_KEY = re.compile(
     r'(?<![A-Za-z0-9_])AIza[0-9A-Za-z_\-]{35}(?![A-Za-z0-9_])',
 )
-PRIVATE_KEY_PEM = re.compile(
-    r'-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----',
-)
 ANDROID_API_LEVEL_MAP = {
     '1': '1.0',
     '2': '1.1',
@@ -101,11 +98,9 @@ def scan_manifest(xml_paths, validate_func):
 
 
 def secret_material_checks(findings, xml_path, raw_text):
-    """Flag Google API keys and PEM private keys in Android XML."""
+    """Flag Google API keys in Android XML."""
     if GOOGLE_API_KEY.search(raw_text):
         add_finding(findings, xml_path, 'google_api_key')
-    if PRIVATE_KEY_PEM.search(raw_text):
-        add_finding(findings, xml_path, 'private_key_pem')
 
 
 def mobsfscan_format(results):

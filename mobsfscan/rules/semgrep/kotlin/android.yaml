@@ -230,7 +230,7 @@ rules:
           ...
           PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS)
       - pattern-not-inside: |
-          if (...) {
+          if (<... Build.VERSION.SDK_INT ...>) {
             ...
             $FLAGS = <... $P.FLAG_IMMUTABLE ...>
             ...
@@ -238,7 +238,7 @@ rules:
           ...
           PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS)
       - pattern-not-inside: |
-          if (...) {
+          if (<... Build.VERSION.SDK_INT ...>) {
             ...
             $FLAGS = <... $P.FLAG_IMMUTABLE ...>
             ...
@@ -246,7 +246,7 @@ rules:
           ...
           PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS)
       - pattern-not-inside: |
-          if (...) {
+          if (<... Build.VERSION.SDK_INT ...>) {
             ...
             $FLAGS = <... $P.FLAG_IMMUTABLE ...>
             ...
@@ -254,7 +254,7 @@ rules:
           ...
           PendingIntent.getService($CTX, $REQ, $I, $FLAGS)
       - pattern-not-inside: |
-          if (...) {
+          if (<... Build.VERSION.SDK_INT ...>) {
             ...
             $FLAGS = <... $P.FLAG_IMMUTABLE ...>
             ...
@@ -269,7 +269,7 @@ rules:
       required.
     languages:
       - kotlin
-    severity: WARNING
+    severity: INFO
     metadata:
       cwe: cwe-926
       owasp-mobile: m1
@@ -311,6 +311,22 @@ rules:
               $FILE = File($CTX.getExternalFilesDir(...), $N)
               ...
               SQLiteDatabase.openOrCreateDatabase($FILE, ...)
+          - pattern-inside: |
+              $P = $CTX.getExternalFilesDir(...)!!.path + $REST
+              ...
+              SQLiteDatabase.openDatabase($P, ...)
+          - pattern-inside: |
+              $P = Environment.getExternalStorageDirectory().absolutePath + $REST
+              ...
+              SQLiteDatabase.openDatabase($P, ...)
+          - pattern-inside: |
+              $P = Environment.getExternalStoragePublicDirectory($D).path + $REST
+              ...
+              SQLiteDatabase.openDatabase($P, ...)
+          - pattern-inside: |
+              $FILE = File($CTX.getExternalFilesDir(...), $N)
+              ...
+              SQLiteDatabase.openDatabase($FILE.absolutePath, ...)
           - pattern: |
               class $C(...) : SQLiteOpenHelper($CTX, <... Environment.getExternalStorageDirectory() ...>, ...)
           - pattern: |

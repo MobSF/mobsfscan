@@ -152,8 +152,8 @@
     that the archive is trusted. Matches one unzipFileAtPath call that
     passes toDestination, including delegate and progress-handler overloads.
   input_case: exact
-  pattern: 'unzipFileAtPath\s*:[\s\S]{0,800}?toDestination\s*:'
-  severity: WARNING
+  pattern: '\[SSZipArchive\s+unzipFileAtPath\s*:(?:[^;\]]|\[[^\]]*\]){0,800}?toDestination\s*:'
+  severity: INFO
   type: Regex
   metadata:
     cwe: cwe-22
