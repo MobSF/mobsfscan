@@ -36,6 +36,8 @@ runs:
   steps:
     - shell: bash
       run: |
+        # A caller's PYTHONPATH can point into the scanned workspace.
+        unset PYTHONPATH
         echo "::group::Installing mobsfscan dependencies"
         cd "$GITHUB_ACTION_PATH"
         python3 -m pip install -r requirements.txt
@@ -43,6 +45,7 @@ runs:
 
     - shell: bash
       run: |
+        unset PYTHONPATH
         echo "Running mobsfscan..."
         python3 "$GITHUB_ACTION_PATH/action_entrypoint.py" ${{ inputs.args }}
         echo "Finished"
