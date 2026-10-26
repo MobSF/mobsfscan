@@ -146,15 +146,15 @@
     owasp-mobile: m1
     reference: https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06f-Testing-Local-Authentication.md#local-authentication-framework
 - id: ios_sszip_unzip
-  message: SSZipArchive extraction of archives. Versions below 2.1.4 are
-    vulnerable to path traversal (ZipSlip). Verify the library version and
-    the trust level of the archive source.
+  message: >-
+    SSZipArchive extraction of archives. Versions below 2.1.4 (2018) are
+    vulnerable to path traversal (ZipSlip). Confirm the linked version and
+    that the archive is trusted. Matches one unzipFileAtPath call that
+    passes toDestination, including delegate and progress-handler overloads.
   input_case: exact
-  pattern:
-  - unzipFileAtPath
-  - toDestination
+  pattern: 'unzipFileAtPath\s*:[\s\S]{0,800}?toDestination\s*:'
   severity: WARNING
-  type: RegexAnd
+  type: Regex
   metadata:
     cwe: cwe-22
     masvs: platform-2

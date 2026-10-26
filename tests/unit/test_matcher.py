@@ -40,3 +40,7 @@ def test_ios():
 
     res = scanner([paths['objc'], paths['swift']])
     assert len(res['results'].keys()) != 0
+    files = res['results']['ios_sszip_unzip'].get('files') or []
+    paths_found = [item.get('file_path') or '' for item in files]
+    assert any(path.endswith('objectivec.m') for path in paths_found)
+    assert not any('sszip_negative.m' in path for path in paths_found)

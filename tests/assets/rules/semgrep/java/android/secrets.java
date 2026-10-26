@@ -47,6 +47,17 @@ public class App
     }
 }
 
+class MaterialSamples {
+    // ruleid:google_api_key
+    static String maps = "AIza12345678901234567890123456789012345";
+    // ok:google_api_key
+    static String brief = "AIza12345";
+    // ruleid:private_key_pem
+    static String material = "-----BEGIN ENCRYPTED PRIVATE KEY-----\nabc";
+    // ok:private_key_pem
+    static String pub = "-----BEGIN PUBLIC KEY-----";
+}
+
 abstract class App2
 {
 

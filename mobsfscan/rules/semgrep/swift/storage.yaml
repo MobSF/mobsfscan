@@ -28,16 +28,12 @@ rules:
       reference: >-
         https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#uipasteboard
   - id: ios_ssziparchive_unzip
-    patterns:
-      - pattern-either:
-          - pattern: |
-              SSZipArchive.unzipFile(atPath: $SRC, toDestination: $DEST)
-          - pattern: |
-              SSZipArchive.unzipFile(atPath: $SRC, toDestination: $DEST, overwrite: $O, password: $P)
+    pattern: SSZipArchive.unzipFile(...)
     message: >-
-      SSZipArchive extraction. Versions below 2.1.4 are vulnerable to path
-      traversal (ZipSlip) when extracting malicious archives. Verify the
-      library version and the trust level of the archive source.
+      SSZipArchive extraction. Versions below 2.1.4 (2018) are vulnerable to
+      path traversal (ZipSlip). This matches every unzipFile overload,
+      including delegate and progress-handler forms. Confirm the linked
+      version is at least 2.1.4 and that the archive is trusted.
     languages:
       - swift
     severity: WARNING

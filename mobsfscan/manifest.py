@@ -26,6 +26,12 @@ SENSITIVE_INPUT_NAME = re.compile(
     r'(?:password|passcode|pin|secret|otp|token)',
     re.IGNORECASE,
 )
+GOOGLE_API_KEY = re.compile(
+    r'(?<![A-Za-z0-9_])AIza[0-9A-Za-z_\-]{35}(?![A-Za-z0-9_])',
+)
+PRIVATE_KEY_PEM = re.compile(
+    r'-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----',
+)
 ANDROID_API_LEVEL_MAP = {
     '1': '1.0',
     '2': '1.1',
@@ -71,21 +77,35 @@ ANDROID_API_LEVEL_MAP = {
 def scan_manifest(xml_paths, validate_func):
     """Scan android manifest xml."""
     results = []
-    p = None
     for xml_path in xml_paths:
         try:
             if not validate_func(xml_path):
                 continue
-            p = parse(xml_path.read_text())
+            raw = xml_path.read_text(encoding='utf-8', errors='replace')
+        except Exception:
+            logger.warning('Failed to read XML: %s', xml_path)
+            continue
+        reported = report_path(xml_path)
+        findings = []
+        secret_material_checks(findings, reported, raw)
+        try:
+            parsed = parse(raw)
         except Exception:
             logger.warning('Failed to parse XML: %s', xml_path)
-            continue
-        if p:
-            findings = do_checks(
-                report_path(xml_path), p)
-            if findings:
-                results.extend(findings)
+            parsed = None
+        if parsed:
+            findings.extend(do_checks(reported, parsed))
+        if findings:
+            results.extend(findings)
     return mobsfscan_format(results)
+
+
+def secret_material_checks(findings, xml_path, raw_text):
+    """Flag Google API keys and PEM private keys in Android XML."""
+    if GOOGLE_API_KEY.search(raw_text):
+        add_finding(findings, xml_path, 'google_api_key')
+    if PRIVATE_KEY_PEM.search(raw_text):
+        add_finding(findings, xml_path, 'private_key_pem')
 
 
 def mobsfscan_format(results):

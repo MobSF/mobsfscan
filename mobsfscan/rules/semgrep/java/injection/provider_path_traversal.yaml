@@ -3,37 +3,48 @@ rules:
     patterns:
       - pattern-either:
           - pattern-inside: |
-              $RET openFile(Uri $URI, ...) {
-                ...
-              }
+              $RET openFile(Uri $URI, ...) { ... }
           - pattern-inside: |
-              $RET $M(..., Uri $URI, ...) {
-                ...
-              }
+              $RET openAssetFile(Uri $URI, ...) { ... }
+          - pattern-inside: |
+              $RET openTypedAssetFile(Uri $URI, ...) { ... }
       - pattern-either:
           - pattern: new File($BASE, $URI.getLastPathSegment())
           - pattern: new File($URI.getLastPathSegment())
           - pattern: new File($BASE, $URI.getEncodedPath())
           - pattern: new File($URI.getEncodedPath())
           - pattern: new File($BASE, $URI.getPath())
+          - pattern: new File($URI.getPath())
+          - patterns:
+              - pattern-either:
+                  - pattern-inside: |
+                      $NAME = $URI.getLastPathSegment();
+                      ...
+                  - pattern-inside: |
+                      $NAME = $URI.getEncodedPath();
+                      ...
+                  - pattern-inside: |
+                      $NAME = $URI.getPath();
+                      ...
+              - pattern-either:
+                  - pattern: new File($BASE, $NAME)
+                  - pattern: new File($NAME)
       - pattern-not-inside: |
-          $RET $M2(...) {
-            ...
-            $X.getCanonicalPath();
+          $FILE = new File(...);
+          ...
+          if (<... $FILE.getCanonicalPath() ...>) {
             ...
           }
       - pattern-not-inside: |
-          $RET $M2(...) {
-            ...
-            if (<... $X.getCanonicalPath() ...>) {
-              ...
-            }
-            ...
-          }
+          $FILE = new File(...);
+          ...
+          $CANON = $FILE.getCanonicalPath();
+          ...
     message: >-
-      ContentProvider openFile() builds a file path from attacker-controlled
-      URI parts without canonicalization. If the provider is exported, any
-      app can traverse outside the intended directory using ../ segments.
+      ContentProvider openFile() or openAssetFile() builds a filesystem path
+      from the URI without checking that file's canonical path. If the
+      provider is exported, any app can traverse outside the intended
+      directory using ../ segments.
     languages:
       - java
     severity: ERROR

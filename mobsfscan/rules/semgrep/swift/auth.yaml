@@ -68,7 +68,7 @@ rules:
               ASWebAuthenticationSession(url: $URL, callbackURLScheme: $SCHEME, completionHandler: $H)
       - metavariable-regex:
           metavariable: "$SCHEME"
-          regex: ^"(?!https?:)[a-zA-Z0-9._-]+"$
+          regex: ^"(?!https?")[A-Za-z0-9._+-]+"$
     message: >-
       OAuth/OIDC callback uses a custom URL scheme. A malicious app can
       register the same scheme and intercept the authorization response

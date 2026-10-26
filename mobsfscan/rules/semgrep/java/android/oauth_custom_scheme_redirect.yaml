@@ -1,15 +1,16 @@
 rules:
   - id: android_oauth_custom_scheme_redirect
     patterns:
-      - pattern: |
-          $RET $M(...) {
-            ...
-            $B.setRedirectUri(Uri.parse($SCHEME));
-            ...
-          }
+      - pattern-either:
+          - pattern: |
+              $B.setRedirectUri(Uri.parse($SCHEME))
+          - pattern-inside: |
+              $V = $SCHEME;
+              ...
+              $B.setRedirectUri(Uri.parse($V));
       - metavariable-regex:
           metavariable: "$SCHEME"
-          regex: ^"(?!https?:)[a-zA-Z0-9._]+:/
+          regex: ^"(?!https?:)[A-Za-z0-9._+-]+:/
     message: >-
       OAuth redirect URI uses a custom URL scheme. Any malicious app can
       register the same scheme and intercept the authorization response

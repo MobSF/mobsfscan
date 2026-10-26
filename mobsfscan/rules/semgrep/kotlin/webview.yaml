@@ -148,21 +148,41 @@ rules:
   - id: android_kotlin_deeplink_to_webview
     patterns:
       - pattern-either:
+          - pattern: $W.loadUrl(getIntent().data.toString())
+          - pattern: $W.loadUrl($O.getIntent().data.toString())
+          - pattern: $W.loadUrl(intent.data.toString())
+          - pattern: $W.loadUrl(getIntent().dataString)
+          - pattern: $W.loadUrl($O.getIntent().dataString)
+          - pattern: $W.loadUrl(intent.dataString)
           - pattern: |
               fun $M(...) {
                 ...
-                $D = $I.data
+                $D = getIntent().data
                 ...
                 $W.loadUrl($D.toString())
                 ...
               }
-          - pattern: $W.loadUrl($I.data.toString())
-          - pattern: $W.loadUrl($I.dataString)
+          - pattern: |
+              fun $M(...) {
+                ...
+                $D = intent.data
+                ...
+                $W.loadUrl($D.toString())
+                ...
+              }
+          - pattern: |
+              fun $M(...) {
+                ...
+                $D = $O.getIntent().data
+                ...
+                $W.loadUrl($D.toString())
+                ...
+              }
     message: >-
-      Deep link or external Intent data is loaded into a WebView without an
-      allowlist. If the activity is browsable, any web page can drive this
-      load; combined with a JavaScript bridge it becomes remote content
-      injection into the app context.
+      Deep link or external Intent data is loaded into a WebView. If the
+      activity is browsable, any web page can drive this load; combined with
+      a JavaScript bridge it becomes remote content injection into the app
+      context.
     languages:
       - kotlin
     severity: WARNING

@@ -47,10 +47,10 @@ rules:
                 ...
               }
     message: >-
-      Deep link or external Intent data is loaded into a WebView without an
-      allowlist. If the activity is browsable, any web page can drive this
-      load; combined with a JavaScript bridge it becomes remote content
-      injection into the app context.
+      Deep link or external Intent data is loaded into a WebView. If the
+      activity is browsable, any web page can drive this load; combined with
+      a JavaScript bridge it becomes remote content injection into the app
+      context.
     languages:
       - java
     severity: WARNING

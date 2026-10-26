@@ -197,6 +197,70 @@ rules:
       - metavariable-regex:
           metavariable: "$FLAGS"
           regex: ^(?:(?!FLAG_IMMUTABLE).)*$
+      - pattern-not-inside: |
+          $FLAGS = <... $P.FLAG_IMMUTABLE ...>
+          ...
+          PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS)
+      - pattern-not-inside: |
+          $FLAGS = <... $P.FLAG_IMMUTABLE ...>
+          ...
+          PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS)
+      - pattern-not-inside: |
+          $FLAGS = <... $P.FLAG_IMMUTABLE ...>
+          ...
+          PendingIntent.getService($CTX, $REQ, $I, $FLAGS)
+      - pattern-not-inside: |
+          $FLAGS = <... $P.FLAG_IMMUTABLE ...>
+          ...
+          PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS)
+      - pattern-not-inside: |
+          $FLAGS = <... FLAG_IMMUTABLE ...>
+          ...
+          PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS)
+      - pattern-not-inside: |
+          $FLAGS = <... FLAG_IMMUTABLE ...>
+          ...
+          PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS)
+      - pattern-not-inside: |
+          $FLAGS = <... FLAG_IMMUTABLE ...>
+          ...
+          PendingIntent.getService($CTX, $REQ, $I, $FLAGS)
+      - pattern-not-inside: |
+          $FLAGS = <... FLAG_IMMUTABLE ...>
+          ...
+          PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS)
+      - pattern-not-inside: |
+          if (...) {
+            ...
+            $FLAGS = <... $P.FLAG_IMMUTABLE ...>
+            ...
+          }
+          ...
+          PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS)
+      - pattern-not-inside: |
+          if (...) {
+            ...
+            $FLAGS = <... $P.FLAG_IMMUTABLE ...>
+            ...
+          }
+          ...
+          PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS)
+      - pattern-not-inside: |
+          if (...) {
+            ...
+            $FLAGS = <... $P.FLAG_IMMUTABLE ...>
+            ...
+          }
+          ...
+          PendingIntent.getService($CTX, $REQ, $I, $FLAGS)
+      - pattern-not-inside: |
+          if (...) {
+            ...
+            $FLAGS = <... $P.FLAG_IMMUTABLE ...>
+            ...
+          }
+          ...
+          PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS)
     message: >-
       PendingIntent is created without FLAG_IMMUTABLE. Prior to API 31,
       PendingIntents are mutable by default; a malicious app may amend the
@@ -215,35 +279,52 @@ rules:
   - id: android_kotlin_db_on_external_storage
     patterns:
       - pattern-either:
+          - pattern-inside: |
+              $P = $CTX.getExternalFilesDir(...)!!.path + $REST
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...)
+          - pattern-inside: |
+              $P = $CTX.getExternalFilesDir(...).path + $REST
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...)
+          - pattern-inside: |
+              $P = $CTX.getExternalFilesDir(...)!!.absolutePath + $REST
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...)
+          - pattern-inside: |
+              $P = Environment.getExternalStorageDirectory().path + $REST
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...)
+          - pattern-inside: |
+              $P = Environment.getExternalStorageDirectory().absolutePath + $REST
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...)
+          - pattern-inside: |
+              $FILE = File(Environment.getExternalStorageDirectory(), $N)
+              ...
+              SQLiteDatabase.openOrCreateDatabase($FILE, ...)
+          - pattern-inside: |
+              $FILE = File($CTX.getExternalFilesDir(...), $N)
+              ...
+              SQLiteDatabase.openOrCreateDatabase($FILE.absolutePath, ...)
+          - pattern-inside: |
+              $FILE = File($CTX.getExternalFilesDir(...), $N)
+              ...
+              SQLiteDatabase.openOrCreateDatabase($FILE, ...)
           - pattern: |
-              fun $M(...) {
-                ...
-                $P = $CTX.getExternalFilesDir(...)!!.path + $REST
-                ...
-                SQLiteDatabase.openOrCreateDatabase($P, ...)
-                ...
-              }
+              class $C(...) : SQLiteOpenHelper($CTX, <... Environment.getExternalStorageDirectory() ...>, ...)
           - pattern: |
-              fun $M(...) {
-                ...
-                $P = $CTX.getExternalFilesDir(...).path + $REST
-                ...
-                SQLiteDatabase.openOrCreateDatabase($P, ...)
-                ...
-              }
+              class $C(...) : SQLiteOpenHelper($CTX, <... $X.getExternalFilesDir($Y) ...>, ...)
           - pattern: |
-              fun $M(...) {
-                ...
-                $P = $CTX.getExternalFilesDir(...)!!.absolutePath + $REST
-                ...
-                SQLiteDatabase.openOrCreateDatabase($P, ...)
-                ...
-              }
+              class $C(...) : SQLiteOpenHelper($CTX, <... Environment.getExternalStoragePublicDirectory($D) ...>, ...)
     message: >-
-      SQLite database is opened on external storage. Databases on shared
-      external storage are world-readable on API <= 28 and can be read or
-      replaced by other apps or over MTP. Store databases in internal
-      storage.
+      SQLite database path comes from external storage.
+      Environment.getExternalStorageDirectory() and
+      getExternalStoragePublicDirectory() are shared storage and are
+      world-readable through API 28. Context.getExternalFilesDir() is
+      app-specific and is not world-readable from API 19, but the file is
+      still outside internal storage. Prefer Context.getDatabasePath() or
+      openOrCreateDatabase(name) so the database stays in internal storage.
     languages:
       - kotlin
     severity: WARNING
@@ -255,15 +336,15 @@ rules:
         https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md
   - id: android_kotlin_oauth_custom_scheme_redirect
     patterns:
-      - pattern: |
-          fun $M(...) {
-            ...
-            $B.setRedirectUri(Uri.parse($SCHEME))
-            ...
-          }
+      - pattern-either:
+          - pattern: $B.setRedirectUri(Uri.parse($SCHEME))
+          - pattern-inside: |
+              $V = $SCHEME
+              ...
+              $B.setRedirectUri(Uri.parse($V))
       - metavariable-regex:
           metavariable: "$SCHEME"
-          regex: ^"(?!https?:)[a-zA-Z0-9._]+:/
+          regex: ^"(?!https?:)[A-Za-z0-9._+-]+:/
     message: >-
       OAuth redirect URI uses a custom URL scheme. Any malicious app can
       register the same scheme and intercept the authorization response

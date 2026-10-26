@@ -26,9 +26,9 @@ rules:
           - pattern: $C.startForegroundService($I)
           - pattern: $C.sendBroadcast($I)
     message: >-
-      An Intent received via getParcelableExtra is re-dispatched without
-      validation. If the component is exported, a malicious app can supply
-      an embedded Intent and escalate privileges (intent redirection).
+      An Intent received via getParcelableExtra is re-dispatched. If the
+      component is exported, a malicious app can supply an embedded Intent
+      and escalate privileges (intent redirection).
     languages:
       - java
     severity: ERROR

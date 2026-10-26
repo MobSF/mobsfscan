@@ -190,42 +190,81 @@ rules:
   - id: android_kotlin_provider_path_traversal
     patterns:
       - pattern-either:
-          - pattern: File($BASE, $URI.lastPathSegment)
-          - pattern: File($BASE, $URI.getLastPathSegment())
-          - pattern: File($URI.lastPathSegment)
+          - pattern-inside: |
+              fun openFile($URI: Uri, $MODE: String): $RET { ... }
+          - pattern-inside: |
+              override fun openFile($URI: Uri, $MODE: String): $RET { ... }
+          - pattern-inside: |
+              fun openAssetFile($URI: Uri, $MODE: String): $RET { ... }
+          - pattern-inside: |
+              override fun openAssetFile($URI: Uri, $MODE: String): $RET { ... }
+          - pattern-inside: |
+              fun openTypedAssetFile($URI: Uri, $MODE: String): $RET { ... }
+          - pattern-inside: |
+              override fun openTypedAssetFile($URI: Uri, $MODE: String): $RET { ... }
       - pattern-either:
-          - pattern-inside: |
-              fun openFile($URI: Uri, $MODE: String): $RET {
-                ...
-              }
-          - pattern-inside: |
-              override fun openFile($URI: Uri, $MODE: String): $RET {
-                ...
-              }
+          - pattern: File($BASE, $URI.lastPathSegment)
+          - pattern: File($URI.lastPathSegment)
+          - pattern: File($BASE, $URI.getLastPathSegment())
+          - pattern: File($URI.getLastPathSegment())
+          - pattern: File($BASE, $URI.encodedPath)
+          - pattern: File($URI.encodedPath)
+          - pattern: File($BASE, $URI.getEncodedPath())
+          - pattern: File($URI.getEncodedPath())
+          - pattern: File($BASE, $URI.path)
+          - pattern: File($URI.path)
+          - pattern: File($BASE, $URI.getPath())
+          - pattern: File($URI.getPath())
+          - patterns:
+              - pattern-either:
+                  - pattern-inside: |
+                      $NAME = $URI.lastPathSegment
+                      ...
+                  - pattern-inside: |
+                      $NAME = $URI.path
+                      ...
+                  - pattern-inside: |
+                      $NAME = $URI.encodedPath
+                      ...
+                  - pattern-inside: |
+                      $NAME = $URI.getLastPathSegment()
+                      ...
+                  - pattern-inside: |
+                      $NAME = $URI.getPath()
+                      ...
+                  - pattern-inside: |
+                      $NAME = $URI.getEncodedPath()
+                      ...
+              - pattern-either:
+                  - pattern: File($BASE, $NAME)
+                  - pattern: File($NAME)
       - pattern-not-inside: |
-          fun $M2(...) {
-            ...
-            $X.canonicalPath
+          $FILE = File(...)
+          ...
+          if (<... $FILE.canonicalPath ...>) {
             ...
           }
       - pattern-not-inside: |
-          fun $M2(...) {
-            ...
-            $X.getCanonicalPath(...)
+          $FILE = File(...)
+          ...
+          if (<... $FILE.getCanonicalPath() ...>) {
             ...
           }
       - pattern-not-inside: |
-          fun $M2(...) {
-            ...
-            if (<... $X.canonicalPath ...>) {
-              ...
-            }
-            ...
-          }
+          $FILE = File(...)
+          ...
+          $CANON = $FILE.canonicalPath
+          ...
+      - pattern-not-inside: |
+          $FILE = File(...)
+          ...
+          $CANON = $FILE.getCanonicalPath()
+          ...
     message: >-
-      ContentProvider openFile() builds a file path from attacker-controlled
-      URI parts without canonicalization. If the provider is exported, any
-      app can traverse outside the intended directory using ../ segments.
+      ContentProvider openFile() or openAssetFile() builds a filesystem path
+      from the URI without checking that file's canonical path. If the
+      provider is exported, any app can traverse outside the intended
+      directory using ../ segments.
     languages:
       - kotlin
     severity: ERROR
@@ -237,31 +276,41 @@ rules:
         https://mas.owasp.org/MASTG/tests/android/MASVS-PLATFORM/MASTG-TEST-0022/
   - id: android_kotlin_zip_slip
     patterns:
-      - pattern: File($DIR, $ENTRY.name)
       - pattern-either:
-          - pattern-inside: |
-              fun $M(...) {
-                ...
-                $ENTRY = $ZIP.nextEntry
-                ...
-              }
-          - pattern-inside: |
-              fun $M(...) {
-                ...
-                var $ENTRY: $T = $ZIP.nextEntry
-                ...
-              }
-          - pattern-inside: |
-              fun $M(...) {
-                ...
-                var $ENTRY = $ZIP.nextEntry
-                ...
-              }
+          - patterns:
+              - pattern-inside: |
+                  $ENTRY = $ZIP.nextEntry
+                  ...
+              - pattern-either:
+                  - pattern: File($DIR, $ENTRY.name)
+                  - pattern: File($DIR, $ENTRY!!.name)
+          - patterns:
+              - pattern-inside: |
+                  $ENTRY = $ZIP.nextEntry
+                  ...
+              - pattern-either:
+                  - pattern-inside: |
+                      $NAME = $ENTRY.name
+                      ...
+                  - pattern-inside: |
+                      $NAME = $ENTRY!!.name
+                      ...
+              - pattern: File($DIR, $NAME)
+      - pattern-not-inside: |
+          $FILE = File(...)
+          ...
+          if (<... $FILE.canonicalPath ...>) {
+            ...
+          }
+      - pattern-not-inside: |
+          $FILE = File(...)
+          ...
+          $CANON = $FILE.canonicalPath
+          ...
     message: >-
-      ZipEntry file name flows into File() without canonicalization. A
-      malicious archive entry using ../ paths can write outside the
-      extraction directory (ZipSlip). Validate the canonical path before
-      writing.
+      ZipEntry file name flows into File() without a canonical-path check on
+      that file. A malicious archive entry using ../ paths can write outside
+      the extraction directory (ZipSlip).
     languages:
       - kotlin
     severity: WARNING
@@ -292,9 +341,9 @@ rules:
           - pattern: $C.startForegroundService($I)
           - pattern: $C.sendBroadcast($I)
     message: >-
-      An Intent received via getParcelableExtra is re-dispatched without
-      validation. If the component is exported, a malicious app can supply
-      an embedded Intent and escalate privileges (intent redirection).
+      An Intent received via getParcelableExtra is re-dispatched. If the
+      component is exported, a malicious app can supply an embedded Intent
+      and escalate privileges (intent redirection).
     languages:
       - kotlin
     severity: ERROR

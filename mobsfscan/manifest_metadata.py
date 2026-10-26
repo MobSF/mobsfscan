@@ -319,6 +319,37 @@ metadata = {
                 'Communication.md'),
         },
     },
+    'google_api_key': {
+        'message': (
+            'A Google API key is identified. API keys are not secrets by '
+            'themselves, but an unrestricted key can be abused for quota '
+            'theft or billed services. Apply package name / API '
+            'restrictions.'),
+        'severity': 'WARNING',
+        'reference': 'AIza Google API key',
+        'metadata': {
+            'cwe': 'cwe-798',
+            'owasp-mobile': 'm2',
+            'masvs': 'code-3',
+            'reference': 'https://cloud.google.com/docs/authentication/api-keys',
+        },
+    },
+    'private_key_pem': {
+        'message': (
+            'Hardcoded private key material (PEM) is identified. Private '
+            'keys must never be embedded in source code or shipped inside '
+            'the application.'),
+        'severity': 'ERROR',
+        'reference': 'PEM private key',
+        'metadata': {
+            'cwe': 'cwe-798',
+            'owasp-mobile': 'm2',
+            'masvs': 'code-3',
+            'reference': (
+                'https://github.com/MobSF/owasp-mstg/blob/master/'
+                'Document/0x05d-Testing-Data-Storage.md'),
+        },
+    },
     'android_layout_sensitive_input_keyboard_cache': {
         'message': (
             'A sensitive input field is configured without a password '

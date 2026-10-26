@@ -12,4 +12,6 @@ fun ssl(socket: javax.net.ssl.SSLSocket) {
     socket.setEnabledCipherSuites(arrayOf("TLS_RSA_WITH_RC4_128_MD5"))
     // ok:android_kotlin_weak_tls_cipher_suite
     socket.setEnabledCipherSuites(arrayOf("TLS_AES_128_GCM_SHA256"))
+    // ruleid:android_kotlin_local_server_socket
+    LocalServerSocket("com.example.app.rpc")
 }

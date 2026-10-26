@@ -2,59 +2,110 @@ rules:
   - id: android_db_on_external_storage
     patterns:
       - pattern-either:
+          - pattern-inside: |
+              $P = $CTX.getExternalFilesDir(...).getPath() + $REST;
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...);
+          - pattern-inside: |
+              $P = $CTX.getExternalFilesDir(...).getAbsolutePath() + $REST;
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...);
+          - pattern-inside: |
+              $P = $CTX.getExternalFilesDir(...).toString() + $REST;
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...);
+          - pattern-inside: |
+              $P = $CTX.getExternalFilesDir(...).getPath() + $REST;
+              ...
+              SQLiteDatabase.openDatabase($P, ...);
+          - pattern-inside: |
+              $P = $CTX.getExternalFilesDir(...).getAbsolutePath() + $REST;
+              ...
+              SQLiteDatabase.openDatabase($P, ...);
+          - pattern-inside: |
+              $P = Environment.getExternalStorageDirectory().getPath() + $REST;
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...);
+          - pattern-inside: |
+              $P = Environment.getExternalStorageDirectory().getAbsolutePath() + $REST;
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...);
+          - pattern-inside: |
+              $P = Environment.getExternalStorageDirectory().toString() + $REST;
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...);
+          - pattern-inside: |
+              $P = Environment.getExternalStorageDirectory().getAbsolutePath() + $REST;
+              ...
+              SQLiteDatabase.openDatabase($P, ...);
+          - pattern-inside: |
+              $P = Environment.getExternalStoragePublicDirectory(...).getPath() + $REST;
+              ...
+              SQLiteDatabase.openOrCreateDatabase($P, ...);
+          - pattern-inside: |
+              $FILE = new File(Environment.getExternalStorageDirectory(), $N);
+              ...
+              SQLiteDatabase.openOrCreateDatabase($FILE, ...);
+          - pattern-inside: |
+              $FILE = new File(Environment.getExternalStorageDirectory(), $N);
+              ...
+              SQLiteDatabase.openOrCreateDatabase($FILE.getAbsolutePath(), ...);
+          - pattern-inside: |
+              $FILE = new File(Environment.getExternalStorageDirectory(), $N);
+              ...
+              SQLiteDatabase.openOrCreateDatabase($FILE.getPath(), ...);
+          - pattern-inside: |
+              $FILE = new File($CTX.getExternalFilesDir(...), $N);
+              ...
+              SQLiteDatabase.openOrCreateDatabase($FILE, ...);
+          - pattern-inside: |
+              $FILE = new File($CTX.getExternalFilesDir(...), $N);
+              ...
+              SQLiteDatabase.openOrCreateDatabase($FILE.getAbsolutePath(), ...);
+          - pattern-inside: |
+              $FILE = new File($CTX.getExternalFilesDir(...), $N);
+              ...
+              SQLiteDatabase.openDatabase($FILE.getPath(), ...);
           - pattern: |
-              $RET $M(...) {
-                ...
-                $TYPE $P = $CTX.getExternalFilesDir(...).getPath() + $REST;
-                ...
-                SQLiteDatabase.openOrCreateDatabase($P, ...);
-                ...
-              }
+              SQLiteDatabase.openOrCreateDatabase(new File($CTX.getExternalFilesDir(...), $N), ...)
           - pattern: |
-              $RET $M(...) {
-                ...
-                $TYPE $P = $CTX.getExternalFilesDir(...).toString() + $REST;
-                ...
-                SQLiteDatabase.openOrCreateDatabase($P, ...);
-                ...
-              }
+              SQLiteDatabase.openOrCreateDatabase(new File(Environment.getExternalStorageDirectory(), $N), ...)
           - pattern: |
-              $RET $M(...) {
-                ...
-                $TYPE $P = $CTX.getExternalFilesDir(...).getAbsolutePath() + $REST;
-                ...
-                SQLiteDatabase.openOrCreateDatabase($P, ...);
-                ...
-              }
+              SQLiteDatabase.openDatabase(new File(Environment.getExternalStorageDirectory(), $N), ...)
           - pattern: |
-              $RET $M(...) {
-                ...
-                $TYPE $P = $CTX.getExternalStorageDirectory().getPath() + $REST;
-                ...
-                SQLiteDatabase.openOrCreateDatabase($P, ...);
-                ...
-              }
+              super($CTX, <... Environment.getExternalStorageDirectory() ...>, ...)
           - pattern: |
-              $RET $M(...) {
-                ...
-                $TYPE $P = $CTX.getExternalFilesDir(...).getPath() + $REST;
-                ...
-                SQLiteDatabase.openDatabase($P, ...);
-                ...
-              }
+              super($CTX, <... Environment.getExternalStoragePublicDirectory(...) ...>, ...)
           - pattern: |
-              $RET $M(...) {
-                ...
-                $TYPE $P = $CTX.getExternalStorageDirectory().toString() + $REST;
-                ...
-                SQLiteDatabase.openDatabase($P, ...);
-                ...
-              }
+              super($CTX, new File($C.getExternalFilesDir(...), $N).getAbsolutePath(), ...)
+          - pattern: |
+              super($CTX, new File(Environment.getExternalStorageDirectory(), $N).getAbsolutePath(), ...)
+          - pattern-inside: |
+              $DIR = Environment.getExternalStoragePublicDirectory(...);
+              ...
+              $FILE = new File($DIR, $N);
+              ...
+              SQLiteDatabase.openDatabase($FILE.getPath(), ...);
+          - pattern-inside: |
+              $DIR = Environment.getExternalStorageDirectory();
+              ...
+              $FILE = new File($DIR, $N);
+              ...
+              SQLiteDatabase.openOrCreateDatabase($FILE, ...);
+          - pattern-inside: |
+              $DIR = $CTX.getExternalFilesDir(...);
+              ...
+              $FILE = new File($DIR, $N);
+              ...
+              SQLiteDatabase.openOrCreateDatabase($FILE, ...);
     message: >-
-      SQLite database is opened on external storage. Databases on shared
-      external storage are world-readable on API <= 28 and can be read or
-      replaced by other apps or over MTP. Store databases in internal
-      storage.
+      SQLite database path comes from external storage.
+      Environment.getExternalStorageDirectory() and
+      getExternalStoragePublicDirectory() are shared storage and are
+      world-readable through API 28. Context.getExternalFilesDir() is
+      app-specific and is not world-readable from API 19, but the file is
+      still outside internal storage. Prefer Context.getDatabasePath() or
+      openOrCreateDatabase(name) so the database stays in internal storage.
     languages:
       - java
     severity: WARNING
