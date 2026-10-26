@@ -1,5 +1,6 @@
 """App Links assetlinks.json check must not reach internal hosts."""
 import socket
+import threading
 import time
 
 import pytest
@@ -191,6 +192,64 @@ def test_total_time_limit(monkeypatch):
         timeout=0.2)
     assert time.monotonic() - start < 2
     assert isinstance(list(results.values())[0], TimeoutError)
+
+
+@pytest.fixture
+def drip_server(monkeypatch):
+    """Local server that sends one byte at a time, never finishing."""
+    stop = threading.Event()
+    listener = socket.socket()
+    listener.bind(('127.0.0.1', 0))
+    listener.listen()
+    port = listener.getsockname()[1]
+    mode = {}
+
+    def handle(conn):
+        with conn:
+            conn.recv(65536)
+            if mode['drip'] == 'body':
+                conn.sendall(b'HTTP/1.1 200 OK\r\n'
+                             b'Content-Length: 1000000\r\n\r\n')
+                payload = iter(lambda: b'x', None)
+            else:
+                conn.sendall(b'HTTP/1.1 200 OK\r\n')
+                payload = iter(lambda: b'X-Slow: x\r\n', None)
+            for data in payload:
+                for byte in data:
+                    if stop.wait(0.2):
+                        return
+                    try:
+                        conn.sendall(bytes([byte]))
+                    except OSError:
+                        return
+
+    def serve():
+        listener.settimeout(0.2)
+        while not stop.is_set():
+            try:
+                conn, _ = listener.accept()
+            except OSError:
+                continue
+            threading.Thread(target=handle, args=(conn,), daemon=True).start()
+
+    threading.Thread(target=serve, daemon=True).start()
+    # The server is on loopback, which the real check rightly refuses.
+    monkeypatch.setattr(
+        network, 'resolve_public_ips', lambda host, port: ('127.0.0.1',))
+    monkeypatch.setattr(network, 'ALLOWED_PORTS', (80, 443, port))
+    yield mode, f'http://slow.example.com:{port}/.well-known/assetlinks.json'
+    stop.set()
+    listener.close()
+
+
+@pytest.mark.parametrize('drip', ['body', 'headers'])
+def test_slow_drip_server_does_not_hang_scan(drip_server, drip):
+    mode, url = drip_server
+    mode['drip'] = drip
+    start = time.monotonic()
+    results = fetch_all_assetlinks([url], timeout=1)
+    assert time.monotonic() - start < 3
+    assert isinstance(results[url], Exception)
 
 
 def test_url_cap(monkeypatch):
