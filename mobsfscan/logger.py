@@ -27,7 +27,7 @@ class ColorLogsWrapper(object):
         log_level = getattr(logging, attr_name.upper())
         # mimicking logging/__init__.py behaviour
         if not self.logger.isEnabledFor(log_level):
-            return
+            return lambda *args, **kwargs: None
 
         def wrapped_attr(msg, *args, **kwargs):
             style_prefix = self.COLOR_MAP[attr_name]
