@@ -19,5 +19,12 @@ class ZipSamples {
         if (!canon.startsWith(new File(destDir).getCanonicalPath())) {
             throw new SecurityException();
         }
+        // ok:android_zip_slip
+        File checked = new File(destDir, entry.getName());
+        // ruleid:android_zip_slip
+        File unchecked = new File(destDir, entry.getName());
+        if (!checked.getCanonicalPath().startsWith(new File(destDir).getCanonicalPath())) {
+            throw new SecurityException();
+        }
     }
 }

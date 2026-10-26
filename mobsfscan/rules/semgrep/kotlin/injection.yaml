@@ -203,69 +203,110 @@ rules:
           - pattern-inside: |
               override fun openTypedAssetFile($URI: Uri, ...): $RET { ... }
       - pattern-either:
-          - pattern: File($BASE, $URI.lastPathSegment)
-          - pattern: File($URI.lastPathSegment)
-          - pattern: File($BASE, $URI.getLastPathSegment())
-          - pattern: File($URI.getLastPathSegment())
-          - pattern: File($BASE, $URI.encodedPath)
-          - pattern: File($URI.encodedPath)
-          - pattern: File($BASE, $URI.getEncodedPath())
-          - pattern: File($URI.getEncodedPath())
-          - pattern: File($BASE, $URI.path)
-          - pattern: File($URI.path)
-          - pattern: File($BASE, $URI.getPath())
-          - pattern: File($URI.getPath())
           - patterns:
               - pattern-either:
-                  - pattern-inside: |
-                      $NAME = $URI.lastPathSegment
-                      ...
-                  - pattern-inside: |
-                      $NAME = $URI.path
-                      ...
-                  - pattern-inside: |
-                      $NAME = $URI.encodedPath
-                      ...
-                  - pattern-inside: |
-                      $NAME = $URI.getLastPathSegment()
-                      ...
-                  - pattern-inside: |
-                      $NAME = $URI.getPath()
-                      ...
-                  - pattern-inside: |
-                      $NAME = $URI.getEncodedPath()
-                      ...
+                  - pattern: $FILE = File($BASE, $URI.lastPathSegment)
+                  - pattern: $FILE = File($URI.lastPathSegment)
+                  - pattern: $FILE = File($BASE, $URI.getLastPathSegment())
+                  - pattern: $FILE = File($URI.getLastPathSegment())
+                  - pattern: $FILE = File($BASE, $URI.encodedPath)
+                  - pattern: $FILE = File($URI.encodedPath)
+                  - pattern: $FILE = File($BASE, $URI.getEncodedPath())
+                  - pattern: $FILE = File($URI.getEncodedPath())
+                  - pattern: $FILE = File($BASE, $URI.path)
+                  - pattern: $FILE = File($URI.path)
+                  - pattern: $FILE = File($BASE, $URI.getPath())
+                  - pattern: $FILE = File($URI.getPath())
+                  - patterns:
+                      - pattern-either:
+                          - pattern-inside: |
+                              $NAME = $URI.lastPathSegment
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.path
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.encodedPath
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.getLastPathSegment()
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.getPath()
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.getEncodedPath()
+                              ...
+                      - pattern-either:
+                          - pattern: $FILE = File($BASE, $NAME)
+                          - pattern: $FILE = File($NAME)
+              - pattern-not-inside: |
+                  $FILE = File(...)
+                  ...
+                  if (<... $FILE.canonicalPath.startsWith(...) ...>) {
+                    ...
+                  }
+              - pattern-not-inside: |
+                  $FILE = File(...)
+                  ...
+                  if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                    ...
+                  }
+              - pattern-not-inside: |
+                  $FILE = File(...)
+                  ...
+                  $CANON = $FILE.canonicalPath
+                  ...
+                  if (<... $CANON.startsWith(...) ...>) {
+                    ...
+                  }
+              - pattern-not-inside: |
+                  $FILE = File(...)
+                  ...
+                  $CANON = $FILE.getCanonicalPath()
+                  ...
+                  if (<... $CANON.startsWith(...) ...>) {
+                    ...
+                  }
+          - patterns:
               - pattern-either:
-                  - pattern: File($BASE, $NAME)
-                  - pattern: File($NAME)
-      - pattern-not-inside: |
-          $FILE = File(...)
-          ...
-          if (<... $FILE.canonicalPath.startsWith(...) ...>) {
-            ...
-          }
-      - pattern-not-inside: |
-          $FILE = File(...)
-          ...
-          if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
-            ...
-          }
-      - pattern-not-inside: |
-          $FILE = File(...)
-          ...
-          $CANON = $FILE.canonicalPath
-          ...
-          if (<... $CANON.startsWith(...) ...>) {
-            ...
-          }
-      - pattern-not-inside: |
-          $FILE = File(...)
-          ...
-          $CANON = $FILE.getCanonicalPath()
-          ...
-          if (<... $CANON.startsWith(...) ...>) {
-            ...
-          }
+                  - pattern: File($BASE, $URI.lastPathSegment)
+                  - pattern: File($URI.lastPathSegment)
+                  - pattern: File($BASE, $URI.getLastPathSegment())
+                  - pattern: File($URI.getLastPathSegment())
+                  - pattern: File($BASE, $URI.encodedPath)
+                  - pattern: File($URI.encodedPath)
+                  - pattern: File($BASE, $URI.getEncodedPath())
+                  - pattern: File($URI.getEncodedPath())
+                  - pattern: File($BASE, $URI.path)
+                  - pattern: File($URI.path)
+                  - pattern: File($BASE, $URI.getPath())
+                  - pattern: File($URI.getPath())
+                  - patterns:
+                      - pattern-either:
+                          - pattern-inside: |
+                              $NAME = $URI.lastPathSegment
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.path
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.encodedPath
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.getLastPathSegment()
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.getPath()
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.getEncodedPath()
+                              ...
+                      - pattern-either:
+                          - pattern: File($BASE, $NAME)
+                          - pattern: File($NAME)
+              - pattern-not-inside: |
+                  $FILE = File(...)
     message: >-
       ContentProvider openFile() or openAssetFile() builds a filesystem path
       from the URI without checking that file's canonical path. If the
@@ -288,8 +329,30 @@ rules:
                   $ENTRY = $ZIP.nextEntry
                   ...
               - pattern-either:
-                  - pattern: File($DIR, $ENTRY.name)
-                  - pattern: File($DIR, $ENTRY!!.name)
+                  - patterns:
+                      - pattern-either:
+                          - pattern: $FILE = File($DIR, $ENTRY.name)
+                          - pattern: $FILE = File($DIR, $ENTRY!!.name)
+                      - pattern-not-inside: |
+                          $FILE = File(...)
+                          ...
+                          if (<... $FILE.canonicalPath.startsWith(...) ...>) {
+                            ...
+                          }
+                      - pattern-not-inside: |
+                          $FILE = File(...)
+                          ...
+                          $CANON = $FILE.canonicalPath
+                          ...
+                          if (<... $CANON.startsWith(...) ...>) {
+                            ...
+                          }
+                  - patterns:
+                      - pattern-either:
+                          - pattern: File($DIR, $ENTRY.name)
+                          - pattern: File($DIR, $ENTRY!!.name)
+                      - pattern-not-inside: |
+                          $FILE = File(...)
           - patterns:
               - pattern-inside: |
                   $ENTRY = $ZIP.nextEntry
@@ -301,21 +364,27 @@ rules:
                   - pattern-inside: |
                       $NAME = $ENTRY!!.name
                       ...
-              - pattern: File($DIR, $NAME)
-      - pattern-not-inside: |
-          $FILE = File(...)
-          ...
-          if (<... $FILE.canonicalPath.startsWith(...) ...>) {
-            ...
-          }
-      - pattern-not-inside: |
-          $FILE = File(...)
-          ...
-          $CANON = $FILE.canonicalPath
-          ...
-          if (<... $CANON.startsWith(...) ...>) {
-            ...
-          }
+              - pattern-either:
+                  - patterns:
+                      - pattern: $FILE = File($DIR, $NAME)
+                      - pattern-not-inside: |
+                          $FILE = File(...)
+                          ...
+                          if (<... $FILE.canonicalPath.startsWith(...) ...>) {
+                            ...
+                          }
+                      - pattern-not-inside: |
+                          $FILE = File(...)
+                          ...
+                          $CANON = $FILE.canonicalPath
+                          ...
+                          if (<... $CANON.startsWith(...) ...>) {
+                            ...
+                          }
+                  - patterns:
+                      - pattern: File($DIR, $NAME)
+                      - pattern-not-inside: |
+                          $FILE = File(...)
     message: >-
       ZipEntry file name flows into File() without a canonical-path check on
       that file. A malicious archive entry using ../ paths can write outside

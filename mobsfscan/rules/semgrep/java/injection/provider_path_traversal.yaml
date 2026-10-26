@@ -9,40 +9,66 @@ rules:
           - pattern-inside: |
               $RET openTypedAssetFile(Uri $URI, ...) { ... }
       - pattern-either:
-          - pattern: new File($BASE, $URI.getLastPathSegment())
-          - pattern: new File($URI.getLastPathSegment())
-          - pattern: new File($BASE, $URI.getEncodedPath())
-          - pattern: new File($URI.getEncodedPath())
-          - pattern: new File($BASE, $URI.getPath())
-          - pattern: new File($URI.getPath())
           - patterns:
               - pattern-either:
-                  - pattern-inside: |
-                      $NAME = $URI.getLastPathSegment();
-                      ...
-                  - pattern-inside: |
-                      $NAME = $URI.getEncodedPath();
-                      ...
-                  - pattern-inside: |
-                      $NAME = $URI.getPath();
-                      ...
+                  - pattern: $FILE = new File($BASE, $URI.getLastPathSegment())
+                  - pattern: $FILE = new File($URI.getLastPathSegment())
+                  - pattern: $FILE = new File($BASE, $URI.getEncodedPath())
+                  - pattern: $FILE = new File($URI.getEncodedPath())
+                  - pattern: $FILE = new File($BASE, $URI.getPath())
+                  - pattern: $FILE = new File($URI.getPath())
+                  - patterns:
+                      - pattern-either:
+                          - pattern-inside: |
+                              $NAME = $URI.getLastPathSegment();
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.getEncodedPath();
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.getPath();
+                              ...
+                      - pattern-either:
+                          - pattern: $FILE = new File($BASE, $NAME)
+                          - pattern: $FILE = new File($NAME)
+              - pattern-not-inside: |
+                  $FILE = new File(...);
+                  ...
+                  if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                    ...
+                  }
+              - pattern-not-inside: |
+                  $FILE = new File(...);
+                  ...
+                  $CANON = $FILE.getCanonicalPath();
+                  ...
+                  if (<... $CANON.startsWith(...) ...>) {
+                    ...
+                  }
+          - patterns:
               - pattern-either:
-                  - pattern: new File($BASE, $NAME)
-                  - pattern: new File($NAME)
-      - pattern-not-inside: |
-          $FILE = new File(...);
-          ...
-          if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
-            ...
-          }
-      - pattern-not-inside: |
-          $FILE = new File(...);
-          ...
-          $CANON = $FILE.getCanonicalPath();
-          ...
-          if (<... $CANON.startsWith(...) ...>) {
-            ...
-          }
+                  - pattern: new File($BASE, $URI.getLastPathSegment())
+                  - pattern: new File($URI.getLastPathSegment())
+                  - pattern: new File($BASE, $URI.getEncodedPath())
+                  - pattern: new File($URI.getEncodedPath())
+                  - pattern: new File($BASE, $URI.getPath())
+                  - pattern: new File($URI.getPath())
+                  - patterns:
+                      - pattern-either:
+                          - pattern-inside: |
+                              $NAME = $URI.getLastPathSegment();
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.getEncodedPath();
+                              ...
+                          - pattern-inside: |
+                              $NAME = $URI.getPath();
+                              ...
+                      - pattern-either:
+                          - pattern: new File($BASE, $NAME)
+                          - pattern: new File($NAME)
+              - pattern-not-inside: |
+                  $FILE = new File(...);
     message: >-
       ContentProvider openFile() or openAssetFile() builds a filesystem path
       from the URI without checking that file's canonical path. If the

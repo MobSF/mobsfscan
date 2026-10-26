@@ -97,6 +97,13 @@ class GoodProvider {
         if (!file.canonicalPath.startsWith(context.filesDir.canonicalPath)) {
             throw SecurityException()
         }
+        // ok:android_kotlin_provider_path_traversal
+        val checked = File(context.filesDir, uri.lastPathSegment)
+        // ruleid:android_kotlin_provider_path_traversal
+        val unchecked = File(uri.path)
+        if (!checked.canonicalPath.startsWith(context.filesDir.canonicalPath)) {
+            throw SecurityException()
+        }
         return null
     }
 }
@@ -112,6 +119,13 @@ fun unzip(zipPath: String, destDir: String) {
     // ok:android_kotlin_zip_slip
     val safe = File(destDir, entry!!.name)
     if (!safe.canonicalPath.startsWith(File(destDir).canonicalPath)) {
+        throw SecurityException()
+    }
+    // ok:android_kotlin_zip_slip
+    val checked = File(destDir, entry.name)
+    // ruleid:android_kotlin_zip_slip
+    val unchecked = File(destDir, entry.name)
+    if (!checked.canonicalPath.startsWith(File(destDir).canonicalPath)) {
         throw SecurityException()
     }
 }

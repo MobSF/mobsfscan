@@ -49,6 +49,20 @@ class GoodPathProvider {
     }
 }
 
+class MixedProvider {
+    ParcelFileDescriptor openFile(Uri uri, String mode) throws Exception {
+        // ok:android_provider_path_traversal
+        File checked = new File(getContext().getFilesDir(), uri.getLastPathSegment());
+        // ruleid:android_provider_path_traversal
+        File unchecked = new File(uri.getPath());
+        if (!checked.getCanonicalPath().startsWith(
+                getContext().getFilesDir().getCanonicalPath())) {
+            throw new SecurityException();
+        }
+        return null;
+    }
+}
+
 class UnusedCanonicalPath {
     ParcelFileDescriptor openFile(Uri uri, String mode) throws Exception {
         // ruleid:android_provider_path_traversal
