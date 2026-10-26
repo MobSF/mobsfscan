@@ -232,37 +232,77 @@ rules:
       reference: >-
         https://developer.android.com/reference/android/app/PendingIntent#FLAG_IMMUTABLE
   - id: android_kotlin_db_on_external_storage
-    mode: taint
-    pattern-sources:
-      - pattern: Environment.getExternalStorageDirectory()
-      - pattern: Environment.getExternalStoragePublicDirectory(...)
-      - pattern: $CTX.getExternalFilesDir(...)
-    pattern-sinks:
-      - patterns:
-          - pattern-either:
-              - pattern: SQLiteDatabase.openOrCreateDatabase($PATH, ...)
-              - pattern: SQLiteDatabase.openDatabase($PATH, ...)
-              - pattern: Room.databaseBuilder($CTX, $K, $PATH)
-          - focus-metavariable: $PATH
-    message: >-
-      SQLite database path comes from external storage.
-      Environment.getExternalStorageDirectory() and
-      getExternalStoragePublicDirectory() are shared storage and are
-      world-readable through API 28. Context.getExternalFilesDir() is
-      app-specific and is not world-readable from API 19, but the file is
-      still outside internal storage. Prefer Context.getDatabasePath() or
-      openOrCreateDatabase(name) so the database stays in internal storage.
-    languages:
-      - kotlin
-    severity: WARNING
-    metadata:
-      cwe: cwe-276
-      owasp-mobile: m2
-      masvs: storage-1
-      reference: >-
-        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md
-  - id: android_kotlin_db_on_external_storage
     pattern-either:
+      - pattern-inside: |
+          $P = $CTX.getExternalFilesDir(...)!!.path + $REST
+          ...
+          SQLiteDatabase.openOrCreateDatabase($P, ...)
+      - pattern-inside: |
+          $P = $CTX.getExternalFilesDir(...).path + $REST
+          ...
+          SQLiteDatabase.openOrCreateDatabase($P, ...)
+      - pattern-inside: |
+          $P = $CTX.getExternalFilesDir(...)!!.absolutePath + $REST
+          ...
+          SQLiteDatabase.openOrCreateDatabase($P, ...)
+      - pattern-inside: |
+          $P = Environment.getExternalStorageDirectory().path + $REST
+          ...
+          SQLiteDatabase.openOrCreateDatabase($P, ...)
+      - pattern-inside: |
+          $P = Environment.getExternalStorageDirectory().absolutePath + $REST
+          ...
+          SQLiteDatabase.openOrCreateDatabase($P, ...)
+      - pattern-inside: |
+          $P = Environment.getExternalStorageDirectory().toString() + $REST
+          ...
+          SQLiteDatabase.openOrCreateDatabase($P, ...)
+      - pattern: |
+          SQLiteDatabase.openOrCreateDatabase(<... Environment.getExternalStorageDirectory() ...>, ...)
+      - pattern: |
+          SQLiteDatabase.openOrCreateDatabase(<... Environment.getExternalStoragePublicDirectory(...) ...>, ...)
+      - pattern: |
+          SQLiteDatabase.openOrCreateDatabase(<... $CTX.getExternalFilesDir(...) ...>, ...)
+      - pattern-inside: |
+          $FILE = File(Environment.getExternalStorageDirectory(), $N)
+          ...
+          SQLiteDatabase.openOrCreateDatabase($FILE, ...)
+      - pattern-inside: |
+          $FILE = File($CTX.getExternalFilesDir(...), $N)
+          ...
+          SQLiteDatabase.openOrCreateDatabase($FILE.absolutePath, ...)
+      - pattern-inside: |
+          $FILE = File($CTX.getExternalFilesDir(...), $N)
+          ...
+          SQLiteDatabase.openOrCreateDatabase($FILE, ...)
+      - pattern-inside: |
+          $P = $CTX.getExternalFilesDir(...)!!.path + $REST
+          ...
+          SQLiteDatabase.openDatabase($P, ...)
+      - pattern-inside: |
+          $P = Environment.getExternalStorageDirectory().absolutePath + $REST
+          ...
+          SQLiteDatabase.openDatabase($P, ...)
+      - pattern-inside: |
+          $P = Environment.getExternalStoragePublicDirectory($D).path + $REST
+          ...
+          SQLiteDatabase.openDatabase($P, ...)
+      - pattern: |
+          SQLiteDatabase.openDatabase(<... Environment.getExternalStorageDirectory() ...>, ...)
+      - pattern: |
+          SQLiteDatabase.openDatabase(<... Environment.getExternalStoragePublicDirectory(...) ...>, ...)
+      - pattern: |
+          SQLiteDatabase.openDatabase(<... $CTX.getExternalFilesDir(...) ...>, ...)
+      - pattern-inside: |
+          $FILE = File($CTX.getExternalFilesDir(...), $N)
+          ...
+          SQLiteDatabase.openDatabase($FILE.absolutePath, ...)
+      - pattern: |
+          Room.databaseBuilder($C, $K, <... Environment.getExternalStorageDirectory() ...>)
+      - pattern: |
+          Room.databaseBuilder($C, $K, <... Environment.getExternalStoragePublicDirectory(...) ...>)
+      - pattern: |
+          Room.databaseBuilder($C, $K, <... $CTX.getExternalFilesDir(...) ...>)
       - pattern: |
           class $C(...) : SQLiteOpenHelper($CTX, <... Environment.getExternalStorageDirectory() ...>, ...)
       - pattern: |

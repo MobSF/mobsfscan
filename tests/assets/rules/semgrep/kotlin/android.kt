@@ -105,23 +105,23 @@ fun badUnrelatedIf(context: Context, intent: Intent, immutableRequested: Boolean
 }
 
 fun externalDb(context: Context) {
+    // ruleid:android_kotlin_db_on_external_storage
     val path = context.getExternalFilesDir(null)!!.path + "/app.db"
-    // ruleid:android_kotlin_db_on_external_storage
     SQLiteDatabase.openOrCreateDatabase(path, null)
+    // ruleid:android_kotlin_db_on_external_storage
     val env = Environment.getExternalStorageDirectory().absolutePath + "/app.db"
-    // ruleid:android_kotlin_db_on_external_storage
     SQLiteDatabase.openOrCreateDatabase(env, null)
-    val db = File(context.getExternalFilesDir(null), "app.db")
     // ruleid:android_kotlin_db_on_external_storage
+    val db = File(context.getExternalFilesDir(null), "app.db")
     SQLiteDatabase.openOrCreateDatabase(db.absolutePath, null)
     // ok:android_kotlin_db_on_external_storage
     SQLiteDatabase.openOrCreateDatabase("app.db", null)
+    // ruleid:android_kotlin_db_on_external_storage
     val publicPath = Environment.getExternalStoragePublicDirectory(
         Environment.DIRECTORY_DOWNLOADS).path + "/app.db"
-    // ruleid:android_kotlin_db_on_external_storage
     SQLiteDatabase.openDatabase(publicPath, null, SQLiteDatabase.OPEN_READWRITE)
+    // ruleid:android_kotlin_db_on_external_storage
     SQLiteDatabase.openOrCreateDatabase(
-        // ruleid:android_kotlin_db_on_external_storage
         Environment.getExternalStorageDirectory().toString() + "/x.db", null)
 }
 
