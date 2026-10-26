@@ -75,6 +75,10 @@ class BadProvider {
         val name = uri.lastPathSegment
         // ruleid:android_kotlin_provider_path_traversal
         val viaName = File(context.filesDir, name)
+        // ruleid:android_kotlin_provider_path_traversal
+        val joined = File(context.filesDir.toString() + "/" + uri.lastPathSegment)
+        // ruleid:android_kotlin_provider_path_traversal
+        val segment = File(context.filesDir, uri.pathSegments[0])
         val ignored = context.filesDir.canonicalPath
         return null
     }
@@ -128,11 +132,25 @@ fun unzip(zipPath: String, destDir: String) {
     if (!checked.canonicalPath.startsWith(File(destDir).canonicalPath)) {
         throw SecurityException()
     }
+    var loopEntry = zis.nextEntry
+    while (loopEntry != null) {
+        // ruleid:android_kotlin_zip_slip
+        val looped = File(destDir, loopEntry!!.name)
+        loopEntry = zis.nextEntry
+    }
 }
 
 fun onReceive(context: Context, intent: Intent) {
     val target = intent.getParcelableExtra<Intent>("extra_intent")
     // ruleid:android_kotlin_intent_redirection
     context.startService(target)
+    // ruleid:android_kotlin_intent_redirection
+    startActivity(target)
+    // ok:android_kotlin_intent_redirection
+    startActivity(Intent(context, NextActivity::class.java))
+    // ok:android_kotlin_intent_redirection
+    startActivity(Intent.parseUri("intent://example.com/#Intent;end", 0))
+    // ruleid:android_kotlin_intent_redirection
+    startActivity(Intent.parseUri(intent.dataString, 0))
 }
 

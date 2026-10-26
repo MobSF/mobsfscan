@@ -1,62 +1,25 @@
 rules:
   - id: android_pending_intent_not_immutable
     patterns:
-      - pattern-either:
-          - pattern: PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS)
-          - pattern: PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS)
-          - pattern: PendingIntent.getService($CTX, $REQ, $I, $FLAGS)
-          - pattern: PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS)
+      - pattern: PendingIntent.$M($CTX, $REQ, $I, $FLAGS, ...)
       - metavariable-regex:
-          metavariable: "$FLAGS"
-          regex: ^(?:(?!FLAG_IMMUTABLE).)*$
+          metavariable: $M
+          regex: ^(?:getActivity|getActivities|getBroadcast|getService|getForegroundService)$
+      - metavariable-regex:
+          metavariable: $FLAGS
+          regex: (?s)^(?!.*FLAG_IMMUTABLE).*$
       - pattern-not-inside: |
           $FLAGS = <... $P.FLAG_IMMUTABLE ...>;
           ...
-          PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS);
-      - pattern-not-inside: |
-          $FLAGS = <... $P.FLAG_IMMUTABLE ...>;
-          ...
-          PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS);
-      - pattern-not-inside: |
-          $FLAGS = <... $P.FLAG_IMMUTABLE ...>;
-          ...
-          PendingIntent.getService($CTX, $REQ, $I, $FLAGS);
-      - pattern-not-inside: |
-          $FLAGS = <... $P.FLAG_IMMUTABLE ...>;
-          ...
-          PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS);
+          PendingIntent.$M($CTX, $REQ, $I, $FLAGS, ...);
       - pattern-not-inside: |
           $FLAGS = <... FLAG_IMMUTABLE ...>;
           ...
-          PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS);
-      - pattern-not-inside: |
-          $FLAGS = <... FLAG_IMMUTABLE ...>;
-          ...
-          PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS);
-      - pattern-not-inside: |
-          $FLAGS = <... FLAG_IMMUTABLE ...>;
-          ...
-          PendingIntent.getService($CTX, $REQ, $I, $FLAGS);
-      - pattern-not-inside: |
-          $FLAGS = <... FLAG_IMMUTABLE ...>;
-          ...
-          PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS);
+          PendingIntent.$M($CTX, $REQ, $I, $FLAGS, ...);
       - pattern-not-inside: |
           $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
           ...
-          PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS);
-      - pattern-not-inside: |
-          $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
-          ...
-          PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS);
-      - pattern-not-inside: |
-          $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
-          ...
-          PendingIntent.getService($CTX, $REQ, $I, $FLAGS);
-      - pattern-not-inside: |
-          $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
-          ...
-          PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS);
+          PendingIntent.$M($CTX, $REQ, $I, $FLAGS, ...);
       - pattern-not-inside: |
           if (<... Build.VERSION.SDK_INT ...>) {
             ...
@@ -64,31 +27,11 @@ rules:
             ...
           }
           ...
-          PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS);
+          PendingIntent.$M($CTX, $REQ, $I, $FLAGS, ...);
       - pattern-not-inside: |
-          if (<... Build.VERSION.SDK_INT ...>) {
-            ...
-            $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
-            ...
-          }
+          if (<... Build.VERSION.SDK_INT ...>) $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
           ...
-          PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS);
-      - pattern-not-inside: |
-          if (<... Build.VERSION.SDK_INT ...>) {
-            ...
-            $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
-            ...
-          }
-          ...
-          PendingIntent.getService($CTX, $REQ, $I, $FLAGS);
-      - pattern-not-inside: |
-          if (<... Build.VERSION.SDK_INT ...>) {
-            ...
-            $FLAGS |= <... $P.FLAG_IMMUTABLE ...>;
-            ...
-          }
-          ...
-          PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS);
+          PendingIntent.$M($CTX, $REQ, $I, $FLAGS, ...);
     message: >-
       PendingIntent is created without FLAG_IMMUTABLE. Prior to API 31,
       PendingIntents are mutable by default; a malicious app may amend the

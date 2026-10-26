@@ -1,40 +1,54 @@
 class DbSamples {
     void filesConcat(Context context) {
-        // ruleid:android_db_on_external_storage
         String path = context.getExternalFilesDir(null).getPath() + "/app.db";
+        // ruleid:android_db_on_external_storage
         SQLiteDatabase.openOrCreateDatabase(path, null);
     }
 
     void envDir() {
-        // ruleid:android_db_on_external_storage
         String path = Environment.getExternalStorageDirectory().getPath() + "/app.db";
+        // ruleid:android_db_on_external_storage
         SQLiteDatabase.openOrCreateDatabase(path, null);
     }
 
+    void directConcat() {
+        SQLiteDatabase.openOrCreateDatabase(
+            // ruleid:android_db_on_external_storage
+            Environment.getExternalStorageDirectory() + "/x.db", null);
+    }
+
     void envFile() {
-        // ruleid:android_db_on_external_storage
         File db = new File(Environment.getExternalStorageDirectory(), "app.db");
+        // ruleid:android_db_on_external_storage
         SQLiteDatabase.openOrCreateDatabase(db, null);
     }
 
     void filesFile(Context context) {
-        // ruleid:android_db_on_external_storage
         File db = new File(context.getExternalFilesDir(null), "app.db");
+        // ruleid:android_db_on_external_storage
         SQLiteDatabase.openOrCreateDatabase(db.getAbsolutePath(), null);
     }
 
     void publicDir() {
-        // ruleid:android_db_on_external_storage
         File dir = Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_DOCUMENTS);
         File db = new File(dir, "app.db");
+        // ruleid:android_db_on_external_storage
         SQLiteDatabase.openDatabase(db.getPath(), null, SQLiteDatabase.OPEN_READWRITE);
     }
 
     void inline(Context context) {
-        // ruleid:android_db_on_external_storage
         SQLiteDatabase.openOrCreateDatabase(
+            // ruleid:android_db_on_external_storage
             new File(context.getExternalFilesDir(null), "app.db"), null);
+    }
+
+    void room(Context context, Class<AppDb> cls) {
+        Room.databaseBuilder(
+            context,
+            cls,
+            // ruleid:android_db_on_external_storage
+            context.getExternalFilesDir(null).getAbsolutePath() + "/app.db");
     }
 
     void internalName(Context context) {
@@ -53,9 +67,9 @@ class DbSamples {
 
 class HelperEnv extends SQLiteOpenHelper {
     HelperEnv(Context context) {
-        // ruleid:android_db_on_external_storage
         super(
             context,
+            // ruleid:android_db_on_external_storage
             Environment.getExternalStorageDirectory().getAbsolutePath() + "/app.db",
             null,
             1);
@@ -64,9 +78,9 @@ class HelperEnv extends SQLiteOpenHelper {
 
 class HelperFiles extends SQLiteOpenHelper {
     HelperFiles(Context context) {
-        // ruleid:android_db_on_external_storage
         super(
             context,
+            // ruleid:android_db_on_external_storage
             new File(context.getExternalFilesDir(null), "notes.db").getAbsolutePath(),
             null,
             1);

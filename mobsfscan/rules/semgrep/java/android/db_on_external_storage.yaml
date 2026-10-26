@@ -1,107 +1,21 @@
 rules:
   - id: android_db_on_external_storage
-    patterns:
-      - pattern-either:
-          - pattern-inside: |
-              $P = $CTX.getExternalFilesDir(...).getPath() + $REST;
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...);
-          - pattern-inside: |
-              $P = $CTX.getExternalFilesDir(...).getAbsolutePath() + $REST;
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...);
-          - pattern-inside: |
-              $P = $CTX.getExternalFilesDir(...).toString() + $REST;
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...);
-          - pattern-inside: |
-              $P = $CTX.getExternalFilesDir(...).getPath() + $REST;
-              ...
-              SQLiteDatabase.openDatabase($P, ...);
-          - pattern-inside: |
-              $P = $CTX.getExternalFilesDir(...).getAbsolutePath() + $REST;
-              ...
-              SQLiteDatabase.openDatabase($P, ...);
-          - pattern-inside: |
-              $P = Environment.getExternalStorageDirectory().getPath() + $REST;
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...);
-          - pattern-inside: |
-              $P = Environment.getExternalStorageDirectory().getAbsolutePath() + $REST;
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...);
-          - pattern-inside: |
-              $P = Environment.getExternalStorageDirectory().toString() + $REST;
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...);
-          - pattern-inside: |
-              $P = Environment.getExternalStorageDirectory().getAbsolutePath() + $REST;
-              ...
-              SQLiteDatabase.openDatabase($P, ...);
-          - pattern-inside: |
-              $P = Environment.getExternalStoragePublicDirectory(...).getPath() + $REST;
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...);
-          - pattern-inside: |
-              $FILE = new File(Environment.getExternalStorageDirectory(), $N);
-              ...
-              SQLiteDatabase.openOrCreateDatabase($FILE, ...);
-          - pattern-inside: |
-              $FILE = new File(Environment.getExternalStorageDirectory(), $N);
-              ...
-              SQLiteDatabase.openOrCreateDatabase($FILE.getAbsolutePath(), ...);
-          - pattern-inside: |
-              $FILE = new File(Environment.getExternalStorageDirectory(), $N);
-              ...
-              SQLiteDatabase.openOrCreateDatabase($FILE.getPath(), ...);
-          - pattern-inside: |
-              $FILE = new File($CTX.getExternalFilesDir(...), $N);
-              ...
-              SQLiteDatabase.openOrCreateDatabase($FILE, ...);
-          - pattern-inside: |
-              $FILE = new File($CTX.getExternalFilesDir(...), $N);
-              ...
-              SQLiteDatabase.openOrCreateDatabase($FILE.getAbsolutePath(), ...);
-          - pattern-inside: |
-              $FILE = new File($CTX.getExternalFilesDir(...), $N);
-              ...
-              SQLiteDatabase.openDatabase($FILE.getPath(), ...);
-          - pattern: |
-              SQLiteDatabase.openOrCreateDatabase(new File($CTX.getExternalFilesDir(...), $N), ...)
-          - pattern: |
-              SQLiteDatabase.openOrCreateDatabase(new File(Environment.getExternalStorageDirectory(), $N), ...)
-          - pattern: |
-              SQLiteDatabase.openDatabase(new File(Environment.getExternalStorageDirectory(), $N), ...)
-          - patterns:
-              - pattern-inside: |
-                  class $CLS extends SQLiteOpenHelper { ... }
-              - pattern-either:
-                  - pattern: |
-                      super($CTX, <... Environment.getExternalStorageDirectory() ...>, ...)
-                  - pattern: |
-                      super($CTX, <... Environment.getExternalStoragePublicDirectory(...) ...>, ...)
-                  - pattern: |
-                      super($CTX, new File($C.getExternalFilesDir(...), $N).getAbsolutePath(), ...)
-                  - pattern: |
-                      super($CTX, new File(Environment.getExternalStorageDirectory(), $N).getAbsolutePath(), ...)
-          - pattern-inside: |
-              $DIR = Environment.getExternalStoragePublicDirectory(...);
-              ...
-              $FILE = new File($DIR, $N);
-              ...
-              SQLiteDatabase.openDatabase($FILE.getPath(), ...);
-          - pattern-inside: |
-              $DIR = Environment.getExternalStorageDirectory();
-              ...
-              $FILE = new File($DIR, $N);
-              ...
-              SQLiteDatabase.openOrCreateDatabase($FILE, ...);
-          - pattern-inside: |
-              $DIR = $CTX.getExternalFilesDir(...);
-              ...
-              $FILE = new File($DIR, $N);
-              ...
-              SQLiteDatabase.openOrCreateDatabase($FILE, ...);
+    mode: taint
+    pattern-sources:
+      - pattern: Environment.getExternalStorageDirectory()
+      - pattern: Environment.getExternalStoragePublicDirectory(...)
+      - pattern: $CTX.getExternalFilesDir(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: SQLiteDatabase.openOrCreateDatabase($PATH, ...)
+              - pattern: SQLiteDatabase.openDatabase($PATH, ...)
+              - pattern: Room.databaseBuilder($CTX, $K, $PATH)
+              - patterns:
+                  - pattern-inside: |
+                      class $CLS extends SQLiteOpenHelper { ... }
+                  - pattern: super($CTX, $PATH, ...)
+          - focus-metavariable: $PATH
     message: >-
       SQLite database path comes from external storage.
       Environment.getExternalStorageDirectory() and

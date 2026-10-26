@@ -188,125 +188,68 @@ rules:
         https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2
 
   - id: android_kotlin_provider_path_traversal
-    patterns:
-      - pattern-either:
-          - pattern-inside: |
-              fun openFile($URI: Uri, $MODE: String): $RET { ... }
-          - pattern-inside: |
-              override fun openFile($URI: Uri, $MODE: String): $RET { ... }
-          - pattern-inside: |
-              fun openAssetFile($URI: Uri, $MODE: String): $RET { ... }
-          - pattern-inside: |
-              override fun openAssetFile($URI: Uri, $MODE: String): $RET { ... }
-          - pattern-inside: |
-              fun openTypedAssetFile($URI: Uri, ...): $RET { ... }
-          - pattern-inside: |
-              override fun openTypedAssetFile($URI: Uri, ...): $RET { ... }
-      - pattern-either:
-          - patterns:
-              - pattern-either:
-                  - pattern: $FILE = File($BASE, $URI.lastPathSegment)
-                  - pattern: $FILE = File($URI.lastPathSegment)
-                  - pattern: $FILE = File($BASE, $URI.getLastPathSegment())
-                  - pattern: $FILE = File($URI.getLastPathSegment())
-                  - pattern: $FILE = File($BASE, $URI.encodedPath)
-                  - pattern: $FILE = File($URI.encodedPath)
-                  - pattern: $FILE = File($BASE, $URI.getEncodedPath())
-                  - pattern: $FILE = File($URI.getEncodedPath())
-                  - pattern: $FILE = File($BASE, $URI.path)
-                  - pattern: $FILE = File($URI.path)
-                  - pattern: $FILE = File($BASE, $URI.getPath())
-                  - pattern: $FILE = File($URI.getPath())
-                  - patterns:
-                      - pattern-either:
-                          - pattern-inside: |
-                              $NAME = $URI.lastPathSegment
-                              ...
-                          - pattern-inside: |
-                              $NAME = $URI.path
-                              ...
-                          - pattern-inside: |
-                              $NAME = $URI.encodedPath
-                              ...
-                          - pattern-inside: |
-                              $NAME = $URI.getLastPathSegment()
-                              ...
-                          - pattern-inside: |
-                              $NAME = $URI.getPath()
-                              ...
-                          - pattern-inside: |
-                              $NAME = $URI.getEncodedPath()
-                              ...
-                      - pattern-either:
-                          - pattern: $FILE = File($BASE, $NAME)
-                          - pattern: $FILE = File($NAME)
-              - pattern-not-inside: |
-                  $FILE = File(...)
-                  ...
-                  if (<... $FILE.canonicalPath.startsWith(...) ...>) {
-                    ...
-                  }
-              - pattern-not-inside: |
-                  $FILE = File(...)
-                  ...
-                  if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
-                    ...
-                  }
-              - pattern-not-inside: |
-                  $FILE = File(...)
-                  ...
-                  $CANON = $FILE.canonicalPath
-                  ...
-                  if (<... $CANON.startsWith(...) ...>) {
-                    ...
-                  }
-              - pattern-not-inside: |
-                  $FILE = File(...)
-                  ...
-                  $CANON = $FILE.getCanonicalPath()
-                  ...
-                  if (<... $CANON.startsWith(...) ...>) {
-                    ...
-                  }
-          - patterns:
-              - pattern-either:
-                  - pattern: File($BASE, $URI.lastPathSegment)
-                  - pattern: File($URI.lastPathSegment)
-                  - pattern: File($BASE, $URI.getLastPathSegment())
-                  - pattern: File($URI.getLastPathSegment())
-                  - pattern: File($BASE, $URI.encodedPath)
-                  - pattern: File($URI.encodedPath)
-                  - pattern: File($BASE, $URI.getEncodedPath())
-                  - pattern: File($URI.getEncodedPath())
-                  - pattern: File($BASE, $URI.path)
-                  - pattern: File($URI.path)
-                  - pattern: File($BASE, $URI.getPath())
-                  - pattern: File($URI.getPath())
-                  - patterns:
-                      - pattern-either:
-                          - pattern-inside: |
-                              $NAME = $URI.lastPathSegment
-                              ...
-                          - pattern-inside: |
-                              $NAME = $URI.path
-                              ...
-                          - pattern-inside: |
-                              $NAME = $URI.encodedPath
-                              ...
-                          - pattern-inside: |
-                              $NAME = $URI.getLastPathSegment()
-                              ...
-                          - pattern-inside: |
-                              $NAME = $URI.getPath()
-                              ...
-                          - pattern-inside: |
-                              $NAME = $URI.getEncodedPath()
-                              ...
-                      - pattern-either:
-                          - pattern: File($BASE, $NAME)
-                          - pattern: File($NAME)
-              - pattern-not-inside: |
-                  $FILE = File(...)
+    mode: taint
+    pattern-sources:
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  fun openFile($URI: Uri, ...): $RET { ... }
+              - pattern-inside: |
+                  override fun openFile($URI: Uri, ...): $RET { ... }
+              - pattern-inside: |
+                  fun openAssetFile($URI: Uri, ...): $RET { ... }
+              - pattern-inside: |
+                  override fun openAssetFile($URI: Uri, ...): $RET { ... }
+              - pattern-inside: |
+                  fun openTypedAssetFile($URI: Uri, ...): $RET { ... }
+              - pattern-inside: |
+                  override fun openTypedAssetFile($URI: Uri, ...): $RET { ... }
+          - pattern-either:
+              - pattern: $URI.lastPathSegment
+              - pattern: $URI.getLastPathSegment()
+              - pattern: $URI.encodedPath
+              - pattern: $URI.getEncodedPath()
+              - pattern: $URI.path
+              - pattern: $URI.getPath()
+              - pattern: $URI.pathSegments
+              - pattern: $URI.getPathSegments()
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - patterns:
+                  - pattern: $FILE = File(...)
+                  - pattern-not-inside: |
+                      $FILE = File(...)
+                      ...
+                      if (<... $FILE.canonicalPath.startsWith(...) ...>) {
+                        ...
+                      }
+                  - pattern-not-inside: |
+                      $FILE = File(...)
+                      ...
+                      if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                        ...
+                      }
+                  - pattern-not-inside: |
+                      $FILE = File(...)
+                      ...
+                      $CANON = $FILE.canonicalPath
+                      ...
+                      if (<... $CANON.startsWith(...) ...>) {
+                        ...
+                      }
+                  - pattern-not-inside: |
+                      $FILE = File(...)
+                      ...
+                      $CANON = $FILE.getCanonicalPath()
+                      ...
+                      if (<... $CANON.startsWith(...) ...>) {
+                        ...
+                      }
+              - patterns:
+                  - pattern: File(...)
+                  - pattern-not-inside: |
+                      $FILE = File(...)
     message: >-
       ContentProvider openFile() or openAssetFile() builds a filesystem path
       from the URI without checking that file's canonical path. If the
@@ -399,29 +342,33 @@ rules:
       reference: >-
         https://snyk.io/research/zip-slip-vulnerability
   - id: android_kotlin_intent_redirection
-    patterns:
-      - pattern-either:
-          - pattern-inside: |
-              fun $M(...) {
-                ...
-                $I = $O.getParcelableExtra(...)
-                ...
-              }
-          - pattern-inside: |
-              fun $M(...) {
-                ...
-                $I = $O.getParcelableExtra<...>(...)
-                ...
-              }
-      - pattern-either:
-          - pattern: $C.startActivity($I)
-          - pattern: $C.startService($I)
-          - pattern: $C.startForegroundService($I)
-          - pattern: $C.sendBroadcast($I)
+    mode: taint
+    pattern-sources:
+      - pattern: $O.getParcelableExtra(...)
+      - pattern: $O.getParcelableExtra<...>(...)
+      - patterns:
+          - pattern: Intent.parseUri(...)
+          - pattern-not: Intent.parseUri("...", ...)
+    pattern-sanitizers:
+      - pattern: Intent($A, $B)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: startActivity($I, ...)
+              - pattern: $C.startActivity($I, ...)
+              - pattern: startActivityForResult($I, ...)
+              - pattern: $C.startActivityForResult($I, ...)
+              - pattern: startService($I)
+              - pattern: $C.startService($I)
+              - pattern: startForegroundService($I)
+              - pattern: $C.startForegroundService($I)
+              - pattern: sendBroadcast($I, ...)
+              - pattern: $C.sendBroadcast($I, ...)
+          - focus-metavariable: $I
     message: >-
-      An Intent received via getParcelableExtra is re-dispatched. If the
-      component is exported, a malicious app can supply an embedded Intent
-      and escalate privileges (intent redirection).
+      An Intent received via getParcelableExtra or Intent.parseUri is
+      re-dispatched. If the component is exported, a malicious app can
+      supply an embedded Intent and escalate privileges (intent redirection).
     languages:
       - kotlin
     severity: ERROR

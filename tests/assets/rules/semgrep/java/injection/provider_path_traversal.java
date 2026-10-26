@@ -9,6 +9,10 @@ class BadProvider {
         String name = uri.getLastPathSegment();
         // ruleid:android_provider_path_traversal
         File viaName = new File(getContext().getFilesDir(), name);
+        // ruleid:android_provider_path_traversal
+        File joined = new File(getContext().getFilesDir() + "/" + uri.getLastPathSegment());
+        // ruleid:android_provider_path_traversal
+        File segment = new File(getContext().getFilesDir(), uri.getPathSegments().get(0));
         String unused = getContext().getFilesDir().getCanonicalPath();
         return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
     }

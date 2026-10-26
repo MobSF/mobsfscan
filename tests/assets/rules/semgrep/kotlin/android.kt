@@ -83,6 +83,18 @@ fun goodPending(context: Context, intent: Intent) {
     PendingIntent.getBroadcast(context, 0, intent, sdkFlags)
 }
 
+fun goodBraceless(context: Context, intent: Intent) {
+    var flags = PendingIntent.FLAG_UPDATE_CURRENT
+    if (Build.VERSION.SDK_INT >= 23) flags = flags or PendingIntent.FLAG_IMMUTABLE
+    // ok:android_kotlin_pending_intent_not_immutable
+    PendingIntent.getBroadcast(context, 0, intent, flags)
+}
+
+fun badFive(context: Context, intent: Intent) {
+    // ruleid:android_kotlin_pending_intent_not_immutable
+    PendingIntent.getActivity(context, 0, intent, 0, null)
+}
+
 fun badUnrelatedIf(context: Context, intent: Intent, immutableRequested: Boolean) {
     var flags = PendingIntent.FLAG_UPDATE_CURRENT
     if (immutableRequested) {
@@ -93,21 +105,24 @@ fun badUnrelatedIf(context: Context, intent: Intent, immutableRequested: Boolean
 }
 
 fun externalDb(context: Context) {
-    // ruleid:android_kotlin_db_on_external_storage
     val path = context.getExternalFilesDir(null)!!.path + "/app.db"
+    // ruleid:android_kotlin_db_on_external_storage
     SQLiteDatabase.openOrCreateDatabase(path, null)
-    // ruleid:android_kotlin_db_on_external_storage
     val env = Environment.getExternalStorageDirectory().absolutePath + "/app.db"
-    SQLiteDatabase.openOrCreateDatabase(env, null)
     // ruleid:android_kotlin_db_on_external_storage
+    SQLiteDatabase.openOrCreateDatabase(env, null)
     val db = File(context.getExternalFilesDir(null), "app.db")
+    // ruleid:android_kotlin_db_on_external_storage
     SQLiteDatabase.openOrCreateDatabase(db.absolutePath, null)
     // ok:android_kotlin_db_on_external_storage
     SQLiteDatabase.openOrCreateDatabase("app.db", null)
-    // ruleid:android_kotlin_db_on_external_storage
     val publicPath = Environment.getExternalStoragePublicDirectory(
         Environment.DIRECTORY_DOWNLOADS).path + "/app.db"
+    // ruleid:android_kotlin_db_on_external_storage
     SQLiteDatabase.openDatabase(publicPath, null, SQLiteDatabase.OPEN_READWRITE)
+    SQLiteDatabase.openOrCreateDatabase(
+        // ruleid:android_kotlin_db_on_external_storage
+        Environment.getExternalStorageDirectory().toString() + "/x.db", null)
 }
 
 // ruleid:android_kotlin_db_on_external_storage

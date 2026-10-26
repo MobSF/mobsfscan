@@ -26,5 +26,10 @@ class ZipSamples {
         if (!checked.getCanonicalPath().startsWith(new File(destDir).getCanonicalPath())) {
             throw new SecurityException();
         }
+        ZipEntry loopEntry;
+        while ((loopEntry = zis.getNextEntry()) != null) {
+            // ruleid:android_zip_slip
+            File looped = new File(destDir, loopEntry.getName());
+        }
     }
 }

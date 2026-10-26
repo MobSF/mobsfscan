@@ -33,9 +33,9 @@ fun fileAccess(settings: WebSettings) {
     settings.allowFileAccess = false
 }
 
-// ruleid:android_kotlin_deeplink_to_webview
 fun deepLink(webView: WebView, uri: Uri) {
     val data = intent.data
+    // ruleid:android_kotlin_deeplink_to_webview
     webView.loadUrl(data.toString())
     // ruleid:android_kotlin_deeplink_to_webview
     webView.loadUrl(intent.dataString)

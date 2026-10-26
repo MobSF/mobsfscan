@@ -146,38 +146,22 @@ rules:
         https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md/#testing-webview-protocol-handlers-mstg-platform-6
 
   - id: android_kotlin_deeplink_to_webview
-    patterns:
-      - pattern-either:
-          - pattern: $W.loadUrl(getIntent().data.toString())
-          - pattern: $W.loadUrl($O.getIntent().data.toString())
-          - pattern: $W.loadUrl(intent.data.toString())
-          - pattern: $W.loadUrl(getIntent().dataString)
-          - pattern: $W.loadUrl($O.getIntent().dataString)
-          - pattern: $W.loadUrl(intent.dataString)
-          - pattern: |
-              fun $M(...) {
-                ...
-                $D = getIntent().data
-                ...
-                $W.loadUrl($D.toString())
-                ...
-              }
-          - pattern: |
-              fun $M(...) {
-                ...
-                $D = intent.data
-                ...
-                $W.loadUrl($D.toString())
-                ...
-              }
-          - pattern: |
-              fun $M(...) {
-                ...
-                $D = $O.getIntent().data
-                ...
-                $W.loadUrl($D.toString())
-                ...
-              }
+    mode: taint
+    pattern-sources:
+      - pattern: getIntent().data
+      - pattern: $O.getIntent().data
+      - pattern: intent.data
+      - pattern: getIntent().dataString
+      - pattern: $O.getIntent().dataString
+      - pattern: intent.dataString
+    pattern-sinks:
+      - patterns:
+          - pattern: $W.loadUrl($URL, ...)
+          - pattern-not-inside: |
+              if (<... $X.host ...>) { ... }
+          - pattern-not-inside: |
+              if (<... $X.getHost() ...>) { ... }
+          - focus-metavariable: $URL
     message: >-
       Deep link or external Intent data is loaded into a WebView. If the
       activity is browsable, any web page can drive this load; combined with

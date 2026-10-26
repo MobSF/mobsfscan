@@ -66,4 +66,28 @@ class PendingIntentSamples {
         // ok:android_pending_intent_not_immutable
         PendingIntent.getBroadcast(context, 0, intent, flags);
     }
+
+    void badWrapped(Context context, Intent intent) {
+        // ruleid:android_pending_intent_not_immutable
+        PendingIntent.getBroadcast(context, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT |
+            PendingIntent.FLAG_ONE_SHOT);
+    }
+
+    void badFive(Context context, Intent intent) {
+        // ruleid:android_pending_intent_not_immutable
+        PendingIntent.getActivity(context, 0, intent, 0, null);
+    }
+
+    void badActivities(Context context, Intent[] intents) {
+        // ruleid:android_pending_intent_not_immutable
+        PendingIntent.getActivities(context, 0, intents, 0);
+    }
+
+    void goodBraceless(Context context, Intent intent) {
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= 23) flags |= PendingIntent.FLAG_IMMUTABLE;
+        // ok:android_pending_intent_not_immutable
+        PendingIntent.getBroadcast(context, 0, intent, flags);
+    }
 }

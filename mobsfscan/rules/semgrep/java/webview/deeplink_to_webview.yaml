@@ -1,51 +1,17 @@
 rules:
   - id: android_deeplink_to_webview
-    patterns:
-      - pattern-either:
-          - pattern: |
-              $RET $M(...) {
-                ...
-                $W.loadUrl($O.getIntent().getData().toString());
-                ...
-              }
-          - pattern: |
-              $RET $M(...) {
-                ...
-                $W.loadUrl(getIntent().getData().toString());
-                ...
-              }
-          - pattern: |
-              $RET $M(...) {
-                ...
-                $TYPE $D = $O.getIntent().getData();
-                ...
-                $W.loadUrl($D.toString());
-                ...
-              }
-          - pattern: |
-              $RET $M(...) {
-                ...
-                $TYPE $D = getIntent().getData();
-                ...
-                $W.loadUrl($D.toString());
-                ...
-              }
-          - pattern: |
-              $RET $M(...) {
-                ...
-                $TYPE $D = $O.getIntent().getData();
-                ...
-                $W.loadUrl($D + $STR);
-                ...
-              }
-          - pattern: |
-              $RET $M(...) {
-                ...
-                $TYPE $D = getIntent().getData();
-                ...
-                $W.loadUrl($D + $STR);
-                ...
-              }
+    mode: taint
+    pattern-sources:
+      - pattern: getIntent().getData()
+      - pattern: $O.getIntent().getData()
+      - pattern: getIntent().getDataString()
+      - pattern: $O.getIntent().getDataString()
+    pattern-sinks:
+      - patterns:
+          - pattern: $W.loadUrl($URL, ...)
+          - pattern-not-inside: |
+              if (<... $X.getHost() ...>) { ... }
+          - focus-metavariable: $URL
     message: >-
       Deep link or external Intent data is loaded into a WebView. If the
       activity is browsable, any web page can drive this load; combined with

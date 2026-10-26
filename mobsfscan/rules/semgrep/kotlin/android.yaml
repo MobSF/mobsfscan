@@ -189,46 +189,21 @@ rules:
         https://mas.owasp.org/MASTG/tests/android/MASVS-STORAGE/MASTG-TEST-0010/
   - id: android_kotlin_pending_intent_not_immutable
     patterns:
-      - pattern-either:
-          - pattern: PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS)
-          - pattern: PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS)
-          - pattern: PendingIntent.getService($CTX, $REQ, $I, $FLAGS)
-          - pattern: PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS)
+      - pattern: PendingIntent.$M($CTX, $REQ, $I, $FLAGS, ...)
       - metavariable-regex:
-          metavariable: "$FLAGS"
-          regex: ^(?:(?!FLAG_IMMUTABLE).)*$
+          metavariable: $M
+          regex: ^(?:getActivity|getActivities|getBroadcast|getService|getForegroundService)$
+      - metavariable-regex:
+          metavariable: $FLAGS
+          regex: (?s)^(?!.*FLAG_IMMUTABLE).*$
       - pattern-not-inside: |
           $FLAGS = <... $P.FLAG_IMMUTABLE ...>
           ...
-          PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS)
-      - pattern-not-inside: |
-          $FLAGS = <... $P.FLAG_IMMUTABLE ...>
-          ...
-          PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS)
-      - pattern-not-inside: |
-          $FLAGS = <... $P.FLAG_IMMUTABLE ...>
-          ...
-          PendingIntent.getService($CTX, $REQ, $I, $FLAGS)
-      - pattern-not-inside: |
-          $FLAGS = <... $P.FLAG_IMMUTABLE ...>
-          ...
-          PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS)
+          PendingIntent.$M($CTX, $REQ, $I, $FLAGS, ...)
       - pattern-not-inside: |
           $FLAGS = <... FLAG_IMMUTABLE ...>
           ...
-          PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS)
-      - pattern-not-inside: |
-          $FLAGS = <... FLAG_IMMUTABLE ...>
-          ...
-          PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS)
-      - pattern-not-inside: |
-          $FLAGS = <... FLAG_IMMUTABLE ...>
-          ...
-          PendingIntent.getService($CTX, $REQ, $I, $FLAGS)
-      - pattern-not-inside: |
-          $FLAGS = <... FLAG_IMMUTABLE ...>
-          ...
-          PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS)
+          PendingIntent.$M($CTX, $REQ, $I, $FLAGS, ...)
       - pattern-not-inside: |
           if (<... Build.VERSION.SDK_INT ...>) {
             ...
@@ -236,31 +211,11 @@ rules:
             ...
           }
           ...
-          PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS)
+          PendingIntent.$M($CTX, $REQ, $I, $FLAGS, ...)
       - pattern-not-inside: |
-          if (<... Build.VERSION.SDK_INT ...>) {
-            ...
-            $FLAGS = <... $P.FLAG_IMMUTABLE ...>
-            ...
-          }
+          if (<... Build.VERSION.SDK_INT ...>) $FLAGS = <... $P.FLAG_IMMUTABLE ...>
           ...
-          PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS)
-      - pattern-not-inside: |
-          if (<... Build.VERSION.SDK_INT ...>) {
-            ...
-            $FLAGS = <... $P.FLAG_IMMUTABLE ...>
-            ...
-          }
-          ...
-          PendingIntent.getService($CTX, $REQ, $I, $FLAGS)
-      - pattern-not-inside: |
-          if (<... Build.VERSION.SDK_INT ...>) {
-            ...
-            $FLAGS = <... $P.FLAG_IMMUTABLE ...>
-            ...
-          }
-          ...
-          PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS)
+          PendingIntent.$M($CTX, $REQ, $I, $FLAGS, ...)
     message: >-
       PendingIntent is created without FLAG_IMMUTABLE. Prior to API 31,
       PendingIntents are mutable by default; a malicious app may amend the
@@ -277,62 +232,43 @@ rules:
       reference: >-
         https://developer.android.com/reference/android/app/PendingIntent#FLAG_IMMUTABLE
   - id: android_kotlin_db_on_external_storage
-    patterns:
-      - pattern-either:
-          - pattern-inside: |
-              $P = $CTX.getExternalFilesDir(...)!!.path + $REST
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...)
-          - pattern-inside: |
-              $P = $CTX.getExternalFilesDir(...).path + $REST
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...)
-          - pattern-inside: |
-              $P = $CTX.getExternalFilesDir(...)!!.absolutePath + $REST
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...)
-          - pattern-inside: |
-              $P = Environment.getExternalStorageDirectory().path + $REST
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...)
-          - pattern-inside: |
-              $P = Environment.getExternalStorageDirectory().absolutePath + $REST
-              ...
-              SQLiteDatabase.openOrCreateDatabase($P, ...)
-          - pattern-inside: |
-              $FILE = File(Environment.getExternalStorageDirectory(), $N)
-              ...
-              SQLiteDatabase.openOrCreateDatabase($FILE, ...)
-          - pattern-inside: |
-              $FILE = File($CTX.getExternalFilesDir(...), $N)
-              ...
-              SQLiteDatabase.openOrCreateDatabase($FILE.absolutePath, ...)
-          - pattern-inside: |
-              $FILE = File($CTX.getExternalFilesDir(...), $N)
-              ...
-              SQLiteDatabase.openOrCreateDatabase($FILE, ...)
-          - pattern-inside: |
-              $P = $CTX.getExternalFilesDir(...)!!.path + $REST
-              ...
-              SQLiteDatabase.openDatabase($P, ...)
-          - pattern-inside: |
-              $P = Environment.getExternalStorageDirectory().absolutePath + $REST
-              ...
-              SQLiteDatabase.openDatabase($P, ...)
-          - pattern-inside: |
-              $P = Environment.getExternalStoragePublicDirectory($D).path + $REST
-              ...
-              SQLiteDatabase.openDatabase($P, ...)
-          - pattern-inside: |
-              $FILE = File($CTX.getExternalFilesDir(...), $N)
-              ...
-              SQLiteDatabase.openDatabase($FILE.absolutePath, ...)
-          - pattern: |
-              class $C(...) : SQLiteOpenHelper($CTX, <... Environment.getExternalStorageDirectory() ...>, ...)
-          - pattern: |
-              class $C(...) : SQLiteOpenHelper($CTX, <... $X.getExternalFilesDir($Y) ...>, ...)
-          - pattern: |
-              class $C(...) : SQLiteOpenHelper($CTX, <... Environment.getExternalStoragePublicDirectory($D) ...>, ...)
+    mode: taint
+    pattern-sources:
+      - pattern: Environment.getExternalStorageDirectory()
+      - pattern: Environment.getExternalStoragePublicDirectory(...)
+      - pattern: $CTX.getExternalFilesDir(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: SQLiteDatabase.openOrCreateDatabase($PATH, ...)
+              - pattern: SQLiteDatabase.openDatabase($PATH, ...)
+              - pattern: Room.databaseBuilder($CTX, $K, $PATH)
+          - focus-metavariable: $PATH
+    message: >-
+      SQLite database path comes from external storage.
+      Environment.getExternalStorageDirectory() and
+      getExternalStoragePublicDirectory() are shared storage and are
+      world-readable through API 28. Context.getExternalFilesDir() is
+      app-specific and is not world-readable from API 19, but the file is
+      still outside internal storage. Prefer Context.getDatabasePath() or
+      openOrCreateDatabase(name) so the database stays in internal storage.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-276
+      owasp-mobile: m2
+      masvs: storage-1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md
+  - id: android_kotlin_db_on_external_storage
+    pattern-either:
+      - pattern: |
+          class $C(...) : SQLiteOpenHelper($CTX, <... Environment.getExternalStorageDirectory() ...>, ...)
+      - pattern: |
+          class $C(...) : SQLiteOpenHelper($CTX, <... $X.getExternalFilesDir($Y) ...>, ...)
+      - pattern: |
+          class $C(...) : SQLiteOpenHelper($CTX, <... Environment.getExternalStoragePublicDirectory($D) ...>, ...)
     message: >-
       SQLite database path comes from external storage.
       Environment.getExternalStorageDirectory() and

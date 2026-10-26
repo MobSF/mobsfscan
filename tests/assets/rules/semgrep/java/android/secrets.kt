@@ -4,7 +4,9 @@ class MaterialSamples {
     // ok:google_api_key
     val brief = "AIza12345"
     // ruleid:private_key_pem
-    val material = "-----BEGIN RSA PRIVATE KEY-----\nabc"
+    val material = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA7x"
+    // ok:private_key_pem
+    val headerOnly = "-----BEGIN PRIVATE KEY-----"
     // ok:private_key_pem
     val pub = "-----BEGIN PUBLIC KEY-----"
 }

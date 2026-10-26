@@ -5,16 +5,90 @@ rules:
     patterns:
       - pattern-either:
           - patterns:
+              - pattern: $FILE = new File($DIR, (ZipEntry $E).getName())
+              - pattern-not-inside: |
+                  $FILE = new File(...);
+                  ...
+                  if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                    ...
+                  }
+              - pattern-not-inside: |
+                  $FILE = new File(...);
+                  ...
+                  $CANON = $FILE.getCanonicalPath();
+                  ...
+                  if (<... $CANON.startsWith(...) ...>) {
+                    ...
+                  }
+          - patterns:
+              - pattern: new File($DIR, (ZipEntry $E).getName())
+              - pattern-not-inside: |
+                  $FILE = new File($DIR, (ZipEntry $E).getName());
+          - patterns:
+              - pattern: $FILE = new File((ZipEntry $E).getName())
+              - pattern-not-inside: |
+                  $FILE = new File(...);
+                  ...
+                  if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                    ...
+                  }
+              - pattern-not-inside: |
+                  $FILE = new File(...);
+                  ...
+                  $CANON = $FILE.getCanonicalPath();
+                  ...
+                  if (<... $CANON.startsWith(...) ...>) {
+                    ...
+                  }
+          - patterns:
+              - pattern-inside: |
+                  $NAME = (ZipEntry $E).getName();
+                  ...
               - pattern-either:
-                  - pattern-inside: |
-                      $TYPE $ENTRY = $ZIP.getNextEntry();
-                      ...
-                  - pattern-inside: |
-                      $ENTRY = $ZIP.getNextEntry();
-                      ...
-                  - pattern-inside: |
-                      $TYPE $ENTRY = $ENTRIES.nextElement();
-                      ...
+                  - patterns:
+                      - pattern: $FILE = new File($DIR, $NAME)
+                      - pattern-not-inside: |
+                          $FILE = new File(...);
+                          ...
+                          if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                            ...
+                          }
+                      - pattern-not-inside: |
+                          $FILE = new File(...);
+                          ...
+                          $CANON = $FILE.getCanonicalPath();
+                          ...
+                          if (<... $CANON.startsWith(...) ...>) {
+                            ...
+                          }
+                  - patterns:
+                      - pattern: $FILE = new File($NAME)
+                      - pattern-not-inside: |
+                          $FILE = new File(...);
+                          ...
+                          if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                            ...
+                          }
+                      - pattern-not-inside: |
+                          $FILE = new File(...);
+                          ...
+                          $CANON = $FILE.getCanonicalPath();
+                          ...
+                          if (<... $CANON.startsWith(...) ...>) {
+                            ...
+                          }
+                  - patterns:
+                      - pattern: new File($DIR, $NAME)
+                      - pattern-not-inside: |
+                          $ANY = new File($DIR, $NAME);
+                  - patterns:
+                      - pattern: new File($NAME)
+                      - pattern-not-inside: |
+                          $ANY = new File($NAME);
+          - patterns:
+              - pattern-inside: |
+                  $TYPE $ENTRY = $ENTRIES.nextElement();
+                  ...
               - pattern-either:
                   - patterns:
                       - pattern: $FILE = new File($DIR, $ENTRY.getName())
@@ -36,41 +110,6 @@ rules:
                       - pattern: new File($DIR, $ENTRY.getName())
                       - pattern-not-inside: |
                           $FILE = new File($DIR, $ENTRY.getName());
-          - patterns:
-              - pattern-either:
-                  - pattern-inside: |
-                      $TYPE $ENTRY = $ZIP.getNextEntry();
-                      ...
-                  - pattern-inside: |
-                      $ENTRY = $ZIP.getNextEntry();
-                      ...
-                  - pattern-inside: |
-                      $TYPE $ENTRY = $ENTRIES.nextElement();
-                      ...
-              - pattern-inside: |
-                  $NAME = $ENTRY.getName();
-                  ...
-              - pattern-either:
-                  - patterns:
-                      - pattern: $FILE = new File($DIR, $NAME)
-                      - pattern-not-inside: |
-                          $FILE = new File(...);
-                          ...
-                          if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
-                            ...
-                          }
-                      - pattern-not-inside: |
-                          $FILE = new File(...);
-                          ...
-                          $CANON = $FILE.getCanonicalPath();
-                          ...
-                          if (<... $CANON.startsWith(...) ...>) {
-                            ...
-                          }
-                  - patterns:
-                      - pattern: new File($DIR, $NAME)
-                      - pattern-not-inside: |
-                          $FILE = new File($DIR, $NAME);
     message: >-
       ZipEntry file name flows into new File() without a canonical-path
       check on that file. A malicious archive entry using ../ paths can
