@@ -166,17 +166,83 @@ def validate_assetlinks_url(url):
     return parsed.scheme, hostname, port
 
 
-class _PinnedTLSAdapter(HTTPAdapter):
+class _RequestDeadline:
+    """Shut down a request's sockets once its time limit passes.
+
+    Socket timeouts apply per operation, so a peer sending one byte at a
+    time could otherwise hold the TLS handshake, headers or body open
+    indefinitely and keep the worker thread blocked.
+    """
+
+    def __init__(self, seconds):
+        self.expired = False
+        self._lock = threading.Lock()
+        # Duplicates, so shutdown still reaches the connection after TLS
+        # wrapping detaches the original socket object, and so a closed
+        # and reused descriptor is never touched.
+        self._sockets = []
+        self._timer = threading.Timer(max(0, seconds), self._expire)
+        self._timer.daemon = True
+        self._timer.start()
+
+    def register(self, sock):
+        dup = sock.dup()
+        with self._lock:
+            if not self.expired:
+                self._sockets.append(dup)
+                return
+        self._shutdown(dup)
+
+    def _expire(self):
+        with self._lock:
+            self.expired = True
+            sockets, self._sockets = self._sockets, []
+        for sock in sockets:
+            self._shutdown(sock)
+
+    def cancel(self):
+        self._timer.cancel()
+        with self._lock:
+            sockets, self._sockets = self._sockets, []
+        for sock in sockets:
+            sock.close()
+
+    @staticmethod
+    def _shutdown(sock):
+        try:
+            sock.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass
+        sock.close()
+
+
+def _deadline_pool(pool_cls, deadline):
+    """Return a pool class whose connections register with the deadline."""
+    class Connection(pool_cls.ConnectionCls):
+        def _new_conn(self):
+            sock = super()._new_conn()
+            deadline.register(sock)
+            return sock
+
+    return type(pool_cls.__name__, (pool_cls,), {'ConnectionCls': Connection})
+
+
+class _PinnedAdapter(HTTPAdapter):
     """Verify TLS against the hostname while connecting to an IP literal."""
 
-    def __init__(self, hostname, **kwargs):
+    def __init__(self, hostname, deadline, **kwargs):
         self.hostname = hostname
+        self.deadline = deadline
         super().__init__(**kwargs)
 
     def init_poolmanager(self, connections, maxsize, block=False, **kwargs):
         kwargs['server_hostname'] = self.hostname
         kwargs['assert_hostname'] = self.hostname
         super().init_poolmanager(connections, maxsize, block=block, **kwargs)
+        self.poolmanager.pool_classes_by_scheme = {
+            scheme: _deadline_pool(pool_cls, self.deadline)
+            for scheme, pool_cls in
+            self.poolmanager.pool_classes_by_scheme.items()}
 
 
 def _get_pinned(scheme, hostname, port, address, deadline):
@@ -188,8 +254,7 @@ def _get_pinned(scheme, hostname, port, address, deadline):
     with requests.Session() as session:
         # A proxy would resolve the hostname itself and undo the pinning.
         session.trust_env = False
-        if scheme == 'https':
-            session.mount('https://', _PinnedTLSAdapter(hostname))
+        session.mount(f'{scheme}://', _PinnedAdapter(hostname, deadline))
         with session.get(url,
                          headers={'Host': host_header},
                          allow_redirects=False,
@@ -200,8 +265,9 @@ def _get_pinned(scheme, hostname, port, address, deadline):
                 body += chunk
                 if len(body) > MAX_RESPONSE_SIZE:
                     raise ValueError('assetlinks.json response too large')
-                if time.monotonic() > deadline:
-                    raise TimeoutError('assetlinks.json request timed out')
+            # A body without Content-Length just ends early on shutdown.
+            if deadline.expired:
+                raise TimeoutError('assetlinks.json request timed out')
             return response.status_code, bytes(body)
 
 
@@ -219,14 +285,23 @@ def fetch_assetlinks(url, deadline):
         hostname, port or (443 if scheme == 'https' else 80))
     if not addresses:
         return None
+    cutoff = _RequestDeadline(deadline - time.monotonic())
     last_error = None
-    for address in addresses:
-        if time.monotonic() > deadline:
-            break
-        try:
-            return _get_pinned(scheme, hostname, port, address, deadline)
-        except requests.ConnectionError as exp:
-            last_error = exp
+    try:
+        for address in addresses:
+            if cutoff.expired:
+                break
+            try:
+                return _get_pinned(scheme, hostname, port, address, cutoff)
+            except (requests.RequestException, OSError) as exp:
+                if cutoff.expired:
+                    raise TimeoutError(
+                        'assetlinks.json request timed out') from exp
+                if not isinstance(exp, requests.ConnectionError):
+                    raise
+                last_error = exp
+    finally:
+        cutoff.cancel()
     raise last_error or TimeoutError('assetlinks.json request timed out')
 
 

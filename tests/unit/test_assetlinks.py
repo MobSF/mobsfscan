@@ -202,7 +202,7 @@ def drip_server(monkeypatch):
     listener.bind(('127.0.0.1', 0))
     listener.listen()
     port = listener.getsockname()[1]
-    mode = {}
+    mode = {'closed': threading.Event()}
 
     def handle(conn):
         with conn:
@@ -210,6 +210,9 @@ def drip_server(monkeypatch):
             if mode['drip'] == 'body':
                 conn.sendall(b'HTTP/1.1 200 OK\r\n'
                              b'Content-Length: 1000000\r\n\r\n')
+                payload = iter(lambda: b'x', None)
+            elif mode['drip'] == 'body_until_close':
+                conn.sendall(b'HTTP/1.0 200 OK\r\n\r\n')
                 payload = iter(lambda: b'x', None)
             else:
                 conn.sendall(b'HTTP/1.1 200 OK\r\n')
@@ -221,6 +224,7 @@ def drip_server(monkeypatch):
                     try:
                         conn.sendall(bytes([byte]))
                     except OSError:
+                        mode['closed'].set()
                         return
 
     def serve():
@@ -242,14 +246,16 @@ def drip_server(monkeypatch):
     listener.close()
 
 
-@pytest.mark.parametrize('drip', ['body', 'headers'])
+@pytest.mark.parametrize('drip', ['body', 'body_until_close', 'headers'])
 def test_slow_drip_server_does_not_hang_scan(drip_server, drip):
     mode, url = drip_server
     mode['drip'] = drip
     start = time.monotonic()
     results = fetch_all_assetlinks([url], timeout=1)
     assert time.monotonic() - start < 3
-    assert isinstance(results[url], Exception)
+    assert isinstance(results[url], TimeoutError)
+    # The connection is torn down, not left running in the worker thread.
+    assert mode['closed'].wait(3)
 
 
 def test_url_cap(monkeypatch):
