@@ -1,8 +1,6 @@
 # -*- coding: utf_8 -*-
 """Logger Config."""
-import socket
 import unicodedata
-from urllib.parse import urlparse
 from pathlib import Path
 
 import mobsfscan.settings as config
@@ -207,41 +205,3 @@ def is_number(s):
     except (TypeError, ValueError):
         pass
     return False
-
-
-def valid_host(host):
-    """Check if host is valid."""
-    try:
-        prefixs = ('http://', 'https://')
-        if not host.startswith(prefixs):
-            host = f'http://{host}'
-        parsed = urlparse(host)
-        domain = parsed.netloc
-        path = parsed.path
-        if len(domain) == 0:
-            # No valid domain
-            return False
-        if len(path) > 0:
-            # Only host is allowed
-            return False
-        if ':' in domain:
-            # IPv6
-            return False
-        # Local network
-        invalid_prefix = (
-            '127.',
-            '192.',
-            '10.',
-            '172.',
-            '169',
-            '0.',
-            'localhost')
-        if domain.startswith(invalid_prefix):
-            return False
-        ip = socket.gethostbyname(domain)
-        if ip.startswith(invalid_prefix):
-            # Resolve dns to get IP
-            return False
-        return True
-    except Exception:
-        return False
