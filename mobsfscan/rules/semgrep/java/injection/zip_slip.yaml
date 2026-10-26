@@ -1,0 +1,125 @@
+# Zip path traversal concept:
+# https://snyk.io/research/zip-slip-vulnerability
+rules:
+  - id: android_zip_slip
+    patterns:
+      - pattern-either:
+          - patterns:
+              - pattern: $FILE = new File($DIR, (ZipEntry $E).getName())
+              - pattern-not-inside: |
+                  $FILE = new File(...);
+                  ...
+                  if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                    ...
+                  }
+              - pattern-not-inside: |
+                  $FILE = new File(...);
+                  ...
+                  $CANON = $FILE.getCanonicalPath();
+                  ...
+                  if (<... $CANON.startsWith(...) ...>) {
+                    ...
+                  }
+          - patterns:
+              - pattern: new File($DIR, (ZipEntry $E).getName())
+              - pattern-not-inside: |
+                  $FILE = new File($DIR, (ZipEntry $E).getName());
+          - patterns:
+              - pattern: $FILE = new File((ZipEntry $E).getName())
+              - pattern-not-inside: |
+                  $FILE = new File(...);
+                  ...
+                  if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                    ...
+                  }
+              - pattern-not-inside: |
+                  $FILE = new File(...);
+                  ...
+                  $CANON = $FILE.getCanonicalPath();
+                  ...
+                  if (<... $CANON.startsWith(...) ...>) {
+                    ...
+                  }
+          - patterns:
+              - pattern-inside: |
+                  $NAME = (ZipEntry $E).getName();
+                  ...
+              - pattern-either:
+                  - patterns:
+                      - pattern: $FILE = new File($DIR, $NAME)
+                      - pattern-not-inside: |
+                          $FILE = new File(...);
+                          ...
+                          if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                            ...
+                          }
+                      - pattern-not-inside: |
+                          $FILE = new File(...);
+                          ...
+                          $CANON = $FILE.getCanonicalPath();
+                          ...
+                          if (<... $CANON.startsWith(...) ...>) {
+                            ...
+                          }
+                  - patterns:
+                      - pattern: $FILE = new File($NAME)
+                      - pattern-not-inside: |
+                          $FILE = new File(...);
+                          ...
+                          if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                            ...
+                          }
+                      - pattern-not-inside: |
+                          $FILE = new File(...);
+                          ...
+                          $CANON = $FILE.getCanonicalPath();
+                          ...
+                          if (<... $CANON.startsWith(...) ...>) {
+                            ...
+                          }
+                  - patterns:
+                      - pattern: new File($DIR, $NAME)
+                      - pattern-not-inside: |
+                          $ANY = new File($DIR, $NAME);
+                  - patterns:
+                      - pattern: new File($NAME)
+                      - pattern-not-inside: |
+                          $ANY = new File($NAME);
+          - patterns:
+              - pattern-inside: |
+                  $TYPE $ENTRY = $ENTRIES.nextElement();
+                  ...
+              - pattern-either:
+                  - patterns:
+                      - pattern: $FILE = new File($DIR, $ENTRY.getName())
+                      - pattern-not-inside: |
+                          $FILE = new File(...);
+                          ...
+                          if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                            ...
+                          }
+                      - pattern-not-inside: |
+                          $FILE = new File(...);
+                          ...
+                          $CANON = $FILE.getCanonicalPath();
+                          ...
+                          if (<... $CANON.startsWith(...) ...>) {
+                            ...
+                          }
+                  - patterns:
+                      - pattern: new File($DIR, $ENTRY.getName())
+                      - pattern-not-inside: |
+                          $FILE = new File($DIR, $ENTRY.getName());
+    message: >-
+      ZipEntry file name flows into new File() without a canonical-path
+      check on that file. A malicious archive entry using ../ paths can
+      write outside the extraction directory (ZipSlip).
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-22
+      owasp-mobile: m1
+      masvs: platform-2
+      reference: >-
+        https://snyk.io/research/zip-slip-vulnerability

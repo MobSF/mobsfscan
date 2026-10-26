@@ -1,0 +1,26 @@
+rules:
+  - id: android_oauth_custom_scheme_redirect
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $B.setRedirectUri(Uri.parse($SCHEME))
+          - pattern-inside: |
+              $V = $SCHEME;
+              ...
+              $B.setRedirectUri(Uri.parse($V));
+      - metavariable-regex:
+          metavariable: "$SCHEME"
+          regex: ^"(?!https?:)[A-Za-z0-9._+-]+:/
+    message: >-
+      OAuth redirect URI uses a custom URL scheme. Any malicious app can
+      register the same scheme and intercept the authorization response
+      (code / PKCE verifier). Prefer App Links (https) verified redirects.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-601
+      owasp-mobile: m2
+      masvs: platform-2
+      reference: >-
+        https://datatracker.ietf.org/doc/html/rfc8252#section-7.1

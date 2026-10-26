@@ -58,3 +58,93 @@ fun notify(builder: androidx.core.app.NotificationCompat.Builder, oneTimePasswor
     // ok:android_kotlin_sensitive_notification
     builder.setContentTitle(accountName)
 }
+
+fun badPending(context: Context, intent: Intent) {
+    // ruleid:android_kotlin_pending_intent_not_immutable
+    PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    val flags = PendingIntent.FLAG_UPDATE_CURRENT
+    // ruleid:android_kotlin_pending_intent_not_immutable
+    PendingIntent.getBroadcast(context, 0, intent, flags)
+}
+
+fun goodPending(context: Context, intent: Intent) {
+    // ok:android_kotlin_pending_intent_not_immutable
+    PendingIntent.getBroadcast(
+        context, 0, intent,
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    // ok:android_kotlin_pending_intent_not_immutable
+    PendingIntent.getBroadcast(context, 0, intent, flags)
+    var sdkFlags = PendingIntent.FLAG_UPDATE_CURRENT
+    if (Build.VERSION.SDK_INT >= 23) {
+        sdkFlags = sdkFlags or PendingIntent.FLAG_IMMUTABLE
+    }
+    // ok:android_kotlin_pending_intent_not_immutable
+    PendingIntent.getBroadcast(context, 0, intent, sdkFlags)
+}
+
+fun goodBraceless(context: Context, intent: Intent) {
+    var flags = PendingIntent.FLAG_UPDATE_CURRENT
+    if (Build.VERSION.SDK_INT >= 23) flags = flags or PendingIntent.FLAG_IMMUTABLE
+    // ok:android_kotlin_pending_intent_not_immutable
+    PendingIntent.getBroadcast(context, 0, intent, flags)
+}
+
+fun badFive(context: Context, intent: Intent) {
+    // ruleid:android_kotlin_pending_intent_not_immutable
+    PendingIntent.getActivity(context, 0, intent, 0, null)
+}
+
+fun badUnrelatedIf(context: Context, intent: Intent, immutableRequested: Boolean) {
+    var flags = PendingIntent.FLAG_UPDATE_CURRENT
+    if (immutableRequested) {
+        flags = flags or PendingIntent.FLAG_IMMUTABLE
+    }
+    // ruleid:android_kotlin_pending_intent_not_immutable
+    PendingIntent.getBroadcast(context, 0, intent, flags)
+}
+
+fun externalDb(context: Context) {
+    // ruleid:android_kotlin_db_on_external_storage
+    val path = context.getExternalFilesDir(null)!!.path + "/app.db"
+    SQLiteDatabase.openOrCreateDatabase(path, null)
+    // ruleid:android_kotlin_db_on_external_storage
+    val env = Environment.getExternalStorageDirectory().absolutePath + "/app.db"
+    SQLiteDatabase.openOrCreateDatabase(env, null)
+    // ruleid:android_kotlin_db_on_external_storage
+    val db = File(context.getExternalFilesDir(null), "app.db")
+    SQLiteDatabase.openOrCreateDatabase(db.absolutePath, null)
+    // ok:android_kotlin_db_on_external_storage
+    SQLiteDatabase.openOrCreateDatabase("app.db", null)
+    // ruleid:android_kotlin_db_on_external_storage
+    val publicPath = Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_DOWNLOADS).path + "/app.db"
+    SQLiteDatabase.openDatabase(publicPath, null, SQLiteDatabase.OPEN_READWRITE)
+    // ruleid:android_kotlin_db_on_external_storage
+    SQLiteDatabase.openOrCreateDatabase(
+        Environment.getExternalStorageDirectory().toString() + "/x.db", null)
+}
+
+// ruleid:android_kotlin_db_on_external_storage
+class Helper(context: Context) : SQLiteOpenHelper(
+    context,
+    Environment.getExternalStorageDirectory().absolutePath + "/app.db",
+    null,
+    1,
+)
+
+// ok:android_kotlin_db_on_external_storage
+class InternalHelper(context: Context) : SQLiteOpenHelper(context, "app.db", null, 1)
+
+fun authorize(builder: AuthorizationRequest.Builder) {
+    // ruleid:android_kotlin_oauth_custom_scheme_redirect
+    builder.setRedirectUri(Uri.parse("my-app://callback"))
+    // ok:android_kotlin_oauth_custom_scheme_redirect
+    builder.setRedirectUri(Uri.parse("https://example.com/oauth"))
+    // ruleid:android_kotlin_oauth_custom_scheme_redirect
+    val custom = "my-app://callback"
+    builder.setRedirectUri(Uri.parse(custom))
+    val https = "https://example.com/oauth"
+    // ok:android_kotlin_oauth_custom_scheme_redirect
+    builder.setRedirectUri(Uri.parse(https))
+}

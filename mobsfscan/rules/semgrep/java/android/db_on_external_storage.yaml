@@ -1,0 +1,35 @@
+rules:
+  - id: android_db_on_external_storage
+    mode: taint
+    pattern-sources:
+      - pattern: Environment.getExternalStorageDirectory()
+      - pattern: Environment.getExternalStoragePublicDirectory(...)
+      - pattern: $CTX.getExternalFilesDir(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: SQLiteDatabase.openOrCreateDatabase($PATH, ...)
+              - pattern: SQLiteDatabase.openDatabase($PATH, ...)
+              - pattern: Room.databaseBuilder($CTX, $K, $PATH)
+              - patterns:
+                  - pattern-inside: |
+                      class $CLS extends SQLiteOpenHelper { ... }
+                  - pattern: super($CTX, $PATH, ...)
+          - focus-metavariable: $PATH
+    message: >-
+      SQLite database path comes from external storage.
+      Environment.getExternalStorageDirectory() and
+      getExternalStoragePublicDirectory() are shared storage and are
+      world-readable through API 28. Context.getExternalFilesDir() is
+      app-specific and is not world-readable from API 19, but the file is
+      still outside internal storage. Prefer Context.getDatabasePath() or
+      openOrCreateDatabase(name) so the database stays in internal storage.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-276
+      owasp-mobile: m2
+      masvs: storage-1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md

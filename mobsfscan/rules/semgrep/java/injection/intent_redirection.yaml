@@ -1,0 +1,41 @@
+rules:
+  - id: android_intent_redirection
+    mode: taint
+    pattern-sources:
+      - pattern: $O.getParcelableExtra(...)
+      - patterns:
+          - pattern: Intent.parseUri(...)
+          - pattern-not: Intent.parseUri("...", ...)
+    pattern-sanitizers:
+      - pattern: new Intent($A, $B)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: startActivity($I, ...)
+              - pattern: $C.startActivity($I, ...)
+              - pattern: startActivityForResult($I, ...)
+              - pattern: $C.startActivityForResult($I, ...)
+              - pattern: startService($I)
+              - pattern: $C.startService($I)
+              - pattern: startForegroundService($I)
+              - pattern: $C.startForegroundService($I)
+              - pattern: sendBroadcast($I, ...)
+              - pattern: $C.sendBroadcast($I, ...)
+              - pattern: sendOrderedBroadcast($I, ...)
+              - pattern: $C.sendOrderedBroadcast($I, ...)
+              - pattern: bindService($I, ...)
+              - pattern: $C.bindService($I, ...)
+          - focus-metavariable: $I
+    message: >-
+      An Intent received via getParcelableExtra or Intent.parseUri is
+      re-dispatched. If the component is exported, a malicious app can
+      supply an embedded Intent and escalate privileges (intent redirection).
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-926
+      owasp-mobile: m1
+      masvs: platform-4
+      reference: >-
+        https://mas.owasp.org/MASTG/Android/0x05h-Testing-Platform-Interaction/

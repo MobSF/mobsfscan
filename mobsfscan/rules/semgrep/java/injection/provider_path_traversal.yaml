@@ -1,0 +1,54 @@
+rules:
+  - id: android_provider_path_traversal
+    mode: taint
+    pattern-sources:
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $RET openFile(Uri $URI, ...) { ... }
+              - pattern-inside: |
+                  $RET openAssetFile(Uri $URI, ...) { ... }
+              - pattern-inside: |
+                  $RET openTypedAssetFile(Uri $URI, ...) { ... }
+          - pattern-either:
+              - pattern: $URI.getLastPathSegment()
+              - pattern: $URI.getEncodedPath()
+              - pattern: $URI.getPath()
+              - pattern: $URI.getPathSegments()
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - patterns:
+                  - pattern: $FILE = new File(...)
+                  - pattern-not-inside: |
+                      $FILE = new File(...);
+                      ...
+                      if (<... $FILE.getCanonicalPath().startsWith(...) ...>) {
+                        ...
+                      }
+                  - pattern-not-inside: |
+                      $FILE = new File(...);
+                      ...
+                      $CANON = $FILE.getCanonicalPath();
+                      ...
+                      if (<... $CANON.startsWith(...) ...>) {
+                        ...
+                      }
+              - patterns:
+                  - pattern: new File(...)
+                  - pattern-not-inside: |
+                      $FILE = new File(...);
+    message: >-
+      ContentProvider openFile() or openAssetFile() builds a filesystem path
+      from the URI without checking that file's canonical path. If the
+      provider is exported, any app can traverse outside the intended
+      directory using ../ segments.
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-22
+      owasp-mobile: m1
+      masvs: platform-4
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-PLATFORM/MASTG-TEST-0022/

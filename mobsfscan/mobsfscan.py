@@ -207,10 +207,26 @@ class MobSFScan:
         self.result['results'] = sgrep_output['matches']
 
     def format_pattern(self, matcher_out):
-        """Format Pattern Matcher output."""
+        """Format Pattern Matcher output.
+
+        Merge files when Semgrep already reported the same rule id, so an
+        XML hit does not replace a source hit.
+        """
         if not matcher_out:
             return
-        self.result['results'].update(matcher_out)
+        for rule_id, details in matcher_out.items():
+            existing = self.result['results'].get(rule_id)
+            if not existing:
+                self.result['results'][rule_id] = details
+                continue
+            extra = details.get('files') or []
+            if not extra:
+                continue
+            files = existing.get('files')
+            if files is None:
+                existing['files'] = list(extra)
+            else:
+                files.extend(extra)
 
     def format_xml(self, res_out):
         """Format XML check output."""

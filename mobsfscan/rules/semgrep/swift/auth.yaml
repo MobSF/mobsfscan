@@ -57,3 +57,28 @@ rules:
       owasp-mobile: m1
       reference: >-
         https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06f-Testing-Local-Authentication.md
+  - id: ios_oauth_callback_custom_scheme
+    patterns:
+      - pattern-either:
+          - pattern: |
+              ASWebAuthenticationSession(url: $URL, callbackURLScheme: $SCHEME) { $A, $B in ... }
+          - pattern: |
+              ASWebAuthenticationSession(url: $URL, callbackURLScheme: $SCHEME) { $A in ... }
+          - pattern: |
+              ASWebAuthenticationSession(url: $URL, callbackURLScheme: $SCHEME, completionHandler: $H)
+      - metavariable-regex:
+          metavariable: "$SCHEME"
+          regex: ^"(?!https?")[A-Za-z0-9._+-]+"$
+    message: >-
+      OAuth/OIDC callback uses a custom URL scheme. A malicious app can
+      register the same scheme and intercept the authorization response
+      (code / PKCE verifier). Prefer universal links (https) redirects.
+    languages:
+      - swift
+    severity: INFO
+    metadata:
+      cwe: cwe-601
+      owasp-mobile: m2
+      masvs: platform-2
+      reference: >-
+        https://datatracker.ietf.org/doc/html/rfc8252#section-7.1

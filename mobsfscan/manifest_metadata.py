@@ -319,6 +319,21 @@ metadata = {
                 'Communication.md'),
         },
     },
+    'google_api_key': {
+        'message': (
+            'A Google API key is identified. API keys are not secrets by '
+            'themselves, but an unrestricted key can be abused for quota '
+            'theft or billed services. Apply package name / API '
+            'restrictions.'),
+        'severity': 'INFO',
+        'reference': 'AIza Google API key',
+        'metadata': {
+            'cwe': 'cwe-798',
+            'owasp-mobile': 'm2',
+            'masvs': 'code-3',
+            'reference': 'https://cloud.google.com/docs/authentication/api-keys',
+        },
+    },
     'android_layout_sensitive_input_keyboard_cache': {
         'message': (
             'A sensitive input field is configured without a password '

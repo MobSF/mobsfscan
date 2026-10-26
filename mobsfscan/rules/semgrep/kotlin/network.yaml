@@ -75,3 +75,19 @@ rules:
       masvs: network-2
       reference: >-
         https://mas.owasp.org/MASTG/tests/android/MASVS-NETWORK/MASTG-TEST-0020/
+  - id: android_kotlin_local_server_socket
+    pattern: LocalServerSocket(...)
+    message: >-
+      LocalServerSocket has no built-in authentication. Any app on the
+      device can connect to this abstract-namespace UNIX domain socket.
+      Ensure an authentication handshake is enforced before honoring
+      commands received on it.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-306
+      owasp-mobile: m1
+      masvs: platform-4
+      reference: >-
+        https://developer.android.com/reference/android/net/LocalServerSocket

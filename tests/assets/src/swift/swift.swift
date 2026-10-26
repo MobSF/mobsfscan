@@ -12,3 +12,22 @@ let password = "s3cret"
 let key = "sk-live-abc123"
 let api_key = "sk-live-abc123"
 let secretKey = "abc"
+
+// Should match ios_oauth_callback_custom_scheme
+func startAuth(url: URL) {
+    let session = ASWebAuthenticationSession(url: url, callbackURLScheme: "com.example.app") { callbackURL, error in
+    }
+}
+
+func startAuthExplicit(url: URL) {
+    let session = ASWebAuthenticationSession(
+        url: url,
+        callbackURLScheme: "com.example.app",
+        completionHandler: { callbackURL, error in })
+}
+
+// Should match ios_ssziparchive_unzip
+func extract(archive: String, dest: String) {
+    SSZipArchive.unzipFile(atPath: archive, toDestination: dest)
+    SSZipArchive.unzipFile(atPath: archive, toDestination: dest, overwrite: true, password: nil)
+}

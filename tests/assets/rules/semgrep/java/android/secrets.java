@@ -47,6 +47,26 @@ public class App
     }
 }
 
+class MaterialSamples {
+    // ruleid:google_api_key
+    static String maps = "AIza12345678901234567890123456789012345";
+    // ok:google_api_key
+    static String brief = "AIza12345";
+    // ruleid:private_key_pem
+    static String material = "-----BEGIN ENCRYPTED PRIVATE KEY-----\nMIIEpAIBAAKCAQEA7x";
+    // ruleid:private_key_pem
+    static String joined = "-----BEGIN RSA PRIVATE KEY-----" + "MIIEpAIBAAKCAQEA7x";
+    // ok:private_key_pem
+    static String headerOnly = "-----BEGIN PRIVATE KEY-----";
+    // ok:private_key_pem
+    static String pub = "-----BEGIN PUBLIC KEY-----";
+
+    void strip(String pem) {
+        // ok:private_key_pem
+        pem.replace("-----BEGIN PRIVATE KEY-----", "");
+    }
+}
+
 abstract class App2
 {
 
