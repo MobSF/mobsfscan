@@ -13,7 +13,7 @@ UNSAFE_HTML = 'unsafehtml'
 def _escape(data, fmt):
     """Escape HTML unsafe data."""
     if fmt == UNSAFE_HTML:
-        return escape(data)
+        return escape(str(data))
     return data
 
 
@@ -25,14 +25,19 @@ def print_tool_info(ver):
 
 
 def format_table(rule_id, details, fmt):
-    """Get CLI friendly format."""
+    """Get CLI friendly format.
+
+    The unsafehtml table format does no escaping, and metadata such as
+    descriptions can carry values from the scanned project, so every cell
+    is escaped except the nested files table, which is built as HTML here.
+    """
     items = []
-    items.append(['RULE ID', rule_id])
+    items.append(['RULE ID', _escape(rule_id, fmt)])
     for meta, value in details['metadata'].items():
         if meta == 'id':
             continue
         meta_format = meta.upper().replace('_', '')
-        items.append([meta_format, value])
+        items.append([_escape(meta_format, fmt), _escape(value, fmt)])
     # Get files
     fstore = []
     files = details.get('files')
@@ -42,11 +47,11 @@ def format_table(rule_id, details, fmt):
             fstore.append(['File', _escape(file_path, fmt)])
             position = match['match_position']
             pos = f'{position[0]} - {position[1]}'
-            fstore.append(['Match Position', pos])
+            fstore.append(['Match Position', _escape(pos, fmt)])
             lines = match.get('match_lines')
             line = (lines[0] if lines[0] == lines[1]
                     else f'{lines[0]}: {lines[1]}')
-            fstore.append(['Line Number(s)', line])
+            fstore.append(['Line Number(s)', _escape(line, fmt)])
             match_string = match['match_string']
             if isinstance(match_string, list):
                 match_string = '\n'.join(ln.strip() for ln in match_string)
