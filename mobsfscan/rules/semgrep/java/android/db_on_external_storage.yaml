@@ -1,0 +1,66 @@
+rules:
+  - id: android_db_on_external_storage
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $TYPE $P = $CTX.getExternalFilesDir(...).getPath() + $REST;
+                ...
+                SQLiteDatabase.openOrCreateDatabase($P, ...);
+                ...
+              }
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $TYPE $P = $CTX.getExternalFilesDir(...).toString() + $REST;
+                ...
+                SQLiteDatabase.openOrCreateDatabase($P, ...);
+                ...
+              }
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $TYPE $P = $CTX.getExternalFilesDir(...).getAbsolutePath() + $REST;
+                ...
+                SQLiteDatabase.openOrCreateDatabase($P, ...);
+                ...
+              }
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $TYPE $P = $CTX.getExternalStorageDirectory().getPath() + $REST;
+                ...
+                SQLiteDatabase.openOrCreateDatabase($P, ...);
+                ...
+              }
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $TYPE $P = $CTX.getExternalFilesDir(...).getPath() + $REST;
+                ...
+                SQLiteDatabase.openDatabase($P, ...);
+                ...
+              }
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $TYPE $P = $CTX.getExternalStorageDirectory().toString() + $REST;
+                ...
+                SQLiteDatabase.openDatabase($P, ...);
+                ...
+              }
+    message: >-
+      SQLite database is opened on external storage. Databases on shared
+      external storage are world-readable on API <= 28 and can be read or
+      replaced by other apps or over MTP. Store databases in internal
+      storage.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-276
+      owasp-mobile: m2
+      masvs: storage-1
+      reference: >-
+        https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md

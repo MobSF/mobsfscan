@@ -1,0 +1,62 @@
+rules:
+  - id: android_deeplink_to_webview
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $W.loadUrl($O.getIntent().getData().toString());
+                ...
+              }
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $W.loadUrl(getIntent().getData().toString());
+                ...
+              }
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $TYPE $D = $O.getIntent().getData();
+                ...
+                $W.loadUrl($D.toString());
+                ...
+              }
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $TYPE $D = getIntent().getData();
+                ...
+                $W.loadUrl($D.toString());
+                ...
+              }
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $TYPE $D = $O.getIntent().getData();
+                ...
+                $W.loadUrl($D + $STR);
+                ...
+              }
+          - pattern: |
+              $RET $M(...) {
+                ...
+                $TYPE $D = getIntent().getData();
+                ...
+                $W.loadUrl($D + $STR);
+                ...
+              }
+    message: >-
+      Deep link or external Intent data is loaded into a WebView without an
+      allowlist. If the activity is browsable, any web page can drive this
+      load; combined with a JavaScript bridge it becomes remote content
+      injection into the app context.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-919
+      owasp-mobile: m1
+      masvs: platform-5
+      reference: >-
+        https://mas.owasp.org/MASTG/Android/0x05h-Testing-Platform-Interaction/

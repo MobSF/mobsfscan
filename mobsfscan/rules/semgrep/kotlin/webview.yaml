@@ -145,3 +145,30 @@ rules:
       reference: >-
         https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md/#testing-webview-protocol-handlers-mstg-platform-6
 
+  - id: android_kotlin_deeplink_to_webview
+    patterns:
+      - pattern-either:
+          - pattern: |
+              fun $M(...) {
+                ...
+                $D = $I.data
+                ...
+                $W.loadUrl($D.toString())
+                ...
+              }
+          - pattern: $W.loadUrl($I.data.toString())
+          - pattern: $W.loadUrl($I.dataString)
+    message: >-
+      Deep link or external Intent data is loaded into a WebView without an
+      allowlist. If the activity is browsable, any web page can drive this
+      load; combined with a JavaScript bridge it becomes remote content
+      injection into the app context.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-919
+      owasp-mobile: m1
+      masvs: platform-5
+      reference: >-
+        https://mas.owasp.org/MASTG/Android/0x05h-Testing-Platform-Interaction/

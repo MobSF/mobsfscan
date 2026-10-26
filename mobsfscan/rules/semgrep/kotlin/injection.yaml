@@ -187,3 +187,120 @@ rules:
       reference: >-
         https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2
 
+  - id: android_kotlin_provider_path_traversal
+    patterns:
+      - pattern-either:
+          - pattern: File($BASE, $URI.lastPathSegment)
+          - pattern: File($BASE, $URI.getLastPathSegment())
+          - pattern: File($URI.lastPathSegment)
+      - pattern-either:
+          - pattern-inside: |
+              fun openFile($URI: Uri, $MODE: String): $RET {
+                ...
+              }
+          - pattern-inside: |
+              override fun openFile($URI: Uri, $MODE: String): $RET {
+                ...
+              }
+      - pattern-not-inside: |
+          fun $M2(...) {
+            ...
+            $X.canonicalPath
+            ...
+          }
+      - pattern-not-inside: |
+          fun $M2(...) {
+            ...
+            $X.getCanonicalPath(...)
+            ...
+          }
+      - pattern-not-inside: |
+          fun $M2(...) {
+            ...
+            if (<... $X.canonicalPath ...>) {
+              ...
+            }
+            ...
+          }
+    message: >-
+      ContentProvider openFile() builds a file path from attacker-controlled
+      URI parts without canonicalization. If the provider is exported, any
+      app can traverse outside the intended directory using ../ segments.
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-22
+      owasp-mobile: m1
+      masvs: platform-4
+      reference: >-
+        https://mas.owasp.org/MASTG/tests/android/MASVS-PLATFORM/MASTG-TEST-0022/
+  - id: android_kotlin_zip_slip
+    patterns:
+      - pattern: File($DIR, $ENTRY.name)
+      - pattern-either:
+          - pattern-inside: |
+              fun $M(...) {
+                ...
+                $ENTRY = $ZIP.nextEntry
+                ...
+              }
+          - pattern-inside: |
+              fun $M(...) {
+                ...
+                var $ENTRY: $T = $ZIP.nextEntry
+                ...
+              }
+          - pattern-inside: |
+              fun $M(...) {
+                ...
+                var $ENTRY = $ZIP.nextEntry
+                ...
+              }
+    message: >-
+      ZipEntry file name flows into File() without canonicalization. A
+      malicious archive entry using ../ paths can write outside the
+      extraction directory (ZipSlip). Validate the canonical path before
+      writing.
+    languages:
+      - kotlin
+    severity: WARNING
+    metadata:
+      cwe: cwe-22
+      owasp-mobile: m1
+      masvs: platform-2
+      reference: >-
+        https://snyk.io/research/zip-slip-vulnerability
+  - id: android_kotlin_intent_redirection
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              fun $M(...) {
+                ...
+                $I = $O.getParcelableExtra(...)
+                ...
+              }
+          - pattern-inside: |
+              fun $M(...) {
+                ...
+                $I = $O.getParcelableExtra<...>(...)
+                ...
+              }
+      - pattern-either:
+          - pattern: $C.startActivity($I)
+          - pattern: $C.startService($I)
+          - pattern: $C.startForegroundService($I)
+          - pattern: $C.sendBroadcast($I)
+    message: >-
+      An Intent received via getParcelableExtra is re-dispatched without
+      validation. If the component is exported, a malicious app can supply
+      an embedded Intent and escalate privileges (intent redirection).
+    languages:
+      - kotlin
+    severity: ERROR
+    metadata:
+      cwe: cwe-926
+      owasp-mobile: m1
+      masvs: platform-4
+      reference: >-
+        https://mas.owasp.org/MASTG/Android/0x05h-Testing-Platform-Interaction/

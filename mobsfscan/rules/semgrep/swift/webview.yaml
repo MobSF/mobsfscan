@@ -30,3 +30,19 @@ rules:
       owasp-mobile: m1
       reference: >-
         https://github.com/MobSF/owasp-mstg/blob/master/Document/0x06h-Testing-Platform-Interaction.md#testing-ios-webviews-mstg-platform-5
+  - id: ios_wkwebview_script_message_handler
+    pattern: |
+      $X.userContentController.add($Y, name: $Z)
+    message: >-
+      WKWebView script message handler registered. Ensure the bridge is not
+      exposed to untrusted or remote content, and that no sensitive data or
+      privileged actions are reachable through the handler.
+    languages:
+      - swift
+    severity: INFO
+    metadata:
+      cwe: cwe-749
+      owasp-mobile: m1
+      masvs: platform-5
+      reference: >-
+        https://developer.apple.com/documentation/webkit/wkscriptmessagehandler

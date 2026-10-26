@@ -1,0 +1,26 @@
+rules:
+  - id: android_pending_intent_not_immutable
+    patterns:
+      - pattern-either:
+          - pattern: PendingIntent.getActivity($CTX, $REQ, $I, $FLAGS)
+          - pattern: PendingIntent.getBroadcast($CTX, $REQ, $I, $FLAGS)
+          - pattern: PendingIntent.getService($CTX, $REQ, $I, $FLAGS)
+          - pattern: PendingIntent.getForegroundService($CTX, $REQ, $I, $FLAGS)
+      - metavariable-regex:
+          metavariable: "$FLAGS"
+          regex: ^(?:(?!FLAG_IMMUTABLE).)*$
+    message: >-
+      PendingIntent is created without FLAG_IMMUTABLE. Prior to API 31,
+      PendingIntents are mutable by default; a malicious app may amend the
+      wrapped Intent (action, data, flags), especially when the base Intent
+      is implicit. Always specify FLAG_IMMUTABLE unless mutability is
+      required.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-926
+      owasp-mobile: m1
+      masvs: platform-4
+      reference: >-
+        https://developer.android.com/reference/android/app/PendingIntent#FLAG_IMMUTABLE

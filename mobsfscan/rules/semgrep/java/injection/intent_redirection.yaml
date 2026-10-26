@@ -1,0 +1,40 @@
+rules:
+  - id: android_intent_redirection
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              $RET $M(...) {
+                ...
+                $TYPE $I = $O.getParcelableExtra(...);
+                ...
+              }
+          - pattern-inside: |
+              $RET $M(...) {
+                ...
+                $I = $O.getParcelableExtra(...);
+                ...
+              }
+          - pattern-inside: |
+              $RET $M(...) {
+                ...
+                $TYPE $I = ($T) $O.getParcelableExtra(...);
+                ...
+              }
+      - pattern-either:
+          - pattern: $C.startActivity($I)
+          - pattern: $C.startService($I)
+          - pattern: $C.startForegroundService($I)
+          - pattern: $C.sendBroadcast($I)
+    message: >-
+      An Intent received via getParcelableExtra is re-dispatched without
+      validation. If the component is exported, a malicious app can supply
+      an embedded Intent and escalate privileges (intent redirection).
+    languages:
+      - java
+    severity: ERROR
+    metadata:
+      cwe: cwe-926
+      owasp-mobile: m1
+      masvs: platform-4
+      reference: >-
+        https://mas.owasp.org/MASTG/Android/0x05h-Testing-Platform-Interaction/
