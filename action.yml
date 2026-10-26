@@ -37,12 +37,12 @@ runs:
     - shell: bash
       run: |
         echo "::group::Installing mobsfscan dependencies"
-        python3 -m pip install -r ${{ github.action_path }}/requirements.txt
+        cd "$GITHUB_ACTION_PATH"
+        python3 -m pip install -r requirements.txt
         echo "::endgroup::"
 
     - shell: bash
       run: |
-        PYTHONPATH=${{ github.action_path }} && export PYTHONPATH=${{ github.action_path }}
         echo "Running mobsfscan..."
-        python3 -m mobsfscan ${{ inputs.args }}
+        python3 "$GITHUB_ACTION_PATH/action_entrypoint.py" ${{ inputs.args }}
         echo "Finished"
