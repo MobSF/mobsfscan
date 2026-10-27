@@ -21,20 +21,6 @@ from mobsfscan.utils import (
 logger = init_logger(__name__)
 
 
-class _Scanner(Scanner):
-    """libsast scanner that never follows symlinked files.
-
-    A symlink in the scanned tree can point outside it, and matched content
-    from the target would appear in the report under the in-tree path.
-    """
-
-    def validate_file(self, path):
-        if path.is_symlink():
-            logger.warning('Skipping symbolic link: %s', path)
-            return False
-        return super().validate_file(path)
-
-
 class MobSFScan:
     def __init__(
             self,
@@ -149,7 +135,7 @@ class MobSFScan:
 
     def scan(self) -> dict:
         """Start Scan."""
-        scanner = _Scanner(self.options, self.paths)
+        scanner = Scanner(self.options, self.paths)
         result = scanner.scan()
         try:
             # Keep beta for a while

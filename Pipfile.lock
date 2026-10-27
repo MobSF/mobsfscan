@@ -559,12 +559,12 @@
         },
         "libsast": {
             "hashes": [
-                "sha256:67b2d968b6cc23c6a0694856f9bae5d2cd8ca21bbf45d9f9346fffbfba1f35c0",
-                "sha256:94dadd4a8aa2447c477b2de4f3b58c39d16412a10f2416bde998517d9656e934"
+                "sha256:20f9497767182e7c6aebaf7fef3c545ff38b0aee98cbbf1713386e814ef854cf",
+                "sha256:72d00af7f460f69c7ee46fe4734e6e3096e54b1f033fed89eaeb08bc72f5014e"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10' and python_version < '4.0'",
-            "version": "==3.1.8"
+            "version": "==3.1.9"
         },
         "markdown-it-py": {
             "hashes": [
