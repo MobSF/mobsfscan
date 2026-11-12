@@ -3,7 +3,7 @@
 package example;
 
 import javax.xml.stream.XMLInputFactory;
-import static java.xml.stream.XMLFactoryInput.IS_SUPPORTING_EXTERNAL_ENTITIES;
+import static javax.xml.stream.XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES;
 
 class GoodXMLInputFactory {
     public void Blah() {
@@ -26,6 +26,25 @@ class GoodConstXMLInputFactory {
         xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
         // ok
         xmlInputFactory.setProperty(IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+    }
+}
+
+class GoodQualifiedConstXMLInputFactory {
+    public void Blah() {
+        final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
+
+        xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        // ok
+        xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+    }
+}
+
+class GoodBooleanFalseXMLInputFactory {
+    public void Blah() {
+        final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
+
+        // ok
+        xmlInputFactory.setProperty("javax.xml.stream.isSupportingExternalEntities", Boolean.FALSE);
     }
 }
 
