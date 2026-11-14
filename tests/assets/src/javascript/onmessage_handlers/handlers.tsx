@@ -3,8 +3,21 @@ export function BadHandlers() {
     console.log(ev.nativeEvent.url);
     handle(ev.nativeEvent.data);
   };
+  const onMessagePresenceIf = (ev) => {
+    if (ev.nativeEvent.url) {
+      handle(ev.nativeEvent.data);
+    }
+  };
+  const handleMessagePresenceReturn = (ev) => {
+    if (!ev.nativeEvent.url) return;
+    handle(ev.nativeEvent.data);
+  };
   return (
-    <WebView onMessage={(e) => run(e.nativeEvent.data)} />
+    <>
+      <WebView onMessage={(e) => run(e.nativeEvent.data)} />
+      <WebView onMessage={(e) => { if (e.nativeEvent.url) { run(e.nativeEvent.data); } }} />
+      <WebView onMessage={(e) => { if (!e.nativeEvent.url) return; run(e.nativeEvent.data); }} />
+    </>
   );
 }
 export function GoodHandlers() {

@@ -10,3 +10,4 @@ if (__DEV__) {
 } else {
   console.log(token);
 }
+popup.window.postMessage(secret, "*");

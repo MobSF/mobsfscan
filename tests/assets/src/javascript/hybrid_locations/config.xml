@@ -5,4 +5,5 @@
   <allow-navigation href="https://trusted.example.com/*" />
   <allow-navigation href="http://*" /> <!-- mobsf-ignore: cordova_config_wildcard_navigation -->
   <allow-navigation href="https://*" />
+  <allow-navigation href="https://*/login" />
 </widget>

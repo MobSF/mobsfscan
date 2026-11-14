@@ -19,7 +19,7 @@ EXPO_CONFIG_FILES = {
 }
 HYBRID_CONFIG_FILES = {'config.xml', 'capacitor.config.json'} | EXPO_CONFIG_FILES
 _WILDCARD_NAV_RE = re.compile(
-    r'^(?:\*|(?:\*|https?)://\*(?:/\*)?)$',
+    r'^(?:\*|(?:\*|https?)://\*(?::(?:\*|\d+))?(?:/.*)?)$',
     re.IGNORECASE,
 )
 _JSON_TOKEN_RE = re.compile(
@@ -67,9 +67,13 @@ def _is_wildcard_nav_href(href):
 
 def _read_bounded_text(cfg_path):
     """Read UTF-8 text if file size is within MAX_CONFIG_BYTES."""
-    if cfg_path.stat().st_size > MAX_CONFIG_BYTES:
+    try:
+        if cfg_path.stat().st_size > MAX_CONFIG_BYTES:
+            return None
+        return cfg_path.read_text(encoding='utf-8', errors='ignore')
+    except OSError:
+        logger.warning('Failed to read config file: %s', cfg_path)
         return None
-    return cfg_path.read_text(encoding='utf-8', errors='ignore')
 
 
 def _forbid_entities(*_args):
@@ -321,15 +325,15 @@ def scan_hybrid_configs(config_paths, validate_func):
         try:
             if not validate_func(cfg_path):
                 continue
+            reported = report_path(cfg_path)
+            name_low = cfg_path.name.lower()
+            if name_low == 'config.xml':
+                findings.extend(check_cordova_config(cfg_path, reported))
+            elif name_low == 'capacitor.config.json':
+                findings.extend(check_capacitor_config(cfg_path, reported))
+            elif name_low in EXPO_CONFIG_FILES:
+                findings.extend(check_expo_config(cfg_path, reported))
         except Exception:
-            logger.warning('Failed to validate config file: %s', cfg_path)
+            logger.warning('Failed to scan config file: %s', cfg_path)
             continue
-        reported = report_path(cfg_path)
-        name_low = cfg_path.name.lower()
-        if name_low == 'config.xml':
-            findings.extend(check_cordova_config(cfg_path, reported))
-        elif name_low == 'capacitor.config.json':
-            findings.extend(check_capacitor_config(cfg_path, reported))
-        elif name_low in EXPO_CONFIG_FILES:
-            findings.extend(check_expo_config(cfg_path, reported))
     return mobsfscan_format(findings)

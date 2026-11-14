@@ -1,6 +1,7 @@
 # -*- coding: utf_8 -*-
 """Tests for JavaScript, TypeScript, and Hybrid source analysis."""
 from mobsfscan import __version__
+from mobsfscan import hybrid
 from mobsfscan.formatters import (
     cli,
     gitlab_sast,
@@ -190,11 +191,11 @@ def test_cordova_no_path_wildcards_repeated_elements_and_json_lines():
     assert access_hits[0]['match_lines'] == (4, 4)
 
     nav_hits = res['cordova_config_wildcard_navigation']['files']
-    assert len(nav_hits) == 1
-    assert nav_hits[0]['match_lines'] == (7, 7)
-    assert nav_hits[0]['match_string'] == (
-        '<allow-navigation href="https://*" />'
-    )
+    assert sorted(h['match_lines'][0] for h in nav_hits) == [7, 8]
+    assert {h['match_string'] for h in nav_hits} == {
+        '<allow-navigation href="https://*" />',
+        '<allow-navigation href="https://*/login" />',
+    }
 
     assert res['capacitor_cleartext_traffic']['files'][0][
         'match_lines'] == (11, 11)
@@ -206,6 +207,14 @@ def test_cordova_no_path_wildcards_repeated_elements_and_json_lines():
         'match_lines'] == (11, 11)
     assert res['expo_updates_unsigned']['files'][0][
         'match_lines'] == (10, 10)
+
+    # A vanished/unreadable config must not discard findings from valid files
+    missing_cfg = src_root / 'vanished' / 'config.xml'
+    partial = hybrid.scan_hybrid_configs(
+        [missing_cfg, src_root / 'capacitor.config.json'],
+        lambda _: True,
+    )
+    assert 'capacitor_cleartext_traffic' in partial
 
 
 def test_webview_shorthand_dom_xss_multiset_http_and_dev_else():
@@ -219,6 +228,7 @@ def test_webview_shorthand_dom_xss_multiset_http_and_dev_else():
         ('js_insecure_async_storage', [5]),
         ('js_cleartext_http_traffic', [6, 7]),
         ('js_console_sensitive_log', [11]),
+        ('js_postmessage_wildcard_origin', [13]),
     ):
         files = res[rule_id]['files']
         assert all(f['file_path'].endswith('vuln.tsx') for f in files), rule_id
@@ -230,4 +240,4 @@ def test_webview_onmessage_handler_scope_and_origin_guards():
     src_root = get_paths()['javascript'] / 'onmessage_handlers'
     res = MobSFScan([str(src_root)], True, mp='thread').scan()['results']
     hits = res['js_webview_unverified_onmessage']['files']
-    assert sorted(h['match_lines'][0] for h in hits) == [4, 7]
+    assert sorted(h['match_lines'][0] for h in hits) == [4, 8, 13, 17, 18, 19]

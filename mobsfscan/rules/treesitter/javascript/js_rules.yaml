@@ -331,8 +331,6 @@
     - >-
       (call_expression
         function: (member_expression
-          object: (_) @_o
-          (#not-match? @_o "(^|\\.)(window|self|global|globalThis)$")
           property: (property_identifier) @_fn (#eq? @_fn "postMessage"))
         arguments: (arguments
           (_)
@@ -638,6 +636,8 @@
       (if_statement
         condition: (parenthesized_expression) @_gcond
         (#match? @_gcond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
+        (#match? @_gcond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+        (#not-match? @_gcond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
         consequence: [
           (return_statement)
           (throw_statement)
@@ -650,6 +650,8 @@
       (if_statement
         condition: (parenthesized_expression) @_dcond
         (#match? @_dcond "\\b(url|origin)\\b")
+        (#match? @_dcond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+        (#not-match? @_dcond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
         consequence: [
           (return_statement)
           (throw_statement)
@@ -659,12 +661,14 @@
     (if_statement
       condition: (parenthesized_expression) @_pcond
       (#match? @_pcond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
-      (#not-match? @_pcond "(!==?|^\\(\\s*!)")
+      (#match? @_pcond "(===?|\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+      (#not-match? @_pcond "(!==?|^\\(\\s*!|(===?)\\s*(['\"]['\"]|``|(null|undefined)\\b))")
       consequence: (_) @match)
     (if_statement
       condition: (parenthesized_expression) @_ncond
       (#match? @_ncond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
-      (#match? @_ncond "(!==?|^\\(\\s*!)")
+      (#match? @_ncond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+      (#not-match? @_ncond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
       alternative: (else_clause (_) @match))
     (switch_statement
       value: (parenthesized_expression) @_sw
@@ -705,6 +709,8 @@
       (if_statement
         condition: (parenthesized_expression) @_gcond
         (#match? @_gcond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
+        (#match? @_gcond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+        (#not-match? @_gcond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
         consequence: [
           (return_statement)
           (throw_statement)
@@ -717,6 +723,8 @@
       (if_statement
         condition: (parenthesized_expression) @_dcond
         (#match? @_dcond "\\b(url|origin)\\b")
+        (#match? @_dcond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+        (#not-match? @_dcond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
         consequence: [
           (return_statement)
           (throw_statement)
@@ -726,12 +734,14 @@
     (if_statement
       condition: (parenthesized_expression) @_pcond
       (#match? @_pcond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
-      (#not-match? @_pcond "(!==?|^\\(\\s*!)")
+      (#match? @_pcond "(===?|\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+      (#not-match? @_pcond "(!==?|^\\(\\s*!|(===?)\\s*(['\"]['\"]|``|(null|undefined)\\b))")
       consequence: (_) @match)
     (if_statement
       condition: (parenthesized_expression) @_ncond
       (#match? @_ncond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
-      (#match? @_ncond "(!==?|^\\(\\s*!)")
+      (#match? @_ncond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+      (#not-match? @_ncond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
       alternative: (else_clause (_) @match))
     (switch_statement
       value: (parenthesized_expression) @_sw
