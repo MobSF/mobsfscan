@@ -18,11 +18,13 @@ def get_paths():
     swift = base_dir / 'swift'
     objc = base_dir / 'objc'
     xmlp = base_dir / 'xml'
+    javascript = base_dir / 'javascript'
     paths = {
         'android_layout': android_layout,
         'android_new_rules': android_new_rules,
         'dot_file': dot_file,
         'java': java,
+        'javascript': javascript,
         'kotlin': kotlin,
         'swift': swift,
         'objc': objc,

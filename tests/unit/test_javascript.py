@@ -1,7 +1,5 @@
 # -*- coding: utf_8 -*-
 """Tests for JavaScript, TypeScript, and Hybrid source analysis."""
-import json
-
 from mobsfscan import __version__
 from mobsfscan.formatters import (
     cli,
@@ -12,52 +10,16 @@ from mobsfscan.formatters import (
 )
 from mobsfscan.mobsfscan import MobSFScan
 
+from .setup_test import get_paths
+
 
 def test_react_native_ts_tsx_rules_and_no_false_missing_bp(
         tmp_path, monkeypatch):
     """Pure JS/TS repo triggers JS rules without missing native BP controls."""
-    monkeypatch.chdir(tmp_path)
-    src = tmp_path / 'src'
-    src.mkdir()
-    (src / 'App.tsx').write_text(
-        'import { WebView } from "react-native-webview";\n'
-        'import AsyncStorage from '
-        '"@react-native-async-storage/async-storage";\n'
-        'import { MMKV } from "react-native-mmkv";\n'
-        'import { Linking } from "react-native";\n'
-        'const API_KEY = "sk_live_9876543210abcdef123456";\n'
-        'const store = new MMKV();\n'
-        'export function Screen({ deepLink, html, isPremium }) {\n'
-        '  if (!isPremium) { return null; }\n'
-        '  const keyName = "auth_token";\n'
-        '  AsyncStorage.setItem(keyName, API_KEY);\n'
-        '  Linking.openURL(deepLink);\n'
-        '  frame.contentWindow.postMessage(API_KEY, "*");\n'
-        '  if (__DEV__) { console.log("dev secret:", API_KEY); }\n'
-        '  console.log("prod secret_token:", API_KEY);\n'
-        '  const onMsg = (ev) => JSON.parse(ev.nativeEvent.data);\n'
-        '  fetch("http://api.insecure.example.com/v1");\n'
-        '  return (\n'
-        '    <WebView\n'
-        '      javaScriptEnabled={true}\n'
-        '      allowUniversalAccessFromFileURLs={true}\n'
-        '      mixedContentMode="always"\n'
-        '      originWhitelist={["*"]}\n'
-        '      dangerouslySetInnerHTML={{ __html: html }}\n'
-        '    />\n'
-        '  );\n'
-        '}\n',
-        encoding='utf-8',
-    )
+    src_root = get_paths()['javascript'] / 'rn_app'
+    monkeypatch.chdir(src_root)
 
-    # node_modules and vendor minified bundles must be ignored
-    nm = tmp_path / 'node_modules' / 'pkg'
-    nm.mkdir(parents=True)
-    (nm / 'bad.js').write_text('eval(untrusted);\n', encoding='utf-8')
-    (src / 'vendor.min.js').write_text('eval(minified);\n', encoding='utf-8')
-    (src / 'jquery.js').write_text('eval(jq);\n', encoding='utf-8')
-
-    res = MobSFScan([str(tmp_path)], True, mp='thread').scan()
+    res = MobSFScan(['.'], True, mp='thread').scan()
     findings = res['results']
 
     expected_rules = {
@@ -98,7 +60,7 @@ def test_react_native_ts_tsx_rules_and_no_false_missing_bp(
 
     # Verify all formatters accept JS findings cleanly
     assert json_fmt.json_output(None, dict(res), __version__)
-    assert sarif.sarif_output(None, dict(res), __version__, [str(tmp_path)])
+    assert sarif.sarif_output(None, dict(res), __version__, ['.'])
     assert sonarqube.sonarqube_output(None, dict(res), __version__)
     assert gitlab_sast.gitlab_sast_output(None, dict(res), __version__)
     html_out = tmp_path / 'report.html'
@@ -106,56 +68,10 @@ def test_react_native_ts_tsx_rules_and_no_false_missing_bp(
     assert html_out.is_file()
 
 
-def test_crypto_sqlite_tls_keychain_oauth_and_safe_negatives(tmp_path):
+def test_crypto_sqlite_tls_keychain_oauth_and_safe_negatives():
     """Test remaining JS/Expo/RN rules and verify safe code does not match."""
-    src = tmp_path / 'src'
-    src.mkdir()
-    (src / 'vuln.tsx').write_text(
-        'cordova.plugin.http.setServerTrustMode("nocheck", a, b);\n'
-        'db.executeSql(`SELECT * FROM users WHERE id=${id}`);\n'
-        'webview.injectJavaScript(`setUser("${name}")`);\n'
-        'const h = CryptoJS.MD5(password);\n'
-        'const c = CryptoJS.DES.encrypt(data, "s3cr3tk3y");\n'
-        'const w1 = <WebView source={{ uri: deepLinkUrl }} />;\n'
-        'Keychain.setGenericPassword(u, p, '
-        '{ accessible: Keychain.ACCESSIBLE.ALWAYS });\n'
-        'Clipboard.setString(user.password);\n'
-        'const w2 = <WebView webviewDebuggingEnabled={true} />;\n'
-        'const w3 = <WebView injectedJavaScriptForMainFrameOnly={false} />;\n'
-        'const w4 = <WebView onShouldStartLoadWithRequest={() => true} />;\n'
-        'useAuthRequest({ responseType: ResponseType.Token, '
-        'usePKCE: false }, d);\n'
-        'const ok = await LocalAuthentication.authenticateAsync();\n'
-        'const p = RNFS.ExternalStorageDirectoryPath + "/t.txt";\n'
-        'const realm = new Realm({ schema: [Note] });\n'
-        'const cfg = { key: "root", storage: AsyncStorage, '
-        'whitelist: ["auth"] };\n'
-        'Reactotron.configure({}).useReactNative().connect();\n'
-        'const bio = { allowDeviceCredentials: true };\n'
-        'setTimeout("refresh(" + id + ")", 100);\n',
-        encoding='utf-8',
-    )
-    (src / 'safe.tsx').write_text(
-        'db.executeSql("SELECT * FROM users WHERE id=?", [id]);\n'
-        'webview.injectJavaScript("window.ready = true;");\n'
-        'const s = crypto.createHash("sha256");\n'
-        'const e = CryptoJS.AES.encrypt(data, keyFromKeychain);\n'
-        'const w = <WebView source={{ uri: "https://example.com" }} />;\n'
-        'Keychain.setGenericPassword(u, p, { accessible: '
-        'Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY });\n'
-        'Clipboard.setString(orderId);\n'
-        'const wd = <WebView webviewDebuggingEnabled={__DEV__} />;\n'
-        'useAuthRequest({ responseType: ResponseType.Code, '
-        'usePKCE: true }, d);\n'
-        'const p = RNFS.DocumentDirectoryPath + "/t.txt";\n'
-        'const realm = new Realm({ schema: [Note], encryptionKey: key });\n'
-        'const cfg = { key: "root", storage: createSecureStore(), '
-        'whitelist: ["auth"] };\n'
-        'setTimeout(() => refresh(id), 100);\n',
-        encoding='utf-8',
-    )
-
-    res = MobSFScan([str(tmp_path)], True, mp='thread').scan()
+    src_root = get_paths()['javascript'] / 'api_rules'
+    res = MobSFScan([str(src_root)], True, mp='thread').scan()
     findings = res['results']
 
     expected = {
@@ -187,29 +103,10 @@ def test_crypto_sqlite_tls_keychain_oauth_and_safe_negatives(tmp_path):
         assert not any(p.endswith('safe.tsx') for p in matched_paths), rule_id
 
 
-def test_embedded_html_and_vue_script_blocks(tmp_path):
+def test_embedded_html_and_vue_script_blocks():
     """Embedded <script> blocks in HTML and Vue SFCs preserve line numbers."""
-    www = tmp_path / 'www'
-    www.mkdir()
-    (www / 'index.html').write_text(
-        '<!doctype html>\n'
-        '<html>\n'
-        '<body>\n'
-        '<script>\n'
-        'document.getElementById("out").innerHTML = location.hash;\n'
-        '</script>\n'
-        '</body>\n'
-        '</html>\n',
-        encoding='utf-8',
-    )
-    (www / 'View.vue').write_text(
-        '<template><div>Hello</div></template>\n'
-        '<script lang="ts">\n'
-        'eval(window.name);\n'
-        '</script>\n',
-        encoding='utf-8',
-    )
-    res = MobSFScan([str(tmp_path)], True, mp='thread').scan()
+    src_root = get_paths()['javascript'] / 'embedded_web'
+    res = MobSFScan([str(src_root)], True, mp='thread').scan()
     findings = res['results']
     xss_files = findings['js_dom_xss_sink']['files']
     assert xss_files[0]['file_path'].endswith('index.html')
@@ -220,49 +117,11 @@ def test_embedded_html_and_vue_script_blocks(tmp_path):
     assert eval_files[0]['match_lines'] == (3, 3)
 
 
-def test_hybrid_configs_cordova_capacitor_expo(tmp_path, monkeypatch):
+def test_hybrid_configs_cordova_capacitor_expo(monkeypatch):
     """Cordova, Capacitor, and Expo configs report insecure settings."""
-    monkeypatch.chdir(tmp_path)
-    (tmp_path / 'config.xml').write_text(
-        '<?xml version="1.0" encoding="utf-8"?>\n'
-        '<widget id="com.example.hybrid">\n'
-        '  <access origin="*" />\n'
-        '  <allow-navigation href="*" />\n'
-        '</widget>\n',
-        encoding='utf-8',
-    )
-    (tmp_path / 'capacitor.config.json').write_text(
-        json.dumps({
-            'appId': 'com.example.hybrid',
-            'server': {
-                'cleartext': True,
-                'allowNavigation': ['*.example.com'],
-            },
-        }, indent=2),
-        encoding='utf-8',
-    )
-    (tmp_path / 'app.json').write_text(
-        json.dumps({
-            'expo': {
-                'name': 'demo',
-                'extra': {
-                    'eas': {'projectId': 'abc'},
-                    'stripeSecretKey': 'sk_test_51Habcdefghijkl',
-                },
-                'updates': {
-                    'url': 'http://updates.example.com/manifest',
-                },
-            },
-        }, indent=2),
-        encoding='utf-8',
-    )
-    # Non-Cordova config.xml and non-Expo app.json in subdirs must not match
-    other = tmp_path / 'backend'
-    other.mkdir()
-    (other / 'config.xml').write_text('<settings><x/></settings>\n')
-    (other / 'app.json').write_text('{"name": "heroku-app"}\n')
-
-    res = MobSFScan([str(tmp_path)], True, mp='thread').scan()
+    src_root = get_paths()['javascript'] / 'hybrid_configs'
+    monkeypatch.chdir(src_root)
+    res = MobSFScan(['.'], True, mp='thread').scan()
     findings = res['results']
     expected = {
         'cordova_config_wildcard_access',
@@ -283,38 +142,19 @@ def test_hybrid_configs_cordova_capacitor_expo(tmp_path, monkeypatch):
         'match_lines'] == (3, 3)
 
 
-def test_hybrid_mixed_repo_and_scan_type_filtering(tmp_path):
+def test_hybrid_mixed_repo_and_scan_type_filtering():
     """Mixed RN + Android repo runs both in auto and filters on --type."""
-    (tmp_path / 'src').mkdir()
-    (tmp_path / 'src' / 'index.js').write_text(
-        'eval(dynamicPayload);\n',
-        encoding='utf-8',
-    )
-    (tmp_path / 'capacitor.config.json').write_text(
-        '{"server": {"cleartext": true}}\n',
-        encoding='utf-8',
-    )
-    android_dir = tmp_path / 'android'
-    android_dir.mkdir()
-    (android_dir / 'BridgeModule.java').write_text(
-        'import java.io.FileInputStream;\n'
-        'public class BridgeModule {\n'
-        '  @ReactMethod\n'
-        '  public void readFile(String p) throws Exception {\n'
-        '    new FileInputStream(p);\n'
-        '  }\n'
-        '}\n',
-        encoding='utf-8',
-    )
+    src_root = get_paths()['javascript'] / 'mixed_repo'
 
     auto_res = MobSFScan(
-        [str(tmp_path)], True, scan_type='auto', mp='thread').scan()['results']
+        [str(src_root)], True, scan_type='auto', mp='thread',
+    ).scan()['results']
     assert 'js_dynamic_code_execution' in auto_res
     assert 'capacitor_cleartext_traffic' in auto_res
     assert 'android_rn_exposed_react_method' in auto_res
 
     js_only = MobSFScan(
-        [str(tmp_path)], True, scan_type='javascript', mp='thread',
+        [str(src_root)], True, scan_type='javascript', mp='thread',
     ).scan()['results']
     assert 'js_dynamic_code_execution' in js_only
     assert 'capacitor_cleartext_traffic' in js_only
@@ -322,36 +162,17 @@ def test_hybrid_mixed_repo_and_scan_type_filtering(tmp_path):
     assert not any(rid.startswith('android_') for rid in js_only)
 
     android_only = MobSFScan(
-        [str(tmp_path)], True, scan_type='android', mp='thread',
+        [str(src_root)], True, scan_type='android', mp='thread',
     ).scan()['results']
     assert 'android_rn_exposed_react_method' in android_only
     assert 'js_dynamic_code_execution' not in android_only
     assert 'capacitor_cleartext_traffic' not in android_only
 
 
-def test_mobsf_ignore_comments_in_jsx_js_and_xml(tmp_path):
+def test_mobsf_ignore_comments_in_jsx_js_and_xml():
     """Inline //, {/* */}, and <!-- --> mobsf-ignore comments suppress hits."""
-    (tmp_path / 'Screen.tsx').write_text(
-        'export function Screen({ html, other }) {\n'
-        '  eval(other); // mobsf-ignore: js_dynamic_code_execution\n'
-        '  return (\n'
-        '    <div>\n'
-        '      <p dangerouslySetInnerHTML={{ __html: html }} /> '
-        '{/* mobsf-ignore: js_dom_xss_sink*/}\n'
-        '      <span dangerouslySetInnerHTML={{ __html: other }} />\n'
-        '    </div>\n'
-        '  );\n'
-        '}\n',
-        encoding='utf-8',
-    )
-    (tmp_path / 'config.xml').write_text(
-        '<widget id="x">\n'
-        '  <access origin="*" /><!-- mobsf-ignore: '
-        'cordova_config_wildcard_access-->\n'
-        '</widget>\n',
-        encoding='utf-8',
-    )
-    res = MobSFScan([str(tmp_path)], True, mp='thread').scan()['results']
+    src_root = get_paths()['javascript'] / 'ignore_comments'
+    res = MobSFScan([str(src_root)], True, mp='thread').scan()['results']
     assert 'js_dynamic_code_execution' not in res
     assert 'cordova_config_wildcard_access' not in res
     xss_files = res['js_dom_xss_sink']['files']
@@ -359,56 +180,10 @@ def test_mobsf_ignore_comments_in_jsx_js_and_xml(tmp_path):
     assert xss_files[0]['match_lines'] == (6, 6)
 
 
-def test_cordova_no_path_wildcards_repeated_elements_and_json_lines(tmp_path):
+def test_cordova_no_path_wildcards_repeated_elements_and_json_lines():
     """Track exact XML/JSON positions and detect http://*, https://* nav."""
-    (tmp_path / 'config.xml').write_text(
-        '<?xml version="1.0" encoding="utf-8"?>\n'
-        '<widget id="com.example.app">\n'
-        '  <access origin="https://api.example.com" /> '
-        '<!-- mobsf-ignore: cordova_config_wildcard_access -->\n'
-        '  <access origin="*" />\n'
-        '  <allow-navigation href="https://trusted.example.com/*" />\n'
-        '  <allow-navigation href="http://*" /> '
-        '<!-- mobsf-ignore: cordova_config_wildcard_navigation -->\n'
-        '  <allow-navigation href="https://*" />\n'
-        '</widget>\n',
-        encoding='utf-8',
-    )
-    (tmp_path / 'capacitor.config.json').write_text(
-        '{\n'
-        '  "plugins": {\n'
-        '    "Other": {\n'
-        '      "cleartext": false,\n'
-        '      "url": "https://safe.example.com",\n'
-        '      "allowNavigation": []\n'
-        '    }\n'
-        '  },\n'
-        '  "server": {\n'
-        '    "cleartext": false,\n'
-        '    "url": "http://dev.example.com",\n'
-        '    "allowNavigation": ["*.example.com"]\n'
-        '  }\n'
-        '}\n',
-        encoding='utf-8',
-    )
-    (tmp_path / 'app.json').write_text(
-        '{\n'
-        '  "unrelated": {\n'
-        '    "extra": {},\n'
-        '    "updates": { "url": "https://safe.example.com" }\n'
-        '  },\n'
-        '  "expo": {\n'
-        '    "extra": {\n'
-        '      "apiSecret": "super_secret_val_123"\n'
-        '    },\n'
-        '    "updates": {\n'
-        '      "url": "http://ota.example.com/manifest"\n'
-        '    }\n'
-        '  }\n'
-        '}\n',
-        encoding='utf-8',
-    )
-    res = MobSFScan([str(tmp_path)], True, mp='thread').scan()['results']
+    src_root = get_paths()['javascript'] / 'hybrid_locations'
+    res = MobSFScan([str(src_root)], True, mp='thread').scan()['results']
 
     access_hits = res['cordova_config_wildcard_access']['files']
     assert len(access_hits) == 1
@@ -417,7 +192,9 @@ def test_cordova_no_path_wildcards_repeated_elements_and_json_lines(tmp_path):
     nav_hits = res['cordova_config_wildcard_navigation']['files']
     assert len(nav_hits) == 1
     assert nav_hits[0]['match_lines'] == (7, 7)
-    assert nav_hits[0]['match_string'] == '<allow-navigation href="https://*" />'
+    assert nav_hits[0]['match_string'] == (
+        '<allow-navigation href="https://*" />'
+    )
 
     assert res['capacitor_cleartext_traffic']['files'][0][
         'match_lines'] == (11, 11)
@@ -431,36 +208,10 @@ def test_cordova_no_path_wildcards_repeated_elements_and_json_lines(tmp_path):
         'match_lines'] == (10, 10)
 
 
-def test_webview_shorthand_dom_xss_multiset_http_and_dev_else(tmp_path):
+def test_webview_shorthand_dom_xss_multiset_http_and_dev_else():
     """Regression coverage for JSX shorthand, sanitizer RHS, multiSet, HTTP."""
-    (tmp_path / 'vuln.tsx').write_text(
-        'const w1 = <WebView allowFileAccess />;\n'
-        'const w2 = <WebView allowUniversalAccessFromFileURLs />;\n'
-        'el.innerHTML = unsanitizedHtml;\n'
-        'el.innerHTML = DOMPurify.sanitize(prefix) + untrustedHtml;\n'
-        'AsyncStorage.multiSet([["theme", "dark"], ["auth_token", tok]]);\n'
-        'fetch("http://localhost.attacker.example/api");\n'
-        'fetch("http://www.w3.org.attacker.example/p");\n'
-        'if (__DEV__) {\n'
-        '  console.log(secret);\n'
-        '} else {\n'
-        '  console.log(token);\n'
-        '}\n',
-        encoding='utf-8',
-    )
-    (tmp_path / 'safe.tsx').write_text(
-        'const w = <WebView allowFileAccess={false} />;\n'
-        'el.innerHTML = DOMPurify.sanitize(untrustedHtml);\n'
-        'el.innerHTML = sanitizeHtml(untrustedHtml);\n'
-        'el.innerHTML = goog.html.SafeHtml.unwrapTrustedHTML(h);\n'
-        'el.innerHTML = "<b>static</b>";\n'
-        'AsyncStorage.setItem("theme", "secret_dark_mode");\n'
-        'AsyncStorage.multiSet([["theme", "auth_token_value_only"]]);\n'
-        'fetch("http://localhost:8080/api");\n'
-        'const svgNs = "http://www.w3.org/2000/svg";\n',
-        encoding='utf-8',
-    )
-    res = MobSFScan([str(tmp_path)], True, mp='thread').scan()['results']
+    src_root = get_paths()['javascript'] / 'edge_cases'
+    res = MobSFScan([str(src_root)], True, mp='thread').scan()['results']
 
     for rule_id, expected_lines in (
         ('js_webview_file_access', [1, 2]),
@@ -474,42 +225,9 @@ def test_webview_shorthand_dom_xss_multiset_http_and_dev_else(tmp_path):
         assert sorted(f['match_lines'][0] for f in files) == expected_lines
 
 
-def test_webview_onmessage_handler_scope_and_origin_guards(tmp_path):
+def test_webview_onmessage_handler_scope_and_origin_guards():
     """Flag unverified WebView handlers; skip origin-guarded or unrelated."""
-    (tmp_path / 'handlers.tsx').write_text(
-        'export function BadHandlers() {\n'
-        '  const onMessage = (ev) => {\n'
-        '    console.log(ev.nativeEvent.url);\n'
-        '    handle(ev.nativeEvent.data);\n'
-        '  };\n'
-        '  return (\n'
-        '    <WebView onMessage={(e) => run(e.nativeEvent.data)} />\n'
-        '  );\n'
-        '}\n'
-        'export function GoodHandlers() {\n'
-        '  const onMessage = (ev) => {\n'
-        '    if (ev.nativeEvent.url !== "https://trusted.example.com") {\n'
-        '      return;\n'
-        '    }\n'
-        '    handle(ev.nativeEvent.data);\n'
-        '  };\n'
-        '  const handleWebViewMessage = (ev) => {\n'
-        '    if (new URL(ev.nativeEvent.url).origin === TRUSTED_ORIGIN) {\n'
-        '      handle(ev.nativeEvent.data);\n'
-        '    }\n'
-        '  };\n'
-        '  const onBridgeMessage = (ev) => {\n'
-        '    const { url } = ev.nativeEvent;\n'
-        '    if (!url.startsWith("https://trusted.example.com/")) return;\n'
-        '    handle(ev.nativeEvent.data);\n'
-        '  };\n'
-        '  const onScroll = (ev) => track(ev.nativeEvent.data);\n'
-        '  return (\n'
-        '    <Camera onBarCodeRead={(e) => scan(e.nativeEvent.data)} />\n'
-        '  );\n'
-        '}\n',
-        encoding='utf-8',
-    )
-    res = MobSFScan([str(tmp_path)], True, mp='thread').scan()['results']
+    src_root = get_paths()['javascript'] / 'onmessage_handlers'
+    res = MobSFScan([str(src_root)], True, mp='thread').scan()['results']
     hits = res['js_webview_unverified_onmessage']['files']
     assert sorted(h['match_lines'][0] for h in hits) == [4, 7]

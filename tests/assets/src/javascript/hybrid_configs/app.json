@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "demo",
+    "extra": {
+      "eas": {
+        "projectId": "abc"
+      },
+      "stripeSecretKey": "sk_test_51Habcdefghijkl"
+    },
+    "updates": {
+      "url": "http://updates.example.com/manifest"
+    }
+  }
+}

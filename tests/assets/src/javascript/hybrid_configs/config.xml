@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="com.example.hybrid">
+  <access origin="*" />
+  <allow-navigation href="*" />
+</widget>

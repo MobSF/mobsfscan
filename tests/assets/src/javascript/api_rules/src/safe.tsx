@@ -1,0 +1,13 @@
+db.executeSql("SELECT * FROM users WHERE id=?", [id]);
+webview.injectJavaScript("window.ready = true;");
+const s = crypto.createHash("sha256");
+const e = CryptoJS.AES.encrypt(data, keyFromKeychain);
+const w = <WebView source={{ uri: "https://example.com" }} />;
+Keychain.setGenericPassword(u, p, { accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY });
+Clipboard.setString(orderId);
+const wd = <WebView webviewDebuggingEnabled={__DEV__} />;
+useAuthRequest({ responseType: ResponseType.Code, usePKCE: true }, d);
+const p = RNFS.DocumentDirectoryPath + "/t.txt";
+const realm = new Realm({ schema: [Note], encryptionKey: key });
+const cfg = { key: "root", storage: createSecureStore(), whitelist: ["auth"] };
+setTimeout(() => refresh(id), 100);
