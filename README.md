@@ -1,7 +1,7 @@
 # mobsfscan
-**mobsfscan** is a static analysis tool that can find insecure code patterns in your Android and iOS source code. Supports Java, Kotlin, Android XML, iOS Info.plist, Swift and Objective C Code. mobsfscan uses [MobSF](https://github.com/MobSF/Mobile-Security-Framework-MobSF) static analysis rules and is powered by [semgrep](https://github.com/returntocorp/semgrep) and [libsast](https://github.com/ajinabraham/libsast) pattern matcher.
+**mobsfscan** is a static analysis tool that can find insecure code patterns in your Android, iOS, and hybrid source code. Supports Java, Kotlin, Android XML, iOS Info.plist, Swift, Objective C, JavaScript, TypeScript, and Cordova/Capacitor/Expo configuration files. mobsfscan uses [MobSF](https://github.com/MobSF/Mobile-Security-Framework-MobSF) static analysis rules and is powered by [semgrep](https://github.com/returntocorp/semgrep) and [libsast](https://github.com/ajinabraham/libsast).
 
-Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82e3a63c-4813-11e6-9430-6015d98aeaab.png) in India  [![Tweet](https://img.shields.io/twitter/url?url=https://github.com/MobSF/mobsfscan)](https://twitter.com/intent/tweet/?text=mobsfscan%20is%20a%20static%20analysis%20tool%20that%20can%20find%20insecure%20code%20patterns%20in%20your%20Android%20and%20iOS%20source%20code.%20Supports%20Java,%20Kotlin,%20Swift,%20and%20Objective%20C%20Code.%20by%20%40ajinabraham%20%40OpenSecurity_IN&url=https://github.com/MobSF/mobsfscan)
+Made with ![Love](https://cloud.githubusercontent.com/assets/4301109/16754758/82e3a63c-4813-11e6-9430-6015d98aeaab.png) in India  [![Tweet](https://img.shields.io/twitter/url?url=https://github.com/MobSF/mobsfscan)](https://twitter.com/intent/tweet/?text=mobsfscan%20is%20a%20static%20analysis%20tool%20that%20can%20find%20insecure%20code%20patterns%20in%20your%20Android,%20iOS,%20and%20hybrid%20source%20code.%20Supports%20Java,%20Kotlin,%20Swift,%20Objective%20C,%20JavaScript,%20and%20TypeScript.%20by%20%40ajinabraham%20%40OpenSecurity_IN&url=https://github.com/MobSF/mobsfscan)
 
 [![PyPI version](https://badge.fury.io/py/mobsfscan.svg)](https://badge.fury.io/py/mobsfscan)
 [![License](https://img.shields.io/:license-lgpl3.0+-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
@@ -27,12 +27,19 @@ If you liked mobsfscan and find it useful, please consider donating.
 
 Requires Python 3.10–3.14
 
+## Supported Languages & Configurations
+
+* **Android**: Java (`.java`), Kotlin (`.kt`), Android Manifest (`AndroidManifest.xml`), Network Security Config, and layout and resource XMLs.
+* **iOS**: Swift (`.swift`), Objective-C (`.m`), and App Transport Security settings in `Info.plist`.
+* **JavaScript, TypeScript & Hybrid Mobile**: React Native, Expo, Cordova / Ionic, Capacitor, and WebView apps via Tree-sitter AST rules across `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, and `<script>` blocks in `.html`, `.htm`, `.vue`, and `.svelte`.
+* **Hybrid App Configurations**: Cordova / PhoneGap, Capacitor, and Expo configuration files.
+
 ## Command Line Options
 
 ```bash
 $ mobsfscan
 usage: mobsfscan [-h] [--json] [--sarif] [--sonarqube] [--gitlab-sast] [--html]
-                 [--type {android,ios,auto}] [-o OUTPUT] [-c CONFIG]
+                 [--type {android,ios,javascript,auto}] [-o OUTPUT] [-c CONFIG]
                  [-mp {default,billiard,thread}] [-w] [--no-fail] [-v]
                  [path ...]
 
@@ -46,8 +53,8 @@ options:
   --sonarqube           set output format as SonarQube generic issues (10.3+)
   --gitlab-sast         set output format as GitLab SAST report
   --html                set output format as HTML
-  --type {android,ios,auto}
-                        optional: force android or ios rules explicitly
+  --type {android,ios,javascript,auto}
+                        optional: force android, ios, or javascript rules explicitly
   -o OUTPUT, --output OUTPUT
                         output filename to save the result
   -c CONFIG, --config CONFIG
@@ -67,7 +74,7 @@ $ mobsfscan tests/assets/src/
 - Pattern Match ████████████████████████████████████████████████████████████ 3
 - Semantic Grep ██████ 37
 
-mobsfscan: v0.3.0 | Ajin Abraham | opensecurity.in
+mobsfscan: v1.2.0 | Ajin Abraham | opensecurity.in
 ╒══════════════╤════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╕
 │ RULE ID      │ android_webview_ignore_ssl                                                                                                                             │
 ├──────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -226,12 +233,21 @@ A `.mobsf` file in the root of the source code directory allows you to configure
 
 ## Suppress Findings
 
-You can suppress findings from source files by adding the comment `// mobsf-ignore: rule_id1, rule_id2` on the line that triggers the finding. Only that match is suppressed; other matches of the same rule in the file still report.
+You can suppress findings from source files by adding a `mobsf-ignore: rule_id1, rule_id2` comment on the line that triggers the finding. Line comments (`//`), JSX block comments (`{/* ... */}`), and HTML/XML comments (`<!-- ... -->`) are supported. Only that match is suppressed; other matches of the same rule in the file still report.
 
-Example:
+Examples:
 
 ```java
 String password = "strong password"; // mobsf-ignore: hardcoded_password
+```
+
+```tsx
+eval(expr); // mobsf-ignore: js_dynamic_code_execution
+<div dangerouslySetInnerHTML={{ __html: html }} /> {/* mobsf-ignore: js_dom_xss_sink */}
+```
+
+```xml
+<access origin="*" /> <!-- mobsf-ignore: cordova_config_wildcard_access -->
 ```
 
 ## CI/CD Integrations
@@ -256,9 +272,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-      with:
-        python-version: '3.12'
     - name: mobsfscan
       uses: MobSF/mobsfscan@main
       with:
@@ -288,15 +301,12 @@ jobs:
     steps:
     - name: Checkout the code
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-      with:
-        python-version: '3.12'
     - name: mobsfscan
       uses: MobSF/mobsfscan@main
       with:
         args: '. --sarif --output results.sarif || true'
     - name: Upload mobsfscan report
-      uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+      uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
       with:
         sarif_file: results.sarif
 ```

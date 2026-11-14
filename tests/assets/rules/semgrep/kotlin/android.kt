@@ -148,3 +148,29 @@ fun authorize(builder: AuthorizationRequest.Builder) {
     // ok:android_kotlin_oauth_custom_scheme_redirect
     builder.setRedirectUri(Uri.parse(https))
 }
+
+class BridgeModule {
+    @ReactMethod
+    fun readBridgeFile(path: String) {
+        // ruleid:android_kotlin_rn_exposed_react_method
+        val fis = FileInputStream(path)
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun execBridgeCmd(cmd: String): String {
+        // ruleid:android_kotlin_rn_exposed_react_method
+        Runtime.getRuntime().exec(cmd)
+        return "ok"
+    }
+
+    fun internalHelper(path: String) {
+        // ok:android_kotlin_rn_exposed_react_method
+        val f = File(path)
+    }
+
+    @ReactMethod
+    fun safeMethod(name: String) {
+        // ok:android_kotlin_rn_exposed_react_method
+        val trimmed = name.trim()
+    }
+}

@@ -52,10 +52,11 @@ def main():
     parser.add_argument('--html',
                         help='set output format as HTML',
                         action='store_true')
-    parser.add_argument('--type',
-                        help='optional: force android or ios rules explicitly',
-                        choices=['android', 'ios', 'auto'],
-                        default='auto')
+    parser.add_argument(
+        '--type',
+        help='optional: force android, ios, or javascript rules explicitly',
+        choices=['android', 'ios', 'javascript', 'auto'],
+        default='auto')
     parser.add_argument('-o', '--output',
                         help='output filename to save the result',
                         required=False)

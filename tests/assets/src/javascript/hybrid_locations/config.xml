@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="com.example.app">
+  <access origin="https://api.example.com" /> <!-- mobsf-ignore: cordova_config_wildcard_access -->
+  <access origin="*" />
+  <allow-navigation href="https://trusted.example.com/*" />
+  <allow-navigation href="http://*" /> <!-- mobsf-ignore: cordova_config_wildcard_navigation -->
+  <allow-navigation href="https://*" />
+  <allow-navigation href="https://*/login" />
+</widget>

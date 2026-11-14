@@ -1,6 +1,6 @@
 name: 'mobsfscan'
 author: 'Ajin Abraham <ajin@opensecurity.in>'
-description: 'mobsfscan is a SAST that can find insecure code patterns in your Android and iOS source code.'
+description: 'mobsfscan is a SAST that can find insecure code patterns in your Android, iOS, and hybrid JavaScript/TypeScript source code.'
 branding:
   icon: 'code'
   color: 'blue'
@@ -18,8 +18,8 @@ inputs:
         --sonarqube           set output format as SonarQube generic issues (10.3+)
         --gitlab-sast         set output format as GitLab SAST report
         --html                set output format as HTML
-        --type {android,ios,auto}
-                              optional: force android or ios rules explicitly
+        --type {android,ios,javascript,auto}
+                              optional: force android, ios, or javascript rules explicitly
         -o OUTPUT, --output OUTPUT
                               output filename to save the result
         -c CONFIG, --config CONFIG
@@ -35,7 +35,7 @@ runs:
   using: "composite"
   steps:
     - id: python
-      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: '3.13'
         update-environment: false

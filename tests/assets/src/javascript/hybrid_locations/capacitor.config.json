@@ -1,0 +1,14 @@
+{
+  "plugins": {
+    "Other": {
+      "cleartext": false,
+      "url": "https://safe.example.com",
+      "allowNavigation": []
+    }
+  },
+  "server": {
+    "cleartext": false,
+    "url": "http://dev.example.com",
+    "allowNavigation": ["*.example.com"]
+  }
+}

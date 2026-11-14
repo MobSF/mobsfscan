@@ -484,4 +484,118 @@ metadata = {
                 'nsexceptiondomains'),
         },
     },
+    # Hybrid (Cordova, Capacitor, Expo) configuration checks
+    'cordova_config_wildcard_access': {
+        'message': (
+            'Cordova config.xml allows network access to all origins '
+            '(<access origin="*" />). Restrict allowed domains to trusted '
+            'backend endpoints.'),
+        'severity': 'WARNING',
+        'reference': '<access origin="*" />',
+        'metadata': {
+            'cvss': 5.3,
+            'cwe': 'CWE-942: Overly Permissive Cross-domain Whitelist',
+            'owasp-mobile': 'M5: Insecure Communication',
+            'masvs': 'MSTG-PLATFORM-2',
+            'reference': (
+                'https://cordova.apache.org/docs/en/latest/'
+                'guide/appdev/allowlist/'),
+        },
+    },
+    'cordova_config_wildcard_navigation': {
+        'message': (
+            'Cordova config.xml permits WebView navigation to a wildcard '
+            'origin (<allow-navigation>). Remote pages loaded into the '
+            'Cordova WebView can access exposed native plugins.'),
+        'severity': 'ERROR',
+        'reference': '<allow-navigation href="*" />',
+        'metadata': {
+            'cvss': 7.5,
+            'cwe': 'CWE-601: URL Redirection to Untrusted Site',
+            'owasp-mobile': 'M8: Security Misconfiguration',
+            'masvs': 'MSTG-PLATFORM-2',
+            'reference': (
+                'https://cordova.apache.org/docs/en/latest/'
+                'guide/appdev/allowlist/'),
+        },
+    },
+    'capacitor_cleartext_traffic': {
+        'message': (
+            'Capacitor configuration enables cleartext HTTP traffic '
+            '(server.cleartext: true or HTTP server.url).'),
+        'severity': 'ERROR',
+        'reference': 'server.cleartext=true or http:// server.url',
+        'metadata': {
+            'cvss': 7.4,
+            'cwe': 'CWE-319: Cleartext Transmission of Sensitive Information',
+            'owasp-mobile': 'M5: Insecure Communication',
+            'masvs': 'MSTG-NETWORK-1',
+            'reference': (
+                'https://capacitorjs.com/docs/config'),
+        },
+    },
+    'capacitor_wildcard_navigation': {
+        'message': (
+            'Capacitor server.allowNavigation includes a wildcard pattern, '
+            'allowing the privileged WebView to navigate to untrusted '
+            'origins.'),
+        'severity': 'WARNING',
+        'reference': 'server.allowNavigation wildcard',
+        'metadata': {
+            'cvss': 6.1,
+            'cwe': 'CWE-601: URL Redirection to Untrusted Site',
+            'owasp-mobile': 'M8: Security Misconfiguration',
+            'masvs': 'MSTG-PLATFORM-2',
+            'reference': (
+                'https://capacitorjs.com/docs/config'),
+        },
+    },
+    'expo_config_extra_secrets': {
+        'message': (
+            'Expo app config "extra" contains secret-looking values. '
+            'Values in "extra" are embedded in the app package and readable '
+            'by anyone through expo-constants.'),
+        'severity': 'WARNING',
+        'reference': 'expo.extra secret-like keys',
+        'metadata': {
+            'cvss': 7.5,
+            'cwe': 'CWE-798: Use of Hard-coded Credentials',
+            'owasp-mobile': 'M1: Improper Credential Usage',
+            'masvs': 'MSTG-STORAGE-14',
+            'reference': (
+                'https://docs.expo.dev/guides/environment-variables/'),
+        },
+    },
+    'expo_updates_cleartext': {
+        'message': (
+            'Expo over-the-air updates are fetched over cleartext HTTP '
+            '(updates.url). A network attacker can serve a malicious '
+            'JavaScript bundle that runs with full app privileges.'),
+        'severity': 'ERROR',
+        'reference': 'updates.url uses http://',
+        'metadata': {
+            'cvss': 8.1,
+            'cwe': 'CWE-319: Cleartext Transmission of Sensitive Information',
+            'owasp-mobile': 'M5: Insecure Communication',
+            'masvs': 'MSTG-NETWORK-1',
+            'reference': (
+                'https://docs.expo.dev/versions/latest/config/app/#updates'),
+        },
+    },
+    'expo_updates_unsigned': {
+        'message': (
+            'Expo over-the-air updates are enabled without code signing '
+            '(no updates.codeSigningCertificate). Update integrity relies '
+            'only on transport security and the update server.'),
+        'severity': 'INFO',
+        'reference': 'updates enabled without codeSigningCertificate',
+        'metadata': {
+            'cvss': 3.7,
+            'cwe': 'CWE-494: Download of Code Without Integrity Check',
+            'owasp-mobile': 'M7: Insufficient Binary Protections',
+            'masvs': 'MSTG-CODE-1',
+            'reference': (
+                'https://docs.expo.dev/eas-update/code-signing/'),
+        },
+    },
 }

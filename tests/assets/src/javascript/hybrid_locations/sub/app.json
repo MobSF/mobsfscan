@@ -1,0 +1,10 @@
+{
+  "name": "root-expo-app",
+  "slug": "root-expo-app",
+  "extra": {
+    "firebaseApiKey": "root_expo_secret_123"
+  },
+  "updates": {
+    "url": "http://root-updates.example.com/manifest"
+  }
+}

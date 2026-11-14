@@ -107,10 +107,11 @@ def mobsfscan_format(results):
     """Convert results to mobsfscan format."""
     final = {}
     for res in results:
+        lines = res.get('match_lines', (1, 1))
         find_details = {
             'file_path': res['file'],
             'match_position': (1, 1),
-            'match_lines': (1, 1),
+            'match_lines': lines,
             'match_string': res['reference'],
         }
         if final.get(res['id']):
@@ -208,11 +209,15 @@ def layout_sensitive_input_checks(findings, xml_path, document):
         )
 
 
-def add_finding(findings, xml_file, rule_id, dynamic=None):
+def add_finding(
+        findings, xml_file, rule_id, dynamic=None, line=1, reference=None):
     """Append Findings."""
     meta = deepcopy(metadata[rule_id])
     meta['id'] = rule_id
     meta['file'] = xml_file
+    meta['match_lines'] = (line, line)
+    if reference:
+        meta['reference'] = reference
     if dynamic:
         meta['message'] = meta['message'].format(*dynamic)
     findings.append(meta)

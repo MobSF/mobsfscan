@@ -1,0 +1,9 @@
+{
+  "appId": "com.example.hybrid",
+  "server": {
+    "cleartext": true,
+    "allowNavigation": [
+      "*.example.com"
+    ]
+  }
+}

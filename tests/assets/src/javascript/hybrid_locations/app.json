@@ -1,0 +1,14 @@
+{
+  "unrelated": {
+    "extra": {},
+    "updates": { "url": "https://safe.example.com" }
+  },
+  "expo": {
+    "extra": {
+      "apiSecret": "super_secret_val_123"
+    },
+    "updates": {
+      "url": "http://ota.example.com/manifest"
+    }
+  }
+}
