@@ -18,6 +18,26 @@ EXPO_CONFIG_FILES = {
     'app.manifest',
 }
 HYBRID_CONFIG_FILES = {'config.xml', 'capacitor.config.json'} | EXPO_CONFIG_FILES
+_EXPO_ROOT_MARKER_KEYS = {
+    'slug',
+    'sdkVersion',
+    'runtimeVersion',
+    'platforms',
+    'orientation',
+    'ios',
+    'android',
+    'scheme',
+    'newArchEnabled',
+    'jsEngine',
+    'updates',
+    'extra',
+}
+_NON_EXPO_APP_JSON_KEYS = {
+    'addons',
+    'buildpacks',
+    'formation',
+    'stack',
+}
 _WILDCARD_NAV_RE = re.compile(
     r'^(?:\*|(?:\*|https?)://\*(?::(?:\*|\d+))?(?:/.*)?)$',
     re.IGNORECASE,
@@ -245,21 +265,39 @@ def check_capacitor_config(cfg_path, reported_path):
     return findings
 
 
+def _is_root_expo_app_json(data):
+    """Return True if an unwrapped app.json looks like an Expo app config."""
+    keys = set(data.keys())
+    if keys & _NON_EXPO_APP_JSON_KEYS:
+        return False
+    if not (keys & _EXPO_ROOT_MARKER_KEYS):
+        return False
+    extra = data.get('extra')
+    updates = data.get('updates')
+    has_expo_markers = bool(
+        keys & (_EXPO_ROOT_MARKER_KEYS - {'extra', 'updates'}),
+    )
+    has_expo_extra = isinstance(extra, dict) and 'eas' in extra
+    has_expo_updates = isinstance(updates, dict) and (
+        'url' in updates
+        or 'codeSigningCertificate' in updates
+        or 'fallbackToCacheTimeout' in updates
+    )
+    return has_expo_markers or has_expo_extra or has_expo_updates
+
+
 def _load_expo_config(cfg_path):
     """Return (expo_dict, lines_map, root_prefix) for an Expo JSON config."""
     data, lines = _load_json_with_lines(cfg_path)
     if not isinstance(data, dict):
         return None, {}, ()
     name_low = cfg_path.name.lower()
-    if name_low == 'app.json':
-        expo = data.get('expo')
-        return (
-            (expo, lines, ('expo',))
-            if isinstance(expo, dict)
-            else (None, {}, ())
-        )
-    if name_low == 'app.config.json' and isinstance(data.get('expo'), dict):
+    if isinstance(data.get('expo'), dict):
         return data['expo'], lines, ('expo',)
+    if name_low == 'app.json':
+        if _is_root_expo_app_json(data):
+            return data, lines, ()
+        return None, {}, ()
     return data, lines, ()
 
 
@@ -287,12 +325,13 @@ def check_expo_config(cfg_path, reported_path):
         return findings
     secret_keys = sorted(set(_iter_secret_keys(data.get('extra'))))
     if secret_keys:
+        keys_ref = 'extra: ' + ', '.join(secret_keys[:10])
         add_finding(
             findings,
             reported_path,
             'expo_config_extra_secrets',
-            dynamic=(', '.join(secret_keys[:10]),),
             line=lines.get(root_prefix + ('extra',), 1),
+            reference=keys_ref,
         )
     updates = data.get('updates')
     if not isinstance(updates, dict) or updates.get('enabled') is False:

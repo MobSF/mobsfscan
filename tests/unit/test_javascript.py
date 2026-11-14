@@ -1,5 +1,7 @@
 # -*- coding: utf_8 -*-
 """Tests for JavaScript, TypeScript, and Hybrid source analysis."""
+from pathlib import Path
+
 from mobsfscan import __version__
 from mobsfscan import hybrid
 from mobsfscan.formatters import (
@@ -134,11 +136,14 @@ def test_hybrid_configs_cordova_capacitor_expo(monkeypatch):
         'expo_updates_unsigned',
     }
     assert expected == set(findings.keys())
-    desc = findings['expo_config_extra_secrets']['metadata']['description']
-    assert 'stripeSecretKey' in desc
-    assert 'projectId' not in desc
-    # Secret value itself must not leak into description
+    extra_finding = findings['expo_config_extra_secrets']
+    desc = extra_finding['metadata']['description']
+    match_str = extra_finding['files'][0]['match_string']
+    assert 'stripeSecretKey' in match_str
+    assert 'projectId' not in match_str
+    # Secret value itself must not leak into description or match_string
     assert 'sk_test_51Habcdefghijkl' not in desc
+    assert 'sk_test_51Habcdefghijkl' not in match_str
     assert findings['cordova_config_wildcard_access']['files'][0][
         'match_lines'] == (3, 3)
 
@@ -201,12 +206,32 @@ def test_cordova_no_path_wildcards_repeated_elements_and_json_lines():
         'match_lines'] == (11, 11)
     assert res['capacitor_wildcard_navigation']['files'][0][
         'match_lines'] == (12, 12)
-    assert res['expo_config_extra_secrets']['files'][0][
-        'match_lines'] == (7, 7)
-    assert res['expo_updates_cleartext']['files'][0][
-        'match_lines'] == (11, 11)
-    assert res['expo_updates_unsigned']['files'][0][
-        'match_lines'] == (10, 10)
+
+    extra_by_file = {
+        Path(f['file_path']).as_posix(): f
+        for f in res['expo_config_extra_secrets']['files']
+    }
+    wrapped_file = next(
+        k for k in extra_by_file if k.endswith('hybrid_locations/app.json')
+    )
+    root_file = next(
+        k for k in extra_by_file if k.endswith('sub/app.json')
+    )
+    assert extra_by_file[wrapped_file]['match_lines'] == (7, 7)
+    assert extra_by_file[wrapped_file]['match_string'] == 'extra: apiSecret'
+    assert extra_by_file[root_file]['match_lines'] == (4, 4)
+    assert extra_by_file[root_file]['match_string'] == 'extra: firebaseApiKey'
+
+    cleartext_lines = sorted(
+        f['match_lines'][0]
+        for f in res['expo_updates_cleartext']['files']
+    )
+    assert cleartext_lines == [8, 11]
+    unsigned_lines = sorted(
+        f['match_lines'][0]
+        for f in res['expo_updates_unsigned']['files']
+    )
+    assert unsigned_lines == [7, 10]
 
     # A vanished/unreadable config must not discard findings from valid files
     missing_cfg = src_root / 'vanished' / 'config.xml'
@@ -229,6 +254,9 @@ def test_webview_shorthand_dom_xss_multiset_http_and_dev_else():
         ('js_cleartext_http_traffic', [6, 7]),
         ('js_console_sensitive_log', [11]),
         ('js_postmessage_wildcard_origin', [13]),
+        ('js_webview_origin_wildcard', [14]),
+        ('js_deeplink_open_url', [15]),
+        ('js_debug_tooling_in_release', [19]),
     ):
         files = res[rule_id]['files']
         assert all(f['file_path'].endswith('vuln.tsx') for f in files), rule_id
@@ -240,4 +268,6 @@ def test_webview_onmessage_handler_scope_and_origin_guards():
     src_root = get_paths()['javascript'] / 'onmessage_handlers'
     res = MobSFScan([str(src_root)], True, mp='thread').scan()['results']
     hits = res['js_webview_unverified_onmessage']['files']
-    assert sorted(h['match_lines'][0] for h in hits) == [4, 8, 13, 17, 18, 19]
+    assert sorted(h['match_lines'][0] for h in hits) == [
+        4, 8, 13, 17, 22, 26, 27, 28, 29,
+    ]

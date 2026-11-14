@@ -552,7 +552,7 @@ metadata = {
     },
     'expo_config_extra_secrets': {
         'message': (
-            'Expo app config "extra" contains secret-looking values ({}). '
+            'Expo app config "extra" contains secret-looking values. '
             'Values in "extra" are embedded in the app package and readable '
             'by anyone through expo-constants.'),
         'severity': 'WARNING',

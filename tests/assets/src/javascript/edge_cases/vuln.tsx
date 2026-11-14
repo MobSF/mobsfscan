@@ -11,3 +11,10 @@ if (__DEV__) {
   console.log(token);
 }
 popup.window.postMessage(secret, "*");
+const w3 = <WebView originWhitelist={["https://*"]} />;
+WebBrowser.openAuthSessionAsync(dynamicAuthUrl, redirectUri);
+if (__DEV__) {
+  // dev-only
+} else {
+  Reactotron.configure({}).useReactNative().connect();
+}

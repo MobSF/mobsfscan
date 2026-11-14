@@ -12,11 +12,21 @@ export function BadHandlers() {
     if (!ev.nativeEvent.url) return;
     handle(ev.nativeEvent.data);
   };
+  const onMessageSubstringBypass = (ev) => {
+    if (ev.nativeEvent.url.includes("trusted.example.com")) {
+      handle(ev.nativeEvent.data);
+    }
+  };
+  const onMessageUnboundedPrefixBypass = (ev) => {
+    if (!ev.nativeEvent.url.startsWith("https://trusted.example.com")) return;
+    handle(ev.nativeEvent.data);
+  };
   return (
     <>
       <WebView onMessage={(e) => run(e.nativeEvent.data)} />
       <WebView onMessage={(e) => { if (e.nativeEvent.url) { run(e.nativeEvent.data); } }} />
       <WebView onMessage={(e) => { if (!e.nativeEvent.url) return; run(e.nativeEvent.data); }} />
+      <WebView onMessage={(e) => { if (e.nativeEvent.url.includes("trusted.example.com")) { run(e.nativeEvent.data); } }} />
     </>
   );
 }
@@ -35,6 +45,10 @@ export function GoodHandlers() {
   const onBridgeMessage = (ev) => {
     const { url } = ev.nativeEvent;
     if (!url.startsWith("https://trusted.example.com/")) return;
+    handle(ev.nativeEvent.data);
+  };
+  const onAllowlistOrigin = (ev) => {
+    if (!ALLOWED_ORIGINS.has(new URL(ev.nativeEvent.url).origin)) return;
     handle(ev.nativeEvent.data);
   };
   const onScroll = (ev) => track(ev.nativeEvent.data);

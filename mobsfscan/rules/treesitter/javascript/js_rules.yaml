@@ -145,12 +145,12 @@
       (jsx_attribute
         (property_identifier) @_prop (#eq? @_prop "originWhitelist")
         (jsx_expression
-          (array (string) @_v (#match? @_v "^['\"](\\*|http://\\*)['\"]$")))) @match
+          (array (string) @_v (#match? @_v "^['\"](\\*|https?://\\*)['\"]$")))) @match
     - >-
       (pair
         key: [(property_identifier) (string)] @_k
         (#match? @_k "^['\"]?originWhitelist['\"]?$")
-        value: (array (string) @_v (#match? @_v "^['\"](\\*|http://\\*)['\"]$"))) @match
+        value: (array (string) @_v (#match? @_v "^['\"](\\*|https?://\\*)['\"]$"))) @match
     - >-
       (assignment_expression
         left: [
@@ -159,7 +159,7 @@
           (subscript_expression
             index: (string) @_s (#match? @_s "^['\"]originWhitelist['\"]$"))
         ]
-        right: (array (string) @_v (#match? @_v "^['\"](\\*|http://\\*)['\"]$"))) @match
+        right: (array (string) @_v (#match? @_v "^['\"](\\*|https?://\\*)['\"]$"))) @match
   metadata:
     cvss: 6.1
     cwe: cwe-942
@@ -486,6 +486,7 @@
           property: (property_identifier) @_fn
           (#match? @_fn "^(openURL|open|openBrowserAsync|openAuthSessionAsync)$"))
         arguments: (arguments
+          .
           [
             (identifier)
             (member_expression)
@@ -636,8 +637,9 @@
       (if_statement
         condition: (parenthesized_expression) @_gcond
         (#match? @_gcond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
-        (#match? @_gcond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+        (#match? @_gcond "(!==?|^\\(\\s*![^=]*\\.(has\\s*\\(|includes\\s*\\(.*\\.origin\\b|startsWith\\s*\\(\\s*['\"]https?://[^/'\"]+[/#?]))")
         (#not-match? @_gcond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
+        (#not-match? @_gcond "nativeEvent\\.(url|origin)\\.includes\\s*\\(")
         consequence: [
           (return_statement)
           (throw_statement)
@@ -650,8 +652,9 @@
       (if_statement
         condition: (parenthesized_expression) @_dcond
         (#match? @_dcond "\\b(url|origin)\\b")
-        (#match? @_dcond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+        (#match? @_dcond "(!==?|^\\(\\s*![^=]*\\.(has\\s*\\(|includes\\s*\\(.*\\borigin\\b|startsWith\\s*\\(\\s*['\"]https?://[^/'\"]+[/#?]))")
         (#not-match? @_dcond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
+        (#not-match? @_dcond "\\b(url|origin)\\.includes\\s*\\(")
         consequence: [
           (return_statement)
           (throw_statement)
@@ -661,14 +664,15 @@
     (if_statement
       condition: (parenthesized_expression) @_pcond
       (#match? @_pcond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
-      (#match? @_pcond "(===?|\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
-      (#not-match? @_pcond "(!==?|^\\(\\s*!|(===?)\\s*(['\"]['\"]|``|(null|undefined)\\b))")
+      (#match? @_pcond "(===?|\\.has\\s*\\(|\\.includes\\s*\\(.*\\.origin\\b|\\.startsWith\\s*\\(\\s*['\"]https?://[^/'\"]+[/#?])")
+      (#not-match? @_pcond "(!==?|^\\(\\s*!|(===?)\\s*(['\"]['\"]|``|(null|undefined)\\b)|nativeEvent\\.(url|origin)\\.includes\\s*\\()")
       consequence: (_) @match)
     (if_statement
       condition: (parenthesized_expression) @_ncond
       (#match? @_ncond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
-      (#match? @_ncond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+      (#match? @_ncond "(!==?|^\\(\\s*![^=]*\\.(has\\s*\\(|includes\\s*\\(.*\\.origin\\b|startsWith\\s*\\(\\s*['\"]https?://[^/'\"]+[/#?]))")
       (#not-match? @_ncond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
+      (#not-match? @_ncond "nativeEvent\\.(url|origin)\\.includes\\s*\\(")
       alternative: (else_clause (_) @match))
     (switch_statement
       value: (parenthesized_expression) @_sw
@@ -709,8 +713,9 @@
       (if_statement
         condition: (parenthesized_expression) @_gcond
         (#match? @_gcond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
-        (#match? @_gcond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+        (#match? @_gcond "(!==?|^\\(\\s*![^=]*\\.(has\\s*\\(|includes\\s*\\(.*\\.origin\\b|startsWith\\s*\\(\\s*['\"]https?://[^/'\"]+[/#?]))")
         (#not-match? @_gcond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
+        (#not-match? @_gcond "nativeEvent\\.(url|origin)\\.includes\\s*\\(")
         consequence: [
           (return_statement)
           (throw_statement)
@@ -723,8 +728,9 @@
       (if_statement
         condition: (parenthesized_expression) @_dcond
         (#match? @_dcond "\\b(url|origin)\\b")
-        (#match? @_dcond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+        (#match? @_dcond "(!==?|^\\(\\s*![^=]*\\.(has\\s*\\(|includes\\s*\\(.*\\borigin\\b|startsWith\\s*\\(\\s*['\"]https?://[^/'\"]+[/#?]))")
         (#not-match? @_dcond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
+        (#not-match? @_dcond "\\b(url|origin)\\.includes\\s*\\(")
         consequence: [
           (return_statement)
           (throw_statement)
@@ -734,14 +740,15 @@
     (if_statement
       condition: (parenthesized_expression) @_pcond
       (#match? @_pcond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
-      (#match? @_pcond "(===?|\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
-      (#not-match? @_pcond "(!==?|^\\(\\s*!|(===?)\\s*(['\"]['\"]|``|(null|undefined)\\b))")
+      (#match? @_pcond "(===?|\\.has\\s*\\(|\\.includes\\s*\\(.*\\.origin\\b|\\.startsWith\\s*\\(\\s*['\"]https?://[^/'\"]+[/#?])")
+      (#not-match? @_pcond "(!==?|^\\(\\s*!|(===?)\\s*(['\"]['\"]|``|(null|undefined)\\b)|nativeEvent\\.(url|origin)\\.includes\\s*\\()")
       consequence: (_) @match)
     (if_statement
       condition: (parenthesized_expression) @_ncond
       (#match? @_ncond "(nativeEvent\\.(url|origin)|\\.origin)\\b")
-      (#match? @_ncond "(!==?|^\\(\\s*![^=]*\\.(startsWith|endsWith|includes|has|test|match)\\s*\\()")
+      (#match? @_ncond "(!==?|^\\(\\s*![^=]*\\.(has\\s*\\(|includes\\s*\\(.*\\.origin\\b|startsWith\\s*\\(\\s*['\"]https?://[^/'\"]+[/#?]))")
       (#not-match? @_ncond "(!==?)\\s*(['\"]['\"]|``|(null|undefined)\\b)")
+      (#not-match? @_ncond "nativeEvent\\.(url|origin)\\.includes\\s*\\(")
       alternative: (else_clause (_) @match))
     (switch_statement
       value: (parenthesized_expression) @_sw
@@ -1412,6 +1419,11 @@
       (member_expression
         object: (_) @_o (#match? @_o "NativeModules$")
         property: (property_identifier) @_p (#match? @_p "^(Flipper|FlipperModule)$")) @match
+  exclude_ancestor: >-
+    (if_statement
+      condition: (parenthesized_expression
+        (identifier) @_c (#eq? @_c "__DEV__"))
+      consequence: (_) @match)
   metadata:
     cvss: 4.3
     cwe: cwe-489
