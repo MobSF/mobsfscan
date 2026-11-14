@@ -1,8 +1,8 @@
 # -*- coding: utf_8 -*-
 """Cordova, Capacitor, and Expo hybrid configuration checks."""
 import json
-
-from xmltodict import parse
+import re
+from xml.parsers import expat
 
 from mobsfscan.logger import init_logger
 from mobsfscan.manifest import add_finding, mobsfscan_format
@@ -18,7 +18,13 @@ EXPO_CONFIG_FILES = {
     'app.manifest',
 }
 HYBRID_CONFIG_FILES = {'config.xml', 'capacitor.config.json'} | EXPO_CONFIG_FILES
-_WILDCARD_NAV_HREFS = {'*', 'http://*/*', 'https://*/*'}
+_WILDCARD_NAV_RE = re.compile(
+    r'^(?:\*|(?:\*|https?)://\*(?:/\*)?)$',
+    re.IGNORECASE,
+)
+_JSON_TOKEN_RE = re.compile(
+    r'"(?:\\.|[^"\\])*"|[{}\[\]:,]|[^\s{}\[\]:,"]+',
+)
 _SECRET_ENDSWITH = (
     'api', 'key', 'secret', 'token', 'username',
     'user_name', 'user', 'pass', 'password',
@@ -54,12 +60,9 @@ def is_secret_key(key):
     )
 
 
-def _line_of_substring(text, needle):
-    """Return 1-indexed line number of needle in text."""
-    idx = text.find(needle)
-    if idx == -1:
-        return 1
-    return text.count('\n', 0, idx) + 1
+def _is_wildcard_nav_href(href):
+    """Return True if a Cordova allow-navigation href allows arbitrary hosts."""
+    return bool(_WILDCARD_NAV_RE.match(href))
 
 
 def _read_bounded_text(cfg_path):
@@ -69,36 +72,109 @@ def _read_bounded_text(cfg_path):
     return cfg_path.read_text(encoding='utf-8', errors='ignore')
 
 
-def _iter_xml_elements(node):
-    """Yield (local_tag_name, attrs_dict) pairs across an xmltodict tree."""
-    if isinstance(node, list):
-        for item in node:
-            yield from _iter_xml_elements(item)
-        return
-    if not isinstance(node, dict):
-        return
-    for raw_tag, child in node.items():
-        if raw_tag.startswith('@'):
+def _forbid_entities(*_args):
+    """Reject XML entity declarations."""
+    raise ValueError('XML entity declarations are not supported')
+
+
+def _parse_cordova_elements(raw):
+    """Return (tag, norm_attrs, line) tuples inside a Cordova <widget> root."""
+    parser = expat.ParserCreate()
+    parser.EntityDeclHandler = _forbid_entities
+    elements = []
+    state = {'depth': 0, 'is_widget': False}
+
+    def start_element(name, attrs):
+        local_tag = name.split(':')[-1].lower()
+        if state['depth'] == 0:
+            state['is_widget'] = local_tag == 'widget'
+        state['depth'] += 1
+        if not state['is_widget']:
+            return
+        norm_attrs = {
+            k.split(':')[-1].lower(): str(v)
+            for k, v in attrs.items()
+        }
+        elements.append((local_tag, norm_attrs, parser.CurrentLineNumber))
+
+    def end_element(_name):
+        state['depth'] -= 1
+
+    parser.StartElementHandler = start_element
+    parser.EndElementHandler = end_element
+    parser.Parse(raw, True)
+    return elements
+
+
+def _parse_json_value(tokens, pos, path, lines):
+    """Advance past one RFC-8259 JSON value, recording key line numbers."""
+    tok, line = tokens[pos]
+    if tok == '{':
+        return _parse_json_object(tokens, pos + 1, path, lines)
+    if tok == '[':
+        return _parse_json_array(tokens, pos + 1, path, lines)
+    lines.setdefault(path, line)
+    return pos + 1
+
+
+def _parse_json_object(tokens, pos, path, lines):
+    """Advance past a JSON object body and record each property's line."""
+    if tokens[pos][0] == '}':
+        return pos + 1
+    while pos < len(tokens):
+        key_tok, key_line = tokens[pos]
+        key = json.loads(key_tok)
+        key_path = path + (key,)
+        lines[key_path] = key_line
+        pos = _parse_json_value(tokens, pos + 2, key_path, lines)
+        if tokens[pos][0] == ',':
+            pos += 1
             continue
-        local_tag = raw_tag.split(':')[-1].lower()
-        if isinstance(child, dict):
-            yield local_tag, child
-            yield from _iter_xml_elements(child)
-        elif isinstance(child, list):
-            for entry in child:
-                if isinstance(entry, dict):
-                    yield local_tag, entry
-                    yield from _iter_xml_elements(entry)
+        return pos + 1
+    return pos
 
 
-def _find_widget_root(parsed):
-    """Return the Cordova <widget> mapping if present, else None."""
-    if not isinstance(parsed, dict):
-        return None
-    for raw_tag, val in parsed.items():
-        if raw_tag.split(':')[-1].lower() == 'widget' and isinstance(val, dict):
-            return val
-    return None
+def _parse_json_array(tokens, pos, path, lines):
+    """Advance past a JSON array body and index element positions."""
+    if tokens[pos][0] == ']':
+        return pos + 1
+    idx = 0
+    while pos < len(tokens):
+        elem_path = path + (idx,)
+        lines[elem_path] = tokens[pos][1]
+        pos = _parse_json_value(tokens, pos, elem_path, lines)
+        idx += 1
+        if tokens[pos][0] == ',':
+            pos += 1
+            continue
+        return pos + 1
+    return pos
+
+
+def _load_json_with_lines(cfg_path):
+    """Parse JSON file and return (data, {key_path_tuple: line_no})."""
+    raw = _read_bounded_text(cfg_path)
+    if not raw:
+        return None, {}
+    try:
+        data = json.loads(raw)
+    except Exception:
+        return None, {}
+    lines = {}
+    try:
+        tokens = []
+        line_no = 1
+        last_idx = 0
+        for match in _JSON_TOKEN_RE.finditer(raw):
+            start = match.start()
+            line_no += raw.count('\n', last_idx, start)
+            last_idx = start
+            tokens.append((match.group(0), line_no))
+        if tokens:
+            _parse_json_value(tokens, 0, (), lines)
+    except Exception:
+        lines = {}
+    return data, lines
 
 
 def check_cordova_config(cfg_path, reported_path):
@@ -108,29 +184,26 @@ def check_cordova_config(cfg_path, reported_path):
     if not raw:
         return findings
     try:
-        parsed = parse(raw)
+        elements = _parse_cordova_elements(raw)
     except Exception:
         return findings
-    widget = _find_widget_root(parsed)
-    if widget is None:
-        return findings
-    for tag, attrs in _iter_xml_elements(widget):
-        if tag == 'access' and str(attrs.get('@origin', '')).strip() == '*':
+    for tag, attrs, line in elements:
+        if tag == 'access' and attrs.get('origin', '').strip() == '*':
             add_finding(
                 findings,
                 reported_path,
                 'cordova_config_wildcard_access',
-                line=_line_of_substring(raw, '<access'),
+                line=line,
             )
         elif tag == 'allow-navigation':
-            href = str(attrs.get('@href', '')).strip()
-            if href in _WILDCARD_NAV_HREFS:
+            href = attrs.get('href', '').strip()
+            if _is_wildcard_nav_href(href):
                 add_finding(
                     findings,
                     reported_path,
                     'cordova_config_wildcard_navigation',
-                    dynamic=(href,),
-                    line=_line_of_substring(raw, '<allow-navigation'),
+                    line=line,
+                    reference=f'<allow-navigation href="{href}" />',
                 )
     return findings
 
@@ -138,24 +211,20 @@ def check_cordova_config(cfg_path, reported_path):
 def check_capacitor_config(cfg_path, reported_path):
     """Check Capacitor capacitor.config.json for cleartext or wildcard nav."""
     findings = []
-    raw = _read_bounded_text(cfg_path)
-    if not raw:
-        return findings
-    try:
-        data = json.loads(raw)
-    except Exception:
-        return findings
+    data, lines = _load_json_with_lines(cfg_path)
     server = data.get('server') if isinstance(data, dict) else None
     if not isinstance(server, dict):
         return findings
-    url_val = str(server.get('url', '')).lower()
-    if server.get('cleartext') is True or url_val.startswith('http://'):
-        needle = 'cleartext' if 'cleartext' in raw else 'url'
+    cleartext_on = server.get('cleartext') is True
+    url_http = str(server.get('url', '')).lower().startswith('http://')
+    if cleartext_on or url_http:
+        prop_path = ('server', 'cleartext') if cleartext_on else (
+            'server', 'url')
         add_finding(
             findings,
             reported_path,
             'capacitor_cleartext_traffic',
-            line=_line_of_substring(raw, needle),
+            line=lines.get(prop_path, lines.get(('server',), 1)),
         )
     allow_nav = server.get('allowNavigation')
     if isinstance(allow_nav, list) and any(
@@ -164,29 +233,30 @@ def check_capacitor_config(cfg_path, reported_path):
             findings,
             reported_path,
             'capacitor_wildcard_navigation',
-            line=_line_of_substring(raw, 'allowNavigation'),
+            line=lines.get(
+                ('server', 'allowNavigation'),
+                lines.get(('server',), 1),
+            ),
         )
     return findings
 
 
 def _load_expo_config(cfg_path):
-    """Return (raw_text, expo_dict) for an Expo JSON config, or (None, None)."""
-    raw = _read_bounded_text(cfg_path)
-    if not raw:
-        return None, None
-    try:
-        data = json.loads(raw)
-    except Exception:
-        return None, None
+    """Return (expo_dict, lines_map, root_prefix) for an Expo JSON config."""
+    data, lines = _load_json_with_lines(cfg_path)
     if not isinstance(data, dict):
-        return None, None
+        return None, {}, ()
     name_low = cfg_path.name.lower()
     if name_low == 'app.json':
         expo = data.get('expo')
-        return (raw, expo) if isinstance(expo, dict) else (None, None)
+        return (
+            (expo, lines, ('expo',))
+            if isinstance(expo, dict)
+            else (None, {}, ())
+        )
     if name_low == 'app.config.json' and isinstance(data.get('expo'), dict):
-        return raw, data['expo']
-    return raw, data
+        return data['expo'], lines, ('expo',)
+    return data, lines, ()
 
 
 def _iter_secret_keys(obj, prefix=''):
@@ -208,7 +278,7 @@ def _iter_secret_keys(obj, prefix=''):
 def check_expo_config(cfg_path, reported_path):
     """Check Expo app config / manifest for extra secrets and OTA updates."""
     findings = []
-    raw, data = _load_expo_config(cfg_path)
+    data, lines, root_prefix = _load_expo_config(cfg_path)
     if data is None:
         return findings
     secret_keys = sorted(set(_iter_secret_keys(data.get('extra'))))
@@ -218,7 +288,7 @@ def check_expo_config(cfg_path, reported_path):
             reported_path,
             'expo_config_extra_secrets',
             dynamic=(', '.join(secret_keys[:10]),),
-            line=_line_of_substring(raw, '"extra"'),
+            line=lines.get(root_prefix + ('extra',), 1),
         )
     updates = data.get('updates')
     if not isinstance(updates, dict) or updates.get('enabled') is False:
@@ -229,14 +299,17 @@ def check_expo_config(cfg_path, reported_path):
             findings,
             reported_path,
             'expo_updates_cleartext',
-            line=_line_of_substring(raw, '"url"'),
+            line=lines.get(
+                root_prefix + ('updates', 'url'),
+                lines.get(root_prefix + ('updates',), 1),
+            ),
         )
     if url and not updates.get('codeSigningCertificate'):
         add_finding(
             findings,
             reported_path,
             'expo_updates_unsigned',
-            line=_line_of_substring(raw, '"updates"'),
+            line=lines.get(root_prefix + ('updates',), 1),
         )
     return findings
 

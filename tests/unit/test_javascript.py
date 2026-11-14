@@ -357,3 +357,159 @@ def test_mobsf_ignore_comments_in_jsx_js_and_xml(tmp_path):
     xss_files = res['js_dom_xss_sink']['files']
     assert len(xss_files) == 1
     assert xss_files[0]['match_lines'] == (6, 6)
+
+
+def test_cordova_no_path_wildcards_repeated_elements_and_json_lines(tmp_path):
+    """Track exact XML/JSON positions and detect http://*, https://* nav."""
+    (tmp_path / 'config.xml').write_text(
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<widget id="com.example.app">\n'
+        '  <access origin="https://api.example.com" /> '
+        '<!-- mobsf-ignore: cordova_config_wildcard_access -->\n'
+        '  <access origin="*" />\n'
+        '  <allow-navigation href="https://trusted.example.com/*" />\n'
+        '  <allow-navigation href="http://*" /> '
+        '<!-- mobsf-ignore: cordova_config_wildcard_navigation -->\n'
+        '  <allow-navigation href="https://*" />\n'
+        '</widget>\n',
+        encoding='utf-8',
+    )
+    (tmp_path / 'capacitor.config.json').write_text(
+        '{\n'
+        '  "plugins": {\n'
+        '    "Other": {\n'
+        '      "cleartext": false,\n'
+        '      "url": "https://safe.example.com",\n'
+        '      "allowNavigation": []\n'
+        '    }\n'
+        '  },\n'
+        '  "server": {\n'
+        '    "cleartext": false,\n'
+        '    "url": "http://dev.example.com",\n'
+        '    "allowNavigation": ["*.example.com"]\n'
+        '  }\n'
+        '}\n',
+        encoding='utf-8',
+    )
+    (tmp_path / 'app.json').write_text(
+        '{\n'
+        '  "unrelated": {\n'
+        '    "extra": {},\n'
+        '    "updates": { "url": "https://safe.example.com" }\n'
+        '  },\n'
+        '  "expo": {\n'
+        '    "extra": {\n'
+        '      "apiSecret": "super_secret_val_123"\n'
+        '    },\n'
+        '    "updates": {\n'
+        '      "url": "http://ota.example.com/manifest"\n'
+        '    }\n'
+        '  }\n'
+        '}\n',
+        encoding='utf-8',
+    )
+    res = MobSFScan([str(tmp_path)], True, mp='thread').scan()['results']
+
+    access_hits = res['cordova_config_wildcard_access']['files']
+    assert len(access_hits) == 1
+    assert access_hits[0]['match_lines'] == (4, 4)
+
+    nav_hits = res['cordova_config_wildcard_navigation']['files']
+    assert len(nav_hits) == 1
+    assert nav_hits[0]['match_lines'] == (7, 7)
+    assert nav_hits[0]['match_string'] == '<allow-navigation href="https://*" />'
+
+    assert res['capacitor_cleartext_traffic']['files'][0][
+        'match_lines'] == (11, 11)
+    assert res['capacitor_wildcard_navigation']['files'][0][
+        'match_lines'] == (12, 12)
+    assert res['expo_config_extra_secrets']['files'][0][
+        'match_lines'] == (7, 7)
+    assert res['expo_updates_cleartext']['files'][0][
+        'match_lines'] == (11, 11)
+    assert res['expo_updates_unsigned']['files'][0][
+        'match_lines'] == (10, 10)
+
+
+def test_webview_shorthand_dom_xss_multiset_http_and_dev_else(tmp_path):
+    """Regression coverage for JSX shorthand, sanitizer RHS, multiSet, HTTP."""
+    (tmp_path / 'vuln.tsx').write_text(
+        'const w1 = <WebView allowFileAccess />;\n'
+        'const w2 = <WebView allowUniversalAccessFromFileURLs />;\n'
+        'el.innerHTML = unsanitizedHtml;\n'
+        'el.innerHTML = DOMPurify.sanitize(prefix) + untrustedHtml;\n'
+        'AsyncStorage.multiSet([["theme", "dark"], ["auth_token", tok]]);\n'
+        'fetch("http://localhost.attacker.example/api");\n'
+        'fetch("http://www.w3.org.attacker.example/p");\n'
+        'if (__DEV__) {\n'
+        '  console.log(secret);\n'
+        '} else {\n'
+        '  console.log(token);\n'
+        '}\n',
+        encoding='utf-8',
+    )
+    (tmp_path / 'safe.tsx').write_text(
+        'const w = <WebView allowFileAccess={false} />;\n'
+        'el.innerHTML = DOMPurify.sanitize(untrustedHtml);\n'
+        'el.innerHTML = sanitizeHtml(untrustedHtml);\n'
+        'el.innerHTML = goog.html.SafeHtml.unwrapTrustedHTML(h);\n'
+        'el.innerHTML = "<b>static</b>";\n'
+        'AsyncStorage.setItem("theme", "secret_dark_mode");\n'
+        'AsyncStorage.multiSet([["theme", "auth_token_value_only"]]);\n'
+        'fetch("http://localhost:8080/api");\n'
+        'const svgNs = "http://www.w3.org/2000/svg";\n',
+        encoding='utf-8',
+    )
+    res = MobSFScan([str(tmp_path)], True, mp='thread').scan()['results']
+
+    for rule_id, expected_lines in (
+        ('js_webview_file_access', [1, 2]),
+        ('js_dom_xss_sink', [3, 4]),
+        ('js_insecure_async_storage', [5]),
+        ('js_cleartext_http_traffic', [6, 7]),
+        ('js_console_sensitive_log', [11]),
+    ):
+        files = res[rule_id]['files']
+        assert all(f['file_path'].endswith('vuln.tsx') for f in files), rule_id
+        assert sorted(f['match_lines'][0] for f in files) == expected_lines
+
+
+def test_webview_onmessage_handler_scope_and_origin_guards(tmp_path):
+    """Flag unverified WebView handlers; skip origin-guarded or unrelated."""
+    (tmp_path / 'handlers.tsx').write_text(
+        'export function BadHandlers() {\n'
+        '  const onMessage = (ev) => {\n'
+        '    console.log(ev.nativeEvent.url);\n'
+        '    handle(ev.nativeEvent.data);\n'
+        '  };\n'
+        '  return (\n'
+        '    <WebView onMessage={(e) => run(e.nativeEvent.data)} />\n'
+        '  );\n'
+        '}\n'
+        'export function GoodHandlers() {\n'
+        '  const onMessage = (ev) => {\n'
+        '    if (ev.nativeEvent.url !== "https://trusted.example.com") {\n'
+        '      return;\n'
+        '    }\n'
+        '    handle(ev.nativeEvent.data);\n'
+        '  };\n'
+        '  const handleWebViewMessage = (ev) => {\n'
+        '    if (new URL(ev.nativeEvent.url).origin === TRUSTED_ORIGIN) {\n'
+        '      handle(ev.nativeEvent.data);\n'
+        '    }\n'
+        '  };\n'
+        '  const onBridgeMessage = (ev) => {\n'
+        '    const { url } = ev.nativeEvent;\n'
+        '    if (!url.startsWith("https://trusted.example.com/")) return;\n'
+        '    handle(ev.nativeEvent.data);\n'
+        '  };\n'
+        '  const onScroll = (ev) => track(ev.nativeEvent.data);\n'
+        '  return (\n'
+        '    <Camera onBarCodeRead={(e) => scan(e.nativeEvent.data)} />\n'
+        '  );\n'
+        '}\n',
+        encoding='utf-8',
+    )
+    res = MobSFScan([str(tmp_path)], True, mp='thread').scan()['results']
+    hits = res['js_webview_unverified_onmessage']['files']
+    assert sorted(h['match_lines'][0] for h in hits) == [4, 7]

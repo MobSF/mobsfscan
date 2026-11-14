@@ -209,12 +209,15 @@ def layout_sensitive_input_checks(findings, xml_path, document):
         )
 
 
-def add_finding(findings, xml_file, rule_id, dynamic=None, line=1):
+def add_finding(
+        findings, xml_file, rule_id, dynamic=None, line=1, reference=None):
     """Append Findings."""
     meta = deepcopy(metadata[rule_id])
     meta['id'] = rule_id
     meta['file'] = xml_file
     meta['match_lines'] = (line, line)
+    if reference:
+        meta['reference'] = reference
     if dynamic:
         meta['message'] = meta['message'].format(*dynamic)
     findings.append(meta)

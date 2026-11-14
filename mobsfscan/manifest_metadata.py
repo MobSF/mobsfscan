@@ -504,9 +504,9 @@ metadata = {
     },
     'cordova_config_wildcard_navigation': {
         'message': (
-            'Cordova config.xml permits WebView navigation to wildcard '
-            'origin (href="{}"). Remote pages loaded into the Cordova '
-            'WebView can access exposed native plugins.'),
+            'Cordova config.xml permits WebView navigation to a wildcard '
+            'origin (<allow-navigation>). Remote pages loaded into the '
+            'Cordova WebView can access exposed native plugins.'),
         'severity': 'ERROR',
         'reference': '<allow-navigation href="*" />',
         'metadata': {
