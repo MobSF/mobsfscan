@@ -23,3 +23,35 @@ class BadXMLInputFactory {
         xmlInputFactory.setProperty("javax.xml.stream.isSupportingExternalEntities", true);
     }
 }
+
+class BadConstXMLInputFactory {
+    public BadConstXMLInputFactory() {
+        final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
+        // ruleid:xmlinputfactory_xxe_enabled
+        xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, true);
+    }
+}
+
+class BadBooleanTrueXMLInputFactory {
+    public BadBooleanTrueXMLInputFactory() {
+        final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
+        // ruleid:xmlinputfactory_xxe_enabled
+        xmlInputFactory.setProperty("javax.xml.stream.isSupportingExternalEntities", Boolean.TRUE);
+    }
+}
+
+class BadSupportDtdXMLInputFactory {
+    public BadSupportDtdXMLInputFactory() {
+        final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
+        // ruleid:xmlinputfactory_xxe_enabled
+        xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, true);
+    }
+}
+
+class BadSupportDtdBooleanTrueXMLInputFactory {
+    public BadSupportDtdBooleanTrueXMLInputFactory() {
+        final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
+        // ruleid:xmlinputfactory_xxe_enabled
+        xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.TRUE);
+    }
+}
