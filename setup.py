@@ -20,9 +20,9 @@ def get_version(rel_path):
 
 
 description = ('mobsfscan is a static analysis tool that can'
-               ' find insecure code patterns in your Android and'
-               ' iOS source code. Supports Java, Kotlin,'
-               ' Swift, and Objective C Code.')
+               ' find insecure code patterns in your Android,'
+               ' iOS, and hybrid source code. Supports Java, Kotlin,'
+               ' Swift, Objective C, JavaScript, and TypeScript Code.')
 setup(
     name='mobsfscan',
     version=get_version('mobsfscan/__init__.py'),
@@ -55,7 +55,7 @@ setup(
     long_description_content_type='text/markdown',
     install_requires=[
         'colorama>=0.4.6',
-        'libsast>=3.1.10',
+        'libsast[js]>=3.2.0',
         'semgrep==1.172.0',
         'sarif-om>=1.0.4',
         'jschema-to-python>=1.2.3',

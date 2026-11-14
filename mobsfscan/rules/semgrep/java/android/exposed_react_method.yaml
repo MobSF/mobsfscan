@@ -1,0 +1,47 @@
+rules:
+  - id: android_rn_exposed_react_method
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              @ReactMethod
+              $RET $METHOD(...) {
+                ...
+              }
+          - pattern-inside: |
+              @com.facebook.react.bridge.ReactMethod
+              $RET $METHOD(...) {
+                ...
+              }
+          - pattern-inside: |
+              @ReactMethod(...)
+              $RET $METHOD(...) {
+                ...
+              }
+          - pattern-inside: |
+              @com.facebook.react.bridge.ReactMethod(...)
+              $RET $METHOD(...) {
+                ...
+              }
+      - pattern-either:
+          - pattern: new File(...)
+          - pattern: new java.io.File(...)
+          - pattern: new FileInputStream(...)
+          - pattern: new java.io.FileInputStream(...)
+          - pattern: new FileOutputStream(...)
+          - pattern: new java.io.FileOutputStream(...)
+          - pattern: Runtime.getRuntime().exec(...)
+          - pattern: new ProcessBuilder(...)
+    message: >-
+      A React Native @ReactMethod native module performs file system or command
+      execution operations. Methods annotated with @ReactMethod are exposed over
+      the JavaScript-to-Native bridge; ensure file paths and arguments are
+      strictly validated and confined to expected directories.
+    languages:
+      - java
+    severity: WARNING
+    metadata:
+      cwe: cwe-22
+      owasp-mobile: m1
+      masvs: platform-2
+      reference: >-
+        https://reactnative.dev/docs/legacy/native-modules-android

@@ -2,6 +2,7 @@
 """The MobSF cli: mobsfscan."""
 from pathlib import Path
 from linecache import getline
+import os
 
 from libsast import (
     Scanner,
@@ -10,15 +11,28 @@ from libsast import (
 
 from mobsfscan.logger import init_logger
 from mobsfscan import settings
+from mobsfscan import hybrid
 from mobsfscan import manifest
 from mobsfscan import ios_plist
 from mobsfscan.utils import (
     get_best_practices,
     get_config,
+    report_path,
 )
 
 
 logger = init_logger(__name__)
+_PRUNE_DIRS = {
+    '__MACOSX',
+    '.expo',
+    '.git',
+    '.gradle',
+    '.hg',
+    '.next',
+    '.svn',
+    'node_modules',
+}
+_NATIVE_SUFFIXES = {'.java', '.kt', '.swift', '.m'}
 
 
 class MobSFScan:
@@ -36,6 +50,8 @@ class MobSFScan:
             'sgrep_rules': None,
             'sgrep_extensions': None,
             'match_extensions': None,
+            'ts_rules': None,
+            'ts_extensions': None,
             'ignore_filenames': self.conf['ignore_filenames'],
             'ignore_extensions': self.conf['ignore_extensions'],
             'ignore_paths': self.conf['ignore_paths'],
@@ -52,15 +68,14 @@ class MobSFScan:
         }
         self.xmls = []
         self.plists = []
+        self.hybrid_configs = []
         # Extensions whose BP presence hits must be stripped (may be a
         # superset of languages actually present — see missing_controls).
         self.best_practices_invert = set()
         # Extensions for which absent controls are reported as missing.
         self.best_practices_missing = set()
         self.standards = standards.get_standards()
-        self.get_extensions()
-        self.get_xmls()
-        self.get_plists()
+        self._discover_files()
 
     def _configure_android(self, present):
         """Semgrep Android rules; invert both Java and Kotlin BP dialects."""
@@ -83,66 +98,80 @@ class MobSFScan:
         self.best_practices_invert = {'.swift', '.m'}
         self.best_practices_missing = set(present)
 
-    def get_extensions(self) -> set:
-        """Discover source suffixes and configure scanners."""
-        scan_suffix = {'.java', '.kt', '.swift', '.m'}
-        found = set()
+    def _configure_javascript(self):
+        """Tree-sitter AST rules for JavaScript, TypeScript, and hybrid web."""
+        self.options['ts_rules'] = (
+            settings.TS_RULES_DIR / 'javascript').as_posix()
+        self.options['ts_extensions'] = set(settings.JS_SCAN_EXTENSIONS)
+
+    def _iter_candidate_files(self):
+        """Yield candidate files under scan paths, pruning dependency dirs."""
         for path in self.paths:
             pobj = Path(path)
             if pobj.is_dir():
-                for pfile in pobj.rglob('*'):
-                    if pfile.suffix in scan_suffix:
-                        found.add(pfile.suffix)
-            elif pobj.suffix in scan_suffix:
-                found.add(pobj.suffix)
+                for dirpath, dirnames, filenames in os.walk(pobj):
+                    dirnames[:] = [
+                        d for d in dirnames if d not in _PRUNE_DIRS
+                    ]
+                    for fname in filenames:
+                        yield Path(dirpath, fname)
+            elif pobj.exists():
+                yield pobj
 
+    def _classify_file(self, pfile, scan_suffix, found):
+        """Classify a discovered file by extension and config filename."""
+        suffix_low = pfile.suffix.lower()
+        name_low = pfile.name.lower()
+        if suffix_low in scan_suffix:
+            found.add(suffix_low)
+        if suffix_low == '.xml':
+            self.xmls.append(pfile)
+        if pfile.name == 'Info.plist':
+            self.plists.append(pfile)
+        if name_low in hybrid.HYBRID_CONFIG_FILES:
+            self.hybrid_configs.append(pfile)
+
+    def _configure_scanners(self, found):
+        """Configure native and JS scanners from discovered file extensions."""
         android = found & {'.java', '.kt'}
         ios = found & {'.swift', '.m'}
+        javascript = found & settings.JS_SCAN_EXTENSIONS
         # Configure only when matching sources exist (plist/xml-only trees
         # should not invent missing-control findings for .kt/.swift).
         if self.scan_type == 'android':
             if android:
                 self._configure_android(android)
-        elif self.scan_type == 'ios':
+            return
+        if self.scan_type == 'ios':
             if ios:
                 self._configure_ios(ios)
-        elif android:
+            return
+        if self.scan_type == 'javascript':
+            if javascript:
+                self._configure_javascript()
+            return
+        if android:
             self._configure_android(android)
         elif ios:
             self._configure_ios(ios)
+        if javascript:
+            self._configure_javascript()
 
-    def get_xmls(self) -> set:
-        """Get XML files for scanning."""
-        for path in self.paths:
-            pobj = Path(path)
-            if pobj.is_dir():
-                for pfile in pobj.rglob('*'):
-                    if pfile.suffix == '.xml':
-                        self.xmls.append(pfile)
-            else:
-                if pobj.suffix == '.xml':
-                    self.xmls.append(pobj)
+    def _discover_files(self):
+        """Discover source and config files and configure active scanners."""
+        scan_suffix = _NATIVE_SUFFIXES | settings.JS_SCAN_EXTENSIONS
+        found = set()
+        for pfile in self._iter_candidate_files():
+            self._classify_file(pfile, scan_suffix, found)
+        self._configure_scanners(found)
 
-    def get_plists(self) -> set:
-        """Get Info.plist files for scanning."""
-        for path in self.paths:
-            pobj = Path(path)
-            if pobj.is_dir():
-                for pfile in pobj.rglob('Info.plist'):
-                    self.plists.append(pfile)
-            elif pobj.name == 'Info.plist':
-                self.plists.append(pobj)
-
-    def scan(self) -> dict:
-        """Start Scan."""
-        scanner = Scanner(self.options, self.paths)
-        result = scanner.scan()
+    def _run_extra_checks(self, result, validate_func):
+        """Run Android XML, iOS Info.plist, and hybrid config checks."""
         try:
-            # Keep beta for a while
             if self.xmls and self.scan_type in ('auto', 'android'):
                 result['xml_checks'] = manifest.scan_manifest(
                     self.xmls,
-                    scanner.validate_file)
+                    validate_func)
         except Exception:
             logger.warning(
                 'Android XML checks failed. '
@@ -151,13 +180,29 @@ class MobSFScan:
             if self.plists and self.scan_type in ('auto', 'ios'):
                 result['plist_checks'] = ios_plist.scan_plists(
                     self.plists,
-                    scanner.validate_file,
+                    validate_func,
                 )
         except Exception:
             logger.warning(
                 'iOS Info.plist checks failed. '
                 'Please report to mobsfscan project')
+        try:
+            if (self.hybrid_configs
+                    and self.scan_type in ('auto', 'javascript')):
+                result['hybrid_checks'] = hybrid.scan_hybrid_configs(
+                    self.hybrid_configs,
+                    validate_func,
+                )
+        except Exception:
+            logger.warning(
+                'Hybrid configuration checks failed. '
+                'Please report to mobsfscan project')
 
+    def scan(self) -> dict:
+        """Start Scan."""
+        scanner = Scanner(self.options, self.paths)
+        result = scanner.scan()
+        self._run_extra_checks(result, scanner.validate_file)
         if result:
             self.format_output(result)
         return self.result
@@ -166,8 +211,10 @@ class MobSFScan:
         """Format to mobsfscan friendly output."""
         self.format_semgrep(results.get('semantic_grep'))
         self.format_pattern(results.get('pattern_matcher'))
+        self.format_treesitter(results.get('treesitter_matcher'))
         self.format_pattern(results.get('xml_checks'))
         self.format_pattern(results.get('plist_checks'))
+        self.format_pattern(results.get('hybrid_checks'))
         self.missing_controls()
         self.post_ignore_rules()
         self.post_override_severities()
@@ -205,6 +252,20 @@ class MobSFScan:
             for finding in sgrep_output['matches'][rule_id]['files']:
                 finding.pop('metavars', None)
         self.result['results'] = sgrep_output['matches']
+
+    def format_treesitter(self, ts_out):
+        """Normalize Tree-sitter output paths/severities and merge findings."""
+        if not ts_out:
+            return
+        for details in ts_out.values():
+            for finding in details.get('files') or []:
+                if finding.get('file_path'):
+                    finding['file_path'] = report_path(finding['file_path'])
+            meta = details.get('metadata')
+            if isinstance(meta, dict) and meta.get('severity'):
+                sev = str(meta['severity']).strip().upper()
+                meta['severity'] = 'ERROR' if sev == 'HIGH' else sev
+        self.format_pattern(ts_out)
 
     def format_pattern(self, matcher_out):
         """Format Pattern Matcher output.
@@ -332,6 +393,8 @@ class MobSFScan:
         if not match_line or 'mobsf-ignore:' not in match_line:
             return False
         marker = match_line.split('mobsf-ignore:', 1)[1]
+        for stop in ('*/', '-->'):
+            marker = marker.split(stop, 1)[0]
         # Stop at end of line comment content; split rule ids
         ids = []
         for part in marker.replace(',', ' ').split():

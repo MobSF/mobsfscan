@@ -59,9 +59,9 @@ def normalize_severity_overrides(raw):
 
 def get_config(base_path, config_file):
     options = {
-        'ignore_filenames': config.IGNORE_FILENAMES,
-        'ignore_extensions': config.IGNORE_EXTENSIONS,
-        'ignore_paths': config.IGNORE_PATHS,
+        'ignore_filenames': set(config.IGNORE_FILENAMES),
+        'ignore_extensions': set(config.IGNORE_EXTENSIONS),
+        'ignore_paths': set(config.IGNORE_PATHS),
         'ignore_rules': set(),
         'severity_filter': config.SEVERITY_FILTER,
         'severity_overrides': {},
