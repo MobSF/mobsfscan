@@ -29,15 +29,10 @@ Requires Python 3.10–3.14
 
 ## Supported Languages & Configurations
 
-* **Android**: Java (`.java`), Kotlin (`.kt`), Android Manifest (`AndroidManifest.xml`), Network Security Config, layout and resource XMLs, and React Native `@ReactMethod` native bridge modules.
+* **Android**: Java (`.java`), Kotlin (`.kt`), Android Manifest (`AndroidManifest.xml`), Network Security Config, and layout and resource XMLs.
 * **iOS**: Swift (`.swift`), Objective-C (`.m`), and App Transport Security settings in `Info.plist`.
 * **JavaScript, TypeScript & Hybrid Mobile**: React Native, Expo, Cordova / Ionic, Capacitor, and WebView apps via Tree-sitter AST rules across `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, and `<script>` blocks in `.html`, `.htm`, `.vue`, and `.svelte`.
-* **Hybrid App Configurations**:
-  * **Cordova / PhoneGap**: `config.xml` (`<access origin="*" />`, wildcard `<allow-navigation>`).
-  * **Capacitor**: `capacitor.config.json` (`server.cleartext`, HTTP `server.url`, wildcard `server.allowNavigation`).
-  * **Expo**: `app.json`, `app.config.json`, `app.config`, and `app.manifest` (embedded `extra` secrets, cleartext or unsigned OTA `updates`).
-
-In `--type auto` (the default), `mobsfscan` automatically scans native Android/iOS sources alongside JavaScript/TypeScript and hybrid configuration files while skipping dependency and vendor bundles (`node_modules`, `.expo`, `.next`, `.gradle`, `*.min.js`, etc.). Use `--type javascript` to run only JavaScript/TypeScript and hybrid configuration checks.
+* **Hybrid App Configurations**: Cordova / PhoneGap, Capacitor, and Expo configuration files.
 
 ## Command Line Options
 
